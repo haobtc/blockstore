@@ -3,21 +3,24 @@
 //
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //
-
+var Thrift = require('thrift').Thrift;
+var ttypes = module.exports = {};
 if (typeof blockstore === 'undefined') {
   blockstore = {};
 }
-blockstore.Network = {
+ttypes.Network = {
 'BITCOIN' : 1,
 'LITECOIN' : 2,
 'DOGECOIN' : 3,
 'DARKCOIN' : 4
 };
-blockstore.InvType = {
+ttypes.InvType = {
 'TX' : 1,
 'BLOCK' : 2
 };
-blockstore.AppException = function(args) {
+blockstore.AppException = module.exports.AppException = function(args) {
+  Thrift.TException.call(this, "blockstore.AppException")
+  this.name = "blockstore.AppException"
   this.code = null;
   this.message = '';
   if (args) {
@@ -46,14 +49,14 @@ blockstore.AppException.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.code = input.readString().value;
+        this.code = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.message = input.readString().value;
+        this.message = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -84,7 +87,7 @@ blockstore.AppException.prototype.write = function(output) {
   return;
 };
 
-blockstore.Verification = function(args) {
+blockstore.Verification = module.exports.Verification = function(args) {
   this.verified = null;
   this.message = null;
   if (args) {
@@ -112,14 +115,14 @@ blockstore.Verification.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.BOOL) {
-        this.verified = input.readBool().value;
+        this.verified = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.message = input.readString().value;
+        this.message = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -150,7 +153,7 @@ blockstore.Verification.prototype.write = function(output) {
   return;
 };
 
-blockstore.Block = function(args) {
+blockstore.Block = module.exports.Block = function(args) {
   this.blockHash = null;
   this.version = null;
   this.prevHash = null;
@@ -210,70 +213,70 @@ blockstore.Block.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.blockHash = input.readString().value;
+        this.blockHash = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.version = input.readI32().value;
+        this.version = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.prevHash = input.readString().value;
+        this.prevHash = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
-        this.merkleRoot = input.readString().value;
+        this.merkleRoot = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.BOOL) {
-        this.isMain = input.readBool().value;
+        this.isMain = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.STRING) {
-        this.nextHash = input.readString().value;
+        this.nextHash = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I32) {
-        this.cntTxes = input.readI32().value;
+        this.cntTxes = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 8:
       if (ftype == Thrift.Type.I32) {
-        this.height = input.readI32().value;
+        this.height = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 9:
       if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64().value;
+        this.timestamp = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 10:
       if (ftype == Thrift.Type.STRING) {
-        this.objId = input.readString().value;
+        this.objId = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -344,7 +347,7 @@ blockstore.Block.prototype.write = function(output) {
   return;
 };
 
-blockstore.TxInput = function(args) {
+blockstore.TxInput = module.exports.TxInput = function(args) {
   this.txid = null;
   this.vout = null;
   this.script = null;
@@ -388,42 +391,42 @@ blockstore.TxInput.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readString().value;
+        this.txid = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.vout = input.readI32().value;
+        this.vout = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.script = input.readString().value;
+        this.script = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
-        this.address = input.readString().value;
+        this.address = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.STRING) {
-        this.amountSatoshi = input.readString().value;
+        this.amountSatoshi = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I64) {
-        this.q = input.readI64().value;
+        this.q = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -474,7 +477,7 @@ blockstore.TxInput.prototype.write = function(output) {
   return;
 };
 
-blockstore.TxOutput = function(args) {
+blockstore.TxOutput = module.exports.TxOutput = function(args) {
   this.address = null;
   this.amountSatoshi = null;
   this.script = null;
@@ -506,21 +509,21 @@ blockstore.TxOutput.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.address = input.readString().value;
+        this.address = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.amountSatoshi = input.readString().value;
+        this.amountSatoshi = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.script = input.readString().value;
+        this.script = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -556,7 +559,7 @@ blockstore.TxOutput.prototype.write = function(output) {
   return;
 };
 
-blockstore.Tx = function(args) {
+blockstore.Tx = module.exports.Tx = function(args) {
   this.txid = null;
   this.blockHash = null;
   this.blockIndex = null;
@@ -600,28 +603,28 @@ blockstore.Tx.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readString().value;
+        this.txid = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.blockHash = input.readString().value;
+        this.blockHash = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.blockIndex = input.readString().value;
+        this.blockIndex = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
-        this.objId = input.readString().value;
+        this.objId = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -638,7 +641,7 @@ blockstore.Tx.prototype.read = function(input) {
         for (var _i5 = 0; _i5 < _size0; ++_i5)
         {
           var elem6 = null;
-          elem6 = new blockstore.TxInput();
+          elem6 = new ttypes.TxInput();
           elem6.read(input);
           this.inputs.push(elem6);
         }
@@ -659,7 +662,7 @@ blockstore.Tx.prototype.read = function(input) {
         for (var _i12 = 0; _i12 < _size7; ++_i12)
         {
           var elem13 = null;
-          elem13 = new blockstore.TxOutput();
+          elem13 = new ttypes.TxOutput();
           elem13.read(input);
           this.outputs.push(elem13);
         }
@@ -732,7 +735,7 @@ blockstore.Tx.prototype.write = function(output) {
   return;
 };
 
-blockstore.TxVerification = function(args) {
+blockstore.TxVerification = module.exports.TxVerification = function(args) {
   this.verified = null;
   this.message = null;
   if (args) {
@@ -760,14 +763,14 @@ blockstore.TxVerification.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.BOOL) {
-        this.verified = input.readBool().value;
+        this.verified = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.message = input.readString().value;
+        this.message = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -798,7 +801,7 @@ blockstore.TxVerification.prototype.write = function(output) {
   return;
 };
 
-blockstore.UTXO = function(args) {
+blockstore.UTXO = module.exports.UTXO = function(args) {
   this.address = null;
   this.amountSatoshi = null;
   this.txid = null;
@@ -846,49 +849,49 @@ blockstore.UTXO.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.address = input.readString().value;
+        this.address = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.amountSatoshi = input.readString().value;
+        this.amountSatoshi = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readString().value;
+        this.txid = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.vout = input.readI32().value;
+        this.vout = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I32) {
-        this.confirmations = input.readI32().value;
+        this.confirmations = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.STRING) {
-        this.scriptPubKey = input.readString().value;
+        this.scriptPubKey = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64().value;
+        this.timestamp = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -944,7 +947,7 @@ blockstore.UTXO.prototype.write = function(output) {
   return;
 };
 
-blockstore.SendTx = function(args) {
+blockstore.SendTx = module.exports.SendTx = function(args) {
   this.txid = null;
   this.raw = null;
   this.remoteAddress = null;
@@ -976,21 +979,21 @@ blockstore.SendTx.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readString().value;
+        this.txid = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.raw = input.readString().value;
+        this.raw = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
-        this.remoteAddress = input.readString().value;
+        this.remoteAddress = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -1026,7 +1029,7 @@ blockstore.SendTx.prototype.write = function(output) {
   return;
 };
 
-blockstore.Inventory = function(args) {
+blockstore.Inventory = module.exports.Inventory = function(args) {
   this.type = null;
   this.hash = null;
   if (args) {
@@ -1054,14 +1057,14 @@ blockstore.Inventory.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.type = input.readI32().value;
+        this.type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.hash = input.readString().value;
+        this.hash = input.readString();
       } else {
         input.skip(ftype);
       }

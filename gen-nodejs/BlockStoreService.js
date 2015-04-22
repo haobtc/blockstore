@@ -3,8 +3,9 @@
 //
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //
+var Thrift = require('thrift').Thrift;
 
-
+var ttypes = require('./blockstore_types');
 //HELPER FUNCTIONS AND STRUCTURES
 
 blockstore.BlockStoreService_getBlock_args = function(args) {
@@ -35,14 +36,14 @@ blockstore.BlockStoreService_getBlock_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.blockhash = input.readString().value;
+        this.blockhash = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -76,7 +77,7 @@ blockstore.BlockStoreService_getBlock_args.prototype.write = function(output) {
 blockstore.BlockStoreService_getBlock_result = function(args) {
   this.success = null;
   this.e = null;
-  if (args instanceof blockstore.AppException) {
+  if (args instanceof ttypes.AppException) {
     this.e = args;
     return;
   }
@@ -105,7 +106,7 @@ blockstore.BlockStoreService_getBlock_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new blockstore.Block();
+        this.success = new ttypes.Block();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -113,7 +114,7 @@ blockstore.BlockStoreService_getBlock_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.e = new blockstore.AppException();
+        this.e = new ttypes.AppException();
         this.e.read(input);
       } else {
         input.skip(ftype);
@@ -169,7 +170,7 @@ blockstore.BlockStoreService_getTipBlock_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -201,7 +202,7 @@ blockstore.BlockStoreService_getTipBlock_args.prototype.write = function(output)
 blockstore.BlockStoreService_getTipBlock_result = function(args) {
   this.success = null;
   this.e = null;
-  if (args instanceof blockstore.AppException) {
+  if (args instanceof ttypes.AppException) {
     this.e = args;
     return;
   }
@@ -230,7 +231,7 @@ blockstore.BlockStoreService_getTipBlock_result.prototype.read = function(input)
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new blockstore.Block();
+        this.success = new ttypes.Block();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -238,7 +239,7 @@ blockstore.BlockStoreService_getTipBlock_result.prototype.read = function(input)
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.e = new blockstore.AppException();
+        this.e = new ttypes.AppException();
         this.e.read(input);
       } else {
         input.skip(ftype);
@@ -298,14 +299,14 @@ blockstore.BlockStoreService_verifyBlock_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.block = new blockstore.Block();
+        this.block = new ttypes.Block();
         this.block.read(input);
       } else {
         input.skip(ftype);
@@ -361,7 +362,7 @@ blockstore.BlockStoreService_verifyBlock_result.prototype.read = function(input)
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new blockstore.Verification();
+        this.success = new ttypes.Verification();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -419,14 +420,14 @@ blockstore.BlockStoreService_addBlock_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.block = new blockstore.Block();
+        this.block = new ttypes.Block();
         this.block.read(input);
       } else {
         input.skip(ftype);
@@ -460,7 +461,7 @@ blockstore.BlockStoreService_addBlock_args.prototype.write = function(output) {
 
 blockstore.BlockStoreService_addBlock_result = function(args) {
   this.e = null;
-  if (args instanceof blockstore.AppException) {
+  if (args instanceof ttypes.AppException) {
     this.e = args;
     return;
   }
@@ -486,7 +487,7 @@ blockstore.BlockStoreService_addBlock_result.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.e = new blockstore.AppException();
+        this.e = new ttypes.AppException();
         this.e.read(input);
       } else {
         input.skip(ftype);
@@ -544,14 +545,14 @@ blockstore.BlockStoreService_getTx_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readString().value;
+        this.txid = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -585,7 +586,7 @@ blockstore.BlockStoreService_getTx_args.prototype.write = function(output) {
 blockstore.BlockStoreService_getTx_result = function(args) {
   this.success = null;
   this.e = null;
-  if (args instanceof blockstore.AppException) {
+  if (args instanceof ttypes.AppException) {
     this.e = args;
     return;
   }
@@ -614,7 +615,7 @@ blockstore.BlockStoreService_getTx_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new blockstore.Tx();
+        this.success = new ttypes.Tx();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -622,7 +623,7 @@ blockstore.BlockStoreService_getTx_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.e = new blockstore.AppException();
+        this.e = new ttypes.AppException();
         this.e.read(input);
       } else {
         input.skip(ftype);
@@ -682,7 +683,7 @@ blockstore.BlockStoreService_getTxList_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -699,7 +700,7 @@ blockstore.BlockStoreService_getTxList_args.prototype.read = function(input) {
         for (var _i21 = 0; _i21 < _size16; ++_i21)
         {
           var elem22 = null;
-          elem22 = input.readString().value;
+          elem22 = input.readString();
           this.txids.push(elem22);
         }
         input.readListEnd();
@@ -776,7 +777,7 @@ blockstore.BlockStoreService_getTxList_result.prototype.read = function(input) {
         for (var _i29 = 0; _i29 < _size24; ++_i29)
         {
           var elem30 = null;
-          elem30 = new blockstore.Tx();
+          elem30 = new ttypes.Tx();
           elem30.read(input);
           this.success.push(elem30);
         }
@@ -846,7 +847,7 @@ blockstore.BlockStoreService_getMissingTxIdList_args.prototype.read = function(i
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -863,7 +864,7 @@ blockstore.BlockStoreService_getMissingTxIdList_args.prototype.read = function(i
         for (var _i37 = 0; _i37 < _size32; ++_i37)
         {
           var elem38 = null;
-          elem38 = input.readString().value;
+          elem38 = input.readString();
           this.txids.push(elem38);
         }
         input.readListEnd();
@@ -940,7 +941,7 @@ blockstore.BlockStoreService_getMissingTxIdList_result.prototype.read = function
         for (var _i45 = 0; _i45 < _size40; ++_i45)
         {
           var elem46 = null;
-          elem46 = input.readString().value;
+          elem46 = input.readString();
           this.success.push(elem46);
         }
         input.readListEnd();
@@ -1009,14 +1010,14 @@ blockstore.BlockStoreService_verifyTx_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.tx = new blockstore.Tx();
+        this.tx = new ttypes.Tx();
         this.tx.read(input);
       } else {
         input.skip(ftype);
@@ -1072,7 +1073,7 @@ blockstore.BlockStoreService_verifyTx_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new blockstore.Verification();
+        this.success = new ttypes.Verification();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -1134,7 +1135,7 @@ blockstore.BlockStoreService_addTxList_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -1151,7 +1152,7 @@ blockstore.BlockStoreService_addTxList_args.prototype.read = function(input) {
         for (var _i53 = 0; _i53 < _size48; ++_i53)
         {
           var elem54 = null;
-          elem54 = new blockstore.Tx();
+          elem54 = new ttypes.Tx();
           elem54.read(input);
           this.txes.push(elem54);
         }
@@ -1162,7 +1163,7 @@ blockstore.BlockStoreService_addTxList_args.prototype.read = function(input) {
       break;
       case 3:
       if (ftype == Thrift.Type.BOOL) {
-        this.soft = input.readBool().value;
+        this.soft = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -1263,14 +1264,14 @@ blockstore.BlockStoreService_getTxListSince_args.prototype.read = function(input
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.objId = input.readString().value;
+        this.objId = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -1335,7 +1336,7 @@ blockstore.BlockStoreService_getTxListSince_result.prototype.read = function(inp
         for (var _i61 = 0; _i61 < _size56; ++_i61)
         {
           var elem62 = null;
-          elem62 = new blockstore.Tx();
+          elem62 = new ttypes.Tx();
           elem62.read(input);
           this.success.push(elem62);
         }
@@ -1401,7 +1402,7 @@ blockstore.BlockStoreService_getLatestTxList_args.prototype.read = function(inpu
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -1464,7 +1465,7 @@ blockstore.BlockStoreService_getLatestTxList_result.prototype.read = function(in
         for (var _i69 = 0; _i69 < _size64; ++_i69)
         {
           var elem70 = null;
-          elem70 = new blockstore.Tx();
+          elem70 = new ttypes.Tx();
           elem70.read(input);
           this.success.push(elem70);
         }
@@ -1534,7 +1535,7 @@ blockstore.BlockStoreService_getRelatedTxList_args.prototype.read = function(inp
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -1551,7 +1552,7 @@ blockstore.BlockStoreService_getRelatedTxList_args.prototype.read = function(inp
         for (var _i77 = 0; _i77 < _size72; ++_i77)
         {
           var elem78 = null;
-          elem78 = input.readString().value;
+          elem78 = input.readString();
           this.addresses.push(elem78);
         }
         input.readListEnd();
@@ -1628,7 +1629,7 @@ blockstore.BlockStoreService_getRelatedTxList_result.prototype.read = function(i
         for (var _i85 = 0; _i85 < _size80; ++_i85)
         {
           var elem86 = null;
-          elem86 = new blockstore.Tx();
+          elem86 = new ttypes.Tx();
           elem86.read(input);
           this.success.push(elem86);
         }
@@ -1698,7 +1699,7 @@ blockstore.BlockStoreService_getRelatedTxIdList_args.prototype.read = function(i
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -1715,7 +1716,7 @@ blockstore.BlockStoreService_getRelatedTxIdList_args.prototype.read = function(i
         for (var _i93 = 0; _i93 < _size88; ++_i93)
         {
           var elem94 = null;
-          elem94 = input.readString().value;
+          elem94 = input.readString();
           this.addresses.push(elem94);
         }
         input.readListEnd();
@@ -1792,7 +1793,7 @@ blockstore.BlockStoreService_getRelatedTxIdList_result.prototype.read = function
         for (var _i101 = 0; _i101 < _size96; ++_i101)
         {
           var elem102 = null;
-          elem102 = input.readString().value;
+          elem102 = input.readString();
           this.success.push(elem102);
         }
         input.readListEnd();
@@ -1857,7 +1858,7 @@ blockstore.BlockStoreService_getSendingTxList_args.prototype.read = function(inp
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -1920,7 +1921,7 @@ blockstore.BlockStoreService_getSendingTxList_result.prototype.read = function(i
         for (var _i109 = 0; _i109 < _size104; ++_i109)
         {
           var elem110 = null;
-          elem110 = new blockstore.SendTx();
+          elem110 = new ttypes.SendTx();
           elem110.read(input);
           this.success.push(elem110);
         }
@@ -1990,14 +1991,14 @@ blockstore.BlockStoreService_sendTx_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.sendTx = new blockstore.SendTx();
+        this.sendTx = new ttypes.SendTx();
         this.sendTx.read(input);
       } else {
         input.skip(ftype);
@@ -2031,7 +2032,7 @@ blockstore.BlockStoreService_sendTx_args.prototype.write = function(output) {
 
 blockstore.BlockStoreService_sendTx_result = function(args) {
   this.e = null;
-  if (args instanceof blockstore.AppException) {
+  if (args instanceof ttypes.AppException) {
     this.e = args;
     return;
   }
@@ -2057,7 +2058,7 @@ blockstore.BlockStoreService_sendTx_result.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.e = new blockstore.AppException();
+        this.e = new ttypes.AppException();
         this.e.read(input);
       } else {
         input.skip(ftype);
@@ -2115,7 +2116,7 @@ blockstore.BlockStoreService_getUnspent_args.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -2132,7 +2133,7 @@ blockstore.BlockStoreService_getUnspent_args.prototype.read = function(input) {
         for (var _i117 = 0; _i117 < _size112; ++_i117)
         {
           var elem118 = null;
-          elem118 = input.readString().value;
+          elem118 = input.readString();
           this.addresses.push(elem118);
         }
         input.readListEnd();
@@ -2209,7 +2210,7 @@ blockstore.BlockStoreService_getUnspent_result.prototype.read = function(input) 
         for (var _i125 = 0; _i125 < _size120; ++_i125)
         {
           var elem126 = null;
-          elem126 = new blockstore.UTXO();
+          elem126 = new ttypes.UTXO();
           elem126.read(input);
           this.success.push(elem126);
         }
@@ -2279,7 +2280,7 @@ blockstore.BlockStoreService_getMissingInvList_args.prototype.read = function(in
     {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.network = input.readI32().value;
+        this.network = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -2296,7 +2297,7 @@ blockstore.BlockStoreService_getMissingInvList_args.prototype.read = function(in
         for (var _i133 = 0; _i133 < _size128; ++_i133)
         {
           var elem134 = null;
-          elem134 = new blockstore.Inventory();
+          elem134 = new ttypes.Inventory();
           elem134.read(input);
           this.invs.push(elem134);
         }
@@ -2374,7 +2375,7 @@ blockstore.BlockStoreService_getMissingInvList_result.prototype.read = function(
         for (var _i141 = 0; _i141 < _size136; ++_i141)
         {
           var elem142 = null;
-          elem142 = new blockstore.Inventory();
+          elem142 = new ttypes.Inventory();
           elem142.read(input);
           this.success.push(elem142);
         }
@@ -2416,608 +2417,848 @@ blockstore.BlockStoreService_getMissingInvList_result.prototype.write = function
   return;
 };
 
-blockstore.BlockStoreServiceClient = function(input, output) {
-    this.input = input;
-    this.output = (!output) ? input : output;
+blockstore.BlockStoreServiceClient = exports.Client = function(output, pClass) {
+    this.output = output;
+    this.pClass = pClass;
     this.seqid = 0;
+    this._reqs = {};
 };
 blockstore.BlockStoreServiceClient.prototype = {};
-blockstore.BlockStoreServiceClient.prototype.getBlock = function(network, blockhash) {
+blockstore.BlockStoreServiceClient.prototype.getBlock = function(network, blockhash, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getBlock(network, blockhash);
-  return this.recv_getBlock();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getBlock = function(network, blockhash) {
-  this.output.writeMessageBegin('getBlock', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getBlock', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getBlock_args();
   args.network = network;
   args.blockhash = blockhash;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getBlock = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getBlock = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getBlock_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.e) {
-    throw result.e;
+    return callback(result.e);
   }
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getBlock failed: unknown result';
+  return callback('getBlock failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getTipBlock = function(network) {
+blockstore.BlockStoreServiceClient.prototype.getTipBlock = function(network, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getTipBlock(network);
-  return this.recv_getTipBlock();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getTipBlock = function(network) {
-  this.output.writeMessageBegin('getTipBlock', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getTipBlock', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getTipBlock_args();
   args.network = network;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getTipBlock = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getTipBlock = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getTipBlock_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.e) {
-    throw result.e;
+    return callback(result.e);
   }
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getTipBlock failed: unknown result';
+  return callback('getTipBlock failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.verifyBlock = function(network, block) {
+blockstore.BlockStoreServiceClient.prototype.verifyBlock = function(network, block, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_verifyBlock(network, block);
-  return this.recv_verifyBlock();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_verifyBlock = function(network, block) {
-  this.output.writeMessageBegin('verifyBlock', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('verifyBlock', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_verifyBlock_args();
   args.network = network;
   args.block = block;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_verifyBlock = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_verifyBlock = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_verifyBlock_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'verifyBlock failed: unknown result';
+  return callback('verifyBlock failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.addBlock = function(network, block) {
+blockstore.BlockStoreServiceClient.prototype.addBlock = function(network, block, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_addBlock(network, block);
-  this.recv_addBlock();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_addBlock = function(network, block) {
-  this.output.writeMessageBegin('addBlock', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('addBlock', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_addBlock_args();
   args.network = network;
   args.block = block;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_addBlock = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_addBlock = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_addBlock_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.e) {
-    throw result.e;
+    return callback(result.e);
   }
-  return;
+  callback(null)
 };
-blockstore.BlockStoreServiceClient.prototype.getTx = function(network, txid) {
+blockstore.BlockStoreServiceClient.prototype.getTx = function(network, txid, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getTx(network, txid);
-  return this.recv_getTx();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getTx = function(network, txid) {
-  this.output.writeMessageBegin('getTx', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getTx', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getTx_args();
   args.network = network;
   args.txid = txid;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getTx = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getTx = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getTx_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.e) {
-    throw result.e;
+    return callback(result.e);
   }
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getTx failed: unknown result';
+  return callback('getTx failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getTxList = function(network, txids) {
+blockstore.BlockStoreServiceClient.prototype.getTxList = function(network, txids, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getTxList(network, txids);
-  return this.recv_getTxList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getTxList = function(network, txids) {
-  this.output.writeMessageBegin('getTxList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getTxList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getTxList_args();
   args.network = network;
   args.txids = txids;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getTxList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getTxList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getTxList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getTxList failed: unknown result';
+  return callback('getTxList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getMissingTxIdList = function(network, txids) {
+blockstore.BlockStoreServiceClient.prototype.getMissingTxIdList = function(network, txids, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getMissingTxIdList(network, txids);
-  return this.recv_getMissingTxIdList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getMissingTxIdList = function(network, txids) {
-  this.output.writeMessageBegin('getMissingTxIdList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getMissingTxIdList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getMissingTxIdList_args();
   args.network = network;
   args.txids = txids;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getMissingTxIdList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getMissingTxIdList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getMissingTxIdList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getMissingTxIdList failed: unknown result';
+  return callback('getMissingTxIdList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.verifyTx = function(network, tx) {
+blockstore.BlockStoreServiceClient.prototype.verifyTx = function(network, tx, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_verifyTx(network, tx);
-  return this.recv_verifyTx();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_verifyTx = function(network, tx) {
-  this.output.writeMessageBegin('verifyTx', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('verifyTx', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_verifyTx_args();
   args.network = network;
   args.tx = tx;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_verifyTx = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_verifyTx = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_verifyTx_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'verifyTx failed: unknown result';
+  return callback('verifyTx failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.addTxList = function(network, txes, soft) {
+blockstore.BlockStoreServiceClient.prototype.addTxList = function(network, txes, soft, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_addTxList(network, txes, soft);
-  this.recv_addTxList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_addTxList = function(network, txes, soft) {
-  this.output.writeMessageBegin('addTxList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('addTxList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_addTxList_args();
   args.network = network;
   args.txes = txes;
   args.soft = soft;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_addTxList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_addTxList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_addTxList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
-  return;
+  callback(null)
 };
-blockstore.BlockStoreServiceClient.prototype.getTxListSince = function(network, objId) {
+blockstore.BlockStoreServiceClient.prototype.getTxListSince = function(network, objId, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getTxListSince(network, objId);
-  return this.recv_getTxListSince();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getTxListSince = function(network, objId) {
-  this.output.writeMessageBegin('getTxListSince', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getTxListSince', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getTxListSince_args();
   args.network = network;
   args.objId = objId;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getTxListSince = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getTxListSince = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getTxListSince_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getTxListSince failed: unknown result';
+  return callback('getTxListSince failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getLatestTxList = function(network) {
+blockstore.BlockStoreServiceClient.prototype.getLatestTxList = function(network, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getLatestTxList(network);
-  return this.recv_getLatestTxList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getLatestTxList = function(network) {
-  this.output.writeMessageBegin('getLatestTxList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getLatestTxList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getLatestTxList_args();
   args.network = network;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getLatestTxList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getLatestTxList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getLatestTxList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getLatestTxList failed: unknown result';
+  return callback('getLatestTxList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getRelatedTxList = function(network, addresses) {
+blockstore.BlockStoreServiceClient.prototype.getRelatedTxList = function(network, addresses, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getRelatedTxList(network, addresses);
-  return this.recv_getRelatedTxList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getRelatedTxList = function(network, addresses) {
-  this.output.writeMessageBegin('getRelatedTxList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getRelatedTxList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getRelatedTxList_args();
   args.network = network;
   args.addresses = addresses;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getRelatedTxList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getRelatedTxList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getRelatedTxList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getRelatedTxList failed: unknown result';
+  return callback('getRelatedTxList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getRelatedTxIdList = function(network, addresses) {
+blockstore.BlockStoreServiceClient.prototype.getRelatedTxIdList = function(network, addresses, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getRelatedTxIdList(network, addresses);
-  return this.recv_getRelatedTxIdList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getRelatedTxIdList = function(network, addresses) {
-  this.output.writeMessageBegin('getRelatedTxIdList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getRelatedTxIdList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getRelatedTxIdList_args();
   args.network = network;
   args.addresses = addresses;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getRelatedTxIdList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getRelatedTxIdList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getRelatedTxIdList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getRelatedTxIdList failed: unknown result';
+  return callback('getRelatedTxIdList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getSendingTxList = function(network) {
+blockstore.BlockStoreServiceClient.prototype.getSendingTxList = function(network, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getSendingTxList(network);
-  return this.recv_getSendingTxList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getSendingTxList = function(network) {
-  this.output.writeMessageBegin('getSendingTxList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getSendingTxList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getSendingTxList_args();
   args.network = network;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getSendingTxList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getSendingTxList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getSendingTxList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getSendingTxList failed: unknown result';
+  return callback('getSendingTxList failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.sendTx = function(network, sendTx) {
+blockstore.BlockStoreServiceClient.prototype.sendTx = function(network, sendTx, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_sendTx(network, sendTx);
-  this.recv_sendTx();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_sendTx = function(network, sendTx) {
-  this.output.writeMessageBegin('sendTx', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('sendTx', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_sendTx_args();
   args.network = network;
   args.sendTx = sendTx;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_sendTx = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_sendTx = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_sendTx_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.e) {
-    throw result.e;
+    return callback(result.e);
   }
-  return;
+  callback(null)
 };
-blockstore.BlockStoreServiceClient.prototype.getUnspent = function(network, addresses) {
+blockstore.BlockStoreServiceClient.prototype.getUnspent = function(network, addresses, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getUnspent(network, addresses);
-  return this.recv_getUnspent();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getUnspent = function(network, addresses) {
-  this.output.writeMessageBegin('getUnspent', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getUnspent', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getUnspent_args();
   args.network = network;
   args.addresses = addresses;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getUnspent = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getUnspent = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getUnspent_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getUnspent failed: unknown result';
+  return callback('getUnspent failed: unknown result');
 };
-blockstore.BlockStoreServiceClient.prototype.getMissingInvList = function(network, invs) {
+blockstore.BlockStoreServiceClient.prototype.getMissingInvList = function(network, invs, callback) {
+  this.seqid += 1;
+  this._reqs[this.seqid] = callback;
   this.send_getMissingInvList(network, invs);
-  return this.recv_getMissingInvList();
 };
 
 blockstore.BlockStoreServiceClient.prototype.send_getMissingInvList = function(network, invs) {
-  this.output.writeMessageBegin('getMissingInvList', Thrift.MessageType.CALL, this.seqid);
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getMissingInvList', Thrift.MessageType.CALL, this.seqid);
   var args = new blockstore.BlockStoreService_getMissingInvList_args();
   args.network = network;
   args.invs = invs;
-  args.write(this.output);
-  this.output.writeMessageEnd();
-  return this.output.getTransport().flush();
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
 };
 
-blockstore.BlockStoreServiceClient.prototype.recv_getMissingInvList = function() {
-  var ret = this.input.readMessageBegin();
-  var fname = ret.fname;
-  var mtype = ret.mtype;
-  var rseqid = ret.rseqid;
+blockstore.BlockStoreServiceClient.prototype.recv_getMissingInvList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
   if (mtype == Thrift.MessageType.EXCEPTION) {
     var x = new Thrift.TApplicationException();
-    x.read(this.input);
-    this.input.readMessageEnd();
-    throw x;
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
   }
   var result = new blockstore.BlockStoreService_getMissingInvList_result();
-  result.read(this.input);
-  this.input.readMessageEnd();
+  result.read(input);
+  input.readMessageEnd();
 
   if (null !== result.success) {
-    return result.success;
+    return callback(null, result.success);
   }
-  throw 'getMissingInvList failed: unknown result';
+  return callback('getMissingInvList failed: unknown result');
 };
+blockstore.BlockStoreServiceProcessor = exports.Processor = function(handler) {
+  this._handler = handler
+}
+blockstore.BlockStoreServiceProcessor.prototype.process = function(input, output) {
+  var r = input.readMessageBegin();
+  if (this['process_' + r.fname]) {
+    return this['process_' + r.fname].call(this, r.rseqid, input, output);
+  } else {
+    input.skip(Thrift.Type.STRUCT);
+    input.readMessageEnd();
+    var x = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN_METHOD, 'Unknown function ' + r.fname);
+    output.writeMessageBegin(r.fname, Thrift.MessageType.Exception, r.rseqid);
+    x.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getBlock = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getBlock_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getBlock(args.network, args.blockhash, function (err, result) {
+    var result = new blockstore.BlockStoreService_getBlock_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getBlock", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getTipBlock = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getTipBlock_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getTipBlock(args.network, function (err, result) {
+    var result = new blockstore.BlockStoreService_getTipBlock_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getTipBlock", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_verifyBlock = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_verifyBlock_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.verifyBlock(args.network, args.block, function (err, result) {
+    var result = new blockstore.BlockStoreService_verifyBlock_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("verifyBlock", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_addBlock = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_addBlock_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.addBlock(args.network, args.block, function (err, result) {
+    var result = new blockstore.BlockStoreService_addBlock_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("addBlock", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getTx = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getTx_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getTx(args.network, args.txid, function (err, result) {
+    var result = new blockstore.BlockStoreService_getTx_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getTx", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getTxList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getTxList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getTxList(args.network, args.txids, function (err, result) {
+    var result = new blockstore.BlockStoreService_getTxList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getTxList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getMissingTxIdList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getMissingTxIdList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getMissingTxIdList(args.network, args.txids, function (err, result) {
+    var result = new blockstore.BlockStoreService_getMissingTxIdList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getMissingTxIdList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_verifyTx = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_verifyTx_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.verifyTx(args.network, args.tx, function (err, result) {
+    var result = new blockstore.BlockStoreService_verifyTx_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("verifyTx", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_addTxList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_addTxList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.addTxList(args.network, args.txes, args.soft, function (err, result) {
+    var result = new blockstore.BlockStoreService_addTxList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("addTxList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getTxListSince = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getTxListSince_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getTxListSince(args.network, args.objId, function (err, result) {
+    var result = new blockstore.BlockStoreService_getTxListSince_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getTxListSince", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getLatestTxList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getLatestTxList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getLatestTxList(args.network, function (err, result) {
+    var result = new blockstore.BlockStoreService_getLatestTxList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getLatestTxList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getRelatedTxList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getRelatedTxList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getRelatedTxList(args.network, args.addresses, function (err, result) {
+    var result = new blockstore.BlockStoreService_getRelatedTxList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getRelatedTxList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getRelatedTxIdList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getRelatedTxIdList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getRelatedTxIdList(args.network, args.addresses, function (err, result) {
+    var result = new blockstore.BlockStoreService_getRelatedTxIdList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getRelatedTxIdList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getSendingTxList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getSendingTxList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getSendingTxList(args.network, function (err, result) {
+    var result = new blockstore.BlockStoreService_getSendingTxList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getSendingTxList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_sendTx = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_sendTx_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.sendTx(args.network, args.sendTx, function (err, result) {
+    var result = new blockstore.BlockStoreService_sendTx_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("sendTx", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getUnspent = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getUnspent_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getUnspent(args.network, args.addresses, function (err, result) {
+    var result = new blockstore.BlockStoreService_getUnspent_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getUnspent", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getMissingInvList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getMissingInvList_args();
+  args.read(input);
+  input.readMessageEnd();
+  this._handler.getMissingInvList(args.network, args.invs, function (err, result) {
+    var result = new blockstore.BlockStoreService_getMissingInvList_result((err != null ? err : {success: result}));
+    output.writeMessageBegin("getMissingInvList", Thrift.MessageType.REPLY, seqid);
+    result.write(output);
+    output.writeMessageEnd();
+    output.flush();
+  })
+}
+

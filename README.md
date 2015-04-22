@@ -8,6 +8,7 @@ install
 ```
 % . setup-env.sh
 % project-install
+% thrift -r --gen py --gen js:node blockstore.thrift 
 
 ```
 
