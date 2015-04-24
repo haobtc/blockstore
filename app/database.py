@@ -10,22 +10,22 @@ def dbclient():
     global db_client
     if db_client is None:
         url = 'mongodb://localhost:27017/'
-        db_client = pymongo.MongoClient(url)
+        db_client = pymongo.MongoClient(url, maxPoolSize=1)
     return db_client
-    
+
+
 def conn(netname):
     return dbclient()['blocks_%s' % netname]
 
 @contextmanager
 def transaction(conn):
-    conn.runCommand('beginTransaction')
+    conn.command('beginTransaction')
     try:
         yield conn
-        conn.runCommand('commitTransaction')
+        conn.command('commitTransaction')
     except:
-        conn.runCommand('rollbackTransaction')
+        conn.command('rollbackTransaction')
         import traceback
         traceback.print_exc()
         raise
-
         

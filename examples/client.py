@@ -9,7 +9,7 @@ from thrift.protocol import TBinaryProtocol
 from blockstore import BlockStoreService, ttypes
 from blockstore.ttypes import *
 
-transport = TSocket.TSocket('localhost', 19090)
+transport = TSocket.TSocket('127.0.0.1', 19090)
 transport = TTransport.TBufferedTransport(transport)
 
 # Wrap in a protocol
@@ -22,6 +22,7 @@ transport.open()
 txid = '64a9a0935f50a809b6889f30957c50d4ed5385d4a99e2493118ac5c6fab31b46'.decode('hex')
 txid1 = '64a9a0935f50a809b6889f30957c50d4ed5385d4a99e2493118ac5c6fab31b47'.decode('hex')
 tx = c.getTx(ttypes.Network.BITCOIN, txid)
+print repr(tx.txid)
 for input in tx.inputs:
     print repr(input.txid)
 

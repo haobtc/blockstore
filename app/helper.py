@@ -1,13 +1,13 @@
 from blockstore import BlockStoreService, ttypes
 from bson.binary import Binary
 
-def resolve_network(netname):
-    if netname == ttypes.Network.BITCOIN:
+def resolve_network(nettype):
+    if nettype == ttypes.Network.BITCOIN:
         return 'bitcoin'
-    elif netname == ttypes.Network.LITECOIN:
+    elif nettype == ttypes.Network.LITECOIN:
         return 'litecoin'
-    elif netname == ttypes.Network.DOGECOIN:
+    elif nettype == ttypes.Network.DOGECOIN:
         return 'dogecoin'
-    elif netname == ttypes.Network.DARKCOIN:
+    elif nettype == ttypes.Network.DARKCOIN:
         return 'darkcoin'
 

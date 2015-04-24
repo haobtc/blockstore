@@ -14,6 +14,10 @@ exception AppException {
  2: string message = ""
 }
 
+exception NotFound {
+ 1: string message = "not_found"
+}
+
 struct Verification {
   1:bool verified,
   2:string message
@@ -23,22 +27,24 @@ struct Verification {
 /* block related */
 
 struct Block {
-  1:binary blockHash,
-  2:i32 version,
-  3:binary prevHash,
-  4:binary merkleRoot,
-  5:bool isMain,
-  6:optional binary nextHash,
-  7:i32 cntTxes,
-  8:i32 height,
-  9:i64 timestamp,
-  10:optional binary objId;
+  1:Network nettype,
+  2:binary hash,
+  3:i32 version,
+  4:binary prevHash,
+  5:binary merkleRoot,
+  6:bool isMain,
+  7:optional binary nextHash,
+  8:i32 cntTxes,
+  9:i32 height,
+  10:i32 timestamp,
+  11:optional binary objId;
+  12:optional i64 bits;
 }
 
 
 /* Tx related */
 struct TxInput {
-  1:binary txid,
+  1:binary hash,
   2:i32 vout,
   3:binary script
   4:optional string address,
@@ -53,12 +59,14 @@ struct TxOutput {
 }
 
 struct Tx {
-  1:binary txid,
-  2:optional binary blockHash,
-  3:optional binary blockIndex,
-  4:optional binary objId;
-  5:list<TxInput> inputs = [],
-  6:list<TxOutput> outputs = []
+  1:Network nettype,
+  2:binary hash,
+  3:optional i32 version,
+  4:optional Block block,
+  5:optional i32 blockIndex,
+  6:optional binary objId;
+  7:list<TxInput> inputs = [],
+  8:list<TxOutput> outputs = []
 }
 
 struct TxVerification {
@@ -74,12 +82,12 @@ struct UTXO {
   4:i32 vout
   5:i32 confirmations,
   6:binary scriptPubKey,
-  7:i64 timestamp
+  7:i32 timestamp
 }
 
 /* Sending TX */
 struct SendTx {
-  1:binary txid,
+  1:binary hash,
   2:binary raw,
   4:optional string remoteAddress
 }
@@ -99,24 +107,27 @@ service BlockStoreService
 {
 
   /* block related methods */
-  Block getBlock(1:Network network, 2:binary blockhash) throws (1:AppException e);
-  Block getTipBlock(1:Network network) throws (1:AppException e);
+  Block getBlock(1:Network network, 2:binary blockhash) throws (1:NotFound notfound);
+  Block getTipBlock(1:Network network) throws (1:NotFound notfound);
+  list<Block> getTailBlockList(1:Network network, 2:i32 n);
   Verification verifyBlock(1:Network network, 2:Block block);
-  void addBlock(1:Network network, 2:Block block) throws (1:AppException e);
+  void addBlock(1:Network network, 2:Block block, 3:list<binary> txIds) throws (1:AppException e);
 
   /* tx related methods */	
-  Tx getTx(1:Network network, 2:binary txid) throws (1:AppException e);
+  Tx getTx(1:Network network, 2:binary txid) throws (1:NotFound notfound);
   list<Tx> getTxList(1:Network network, 2:list<binary> txids);
   list<binary> getMissingTxIdList(1:Network network, 2:list<binary> txids);
-  Verification verifyTx(1:Network network, 2:Tx tx);
-  void addTxList(1:Network network, 2:list<Tx> txes, 3:bool soft=true);
+  Verification verifyTx(1:Network network, 2:Tx tx, 3:bool mempool);
+  void addTxList(1:Network network, 2:list<Tx> txes, 3:bool mempool);
+  void removeTx(1:Network network, 2:binary txid) throws (1:NotFound notfound);
   list<Tx> getTxListSince(1:Network network, 2:binary objId);
-  list<Tx> getLatestTxList(1:Network network);
+  list<Tx> getTailTxList(1:Network network, 2:i32 n);
   list<Tx> getRelatedTxList(1:Network network, 2:list<string> addresses);
   list<binary> getRelatedTxIdList(1:Network network, 2:list<string> addresses);
 
   /* sendtx related methods */
   list<SendTx> getSendingTxList(1:Network network);
+  list<SendTx> getSendTxList(1:Network network, 2:list<binary> txids);
   void sendTx(1:Network network, 2:SendTx sendTx) throws (1:AppException e);
 
   /* utxo related methods */
@@ -124,4 +135,8 @@ service BlockStoreService
 
   /* inv related methods */
   list<Inventory> getMissingInvList(1:Network network, 2:list<Inventory> invs);
+
+  /* Misc methods */
+  list<string> getPeers(1:Network network);
+  void setPeers(1:Network network, 2:list<string> peers);
 }
