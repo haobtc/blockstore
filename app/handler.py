@@ -3,13 +3,15 @@ from bson.binary import Binary
 import database
 from blockstore import BlockStoreService, ttypes
 from helper import resolve_network
+
 from tx import get_tx, get_tx_list, get_missing_txid_list, verify_tx_mempool, verify_tx_chain
 from tx import get_sending_tx_list, get_send_tx_list, send_tx, get_tail_tx_list, get_tx_list_since
 from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_tx
-from tx import save_tx
+from tx import save_tx, update_addrs
+
 from block import get_block, get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list
-from misc import set_peers, get_peers
+from misc import set_peers, get_peers, itercol
 
 def network_conn(nettype):
     netname = resolve_network(nettype)
@@ -94,9 +96,13 @@ class BlockStoreHandler:
                     verified_txes.append(tx)
                 else:
                     logging.warn('verify tx failed %s, message=%s', tx.txid, m)
-
             for tx in verified_txes:
                 save_tx(conn, tx)
+
+        for dtx in itercol(conn, conn.tx, 
+                           'update_addrs.tx._id',
+                           len(verified_txes)):
+            update_addrs(conn, dtx)
 
     def removeTx(self, nettype, txid):
         conn = network_conn(nettype)

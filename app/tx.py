@@ -7,6 +7,7 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 from block import db2t_block
 import database
+from misc import get_var, set_var
 
 def get_tx_db_block(conn, dtx, db_block=None):
     bhs = dtx.get('bhs')
@@ -293,14 +294,12 @@ def save_tx(conn, t):
     bhash = dtx.pop('bhash', None)
     bindex = dtx.pop('bindex', None)
     update = {}
-    if bhash:
+    if False and bhash:
+        # FIXME: don't push bhs due to a bug on tokumx
         update['$push'] = {'bhs': bhash, 'bis': bindex}
     
-    #for output in dtx['vout']:
-    #    output.pop('addrs', None)
-
     update['$set'] = dtx
-    print 'saving %s' % txhash.encode('hex'), dtx
+    print 'saving', txhash.encode('hex')
     old_tx = conn.tx.find_one_and_update(
         {'hash': txhash},
         update,
@@ -385,8 +384,8 @@ def get_utxo(conn, dtx, output, i):
 
 def get_unspent(conn, addresses):
     addr_set = set(addresses)
-    output_txes = conn.tx.find({'vout.addrs': {'$in': addresses}}, projection=['hash', 'vout'])
-    input_txes =  conn.tx.find({'vin.addrs': {'$in': addresses}}, projection=['hash', 'vin'])
+    output_txes = conn.tx.find({'oa': {'$in': addresses}}, projection=['hash', 'vout'])
+    input_txes =  conn.tx.find({'ia': {'$in': addresses}}, projection=['hash', 'vin'])
 
     utxos = []
     spent_set = set([])
@@ -413,8 +412,8 @@ def get_related_txid_list(conn, addresses):
     addr_set = set(addresses)
     txes = conn.tx.find({
         '$or': [
-            {'vout.addrs': {'$in': addresses}},
-            {'vin.addrs': {'$in': addresses}}]},
+            {'oa': {'$in': addresses}},
+            {'ia': {'$in': addresses}}]},
                                projection=['hash'])
     return [tx['hash'] for tx in txes]
 
@@ -423,8 +422,30 @@ def get_related_tx_list(conn, addresses):
     addr_set = set(addresses)
     arr = conn.tx.find({
         '$or': [
-            {'vout.addrs': {'$in': addresses}},
-            {'vin.addrs': {'$in': addresses}}]})
-    print 'arr', arr
+            {'oa': {'$in': addresses}},
+            {'ia': {'$in': addresses}}]})
     return db2t_tx_list(conn, arr)
     
+def update_addrs(conn, dtx):
+    update = {}
+    if 'oa' not in dtx:
+        oa = set([])
+        for output in dtx['vout']:
+            addrs = output.get('addrs')
+            if addrs:
+                for a in addrs:
+                    oa.add(a)
+        if oa:
+            update['oa'] = list(oa)
+
+    if 'ia' not in dtx:
+        ia = set([])
+        for output in dtx['vin']:
+            addrs = output.get('addrs')
+            if addrs:
+                for a in addrs:
+                    ia.add(a)
+        if ia:
+            update['ia'] = list(ia)
+    if update:    
+        conn.tx.update({'hash': dtx['hash']}, {'$set': update})

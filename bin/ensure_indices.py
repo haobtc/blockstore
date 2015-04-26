@@ -3,9 +3,10 @@ from app.database import conn
 def ensure_indices(c):
     c.block.ensure_index('hash', unique=True)
     c.block.ensure_index([('height', -1)])
-  
-    #c.tx.ensure_index('hash', unique=True)
-    #c.tx.ensure_index('bhs')
+
+    c.tx.ensure_index('hash', unique=True)
+    c.tx.ensure_index('bhs')
+    c.tx.ensure_index('oa')
     #nc.tx.ensure_index([('vin.hash', 1), ('vin.n', 1)])
     #c.tx.ensure_index('vin.k')
     #c.tx.ensure_index('vin.addrs')

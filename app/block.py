@@ -155,3 +155,4 @@ def get_tail_block_list(conn, n):
     arr = list(arr)
     arr.reverse()
     return [db2t_block(conn, b) for b in arr]
+
