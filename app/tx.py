@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from block import db2t_block
 import database
 from misc import get_var, set_var
+from helper import generated_seconds
 
 def get_tx_db_block(conn, dtx, db_block=None):
     bhs = dtx.get('bhs')
@@ -197,11 +198,16 @@ def verify_tx_mempool(conn, t):
     for i, inp in enumerate(t.inputs):
         if not inp.hash:
             continue
-        source_tx = get_db_tx(conn, inp.hash, projection=['hash', 'vout.addrs', 'vout.v'])
+        source_tx = get_db_tx(conn, inp.hash, projection=['hash', 'vout'])
         if not source_tx:
             return False, 'No input tx at %s' % i
         if len(source_tx['vout']) <= inp.vout:
             return False, 'No output matching %s' % i
+
+        if generated_seconds(source_tx['_id'].generation_time) < 100 * 600:
+            sb, si = get_tx_db_block(conn, source_tx)
+            if si == 0:
+                return False, 'Coinbase tx is too fresh to spend %s' % i            
         if not inp.address:
             output = source_tx['vout'][inp.vout]
             if output.get('w'):
@@ -286,6 +292,7 @@ def remove_db_tx(conn, dtx):
     if not check_removing(conn, dtx):
         return False
     do_remove_tx(conn, dtx)
+    return True
 
 def save_tx(conn, t):
     '''

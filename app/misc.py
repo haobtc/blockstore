@@ -1,7 +1,9 @@
+from datetime  import datetime, timedelta
 from bson.binary import Binary
 from bson.objectid import ObjectId
-from helper import resolve_network
+from helper import resolve_network, utc_now
 import database  
+
 
 def get_var(conn, key):
     return conn.var.find_one({'key': key})
@@ -46,4 +48,13 @@ def itercol(conn, col, key, n):
         yield obj
         set_var(conn, key, objid=obj['_id'], times=t+1)
 
+def idslice(col, start_seconds, end_seconds=0):
+    start_delta = timedelta(seconds=start_seconds)
+    
+    start_objid = ObjectId.from_datetime(utc_now() - start_delta)
+    end_delta = timedelta(seconds=end_seconds)
+    end_objid = ObjectId.from_datetime(utc_now() - end_delta)
+    for obj in col.find({'_id': {'$gte': start_objid,
+                                 '$lt': end_objid}}).sort('_id'):
+        yield obj
 

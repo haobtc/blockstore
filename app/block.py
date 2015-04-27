@@ -131,6 +131,9 @@ def link_txes(conn, block, txids):
     for i, txid in enumerate(txids):
         conn.tx.update({'hash': Binary(txid)}, {'$push': {'bhs': Binary(block.hash), 'bis': i}})
 
+    if conn.tx.find({'bhs': Binary(block.hash)}).count() != block.cntTxes:
+        raise ttypes.AppException(code='tx_failed', message='txes.count != block.cntTxes')
+
 def save_block(conn, b):
     db_block = t2db_block(b)
     db_block.pop('_id', None)
@@ -161,12 +164,12 @@ def get_tail_block_list(conn, n):
     arr.reverse()
     return [db2t_block(conn, b) for b in arr]
 
-def remove_block(conn, bhash, remove_txes=True):
+def remove_block(conn, bhash, cleanup_txes=False):
     binary_phash = Binary(bhash)
 
     arr = list(conn.block.find({'prev_hash': binary_phash}))
     for b in arr:
-        remove_block(conn, b['hash'])
+        remove_block(conn, b['hash'], cleanup_txes=cleanup_txes)
 
     # unlink txes with this 
     for dtx in conn.tx.find({'bhs': binary_phash}):
@@ -180,9 +183,7 @@ def remove_block(conn, bhash, remove_txes=True):
         dtx['bis'] = new_bis
         conn.tx.update({'hash': dtx['hash']},
                        {'$set': {'bhs': new_bhs, 'bis': new_bis}})
-        if (not new_bhs
-            and generated_seconds(dtx['_id'].generation_time) > 10
-            and remove_txes):
+        if not new_bhs and cleanup_txes:
             from tx import remove_db_tx
             remove_db_tx(conn, dtx)
 

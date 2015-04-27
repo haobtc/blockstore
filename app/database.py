@@ -18,12 +18,11 @@ def conn(netname):
     return dbclient()['blocks_%s' % netname]
 
 @contextmanager
-def transaction(conn):
-    conn.command('beginTransaction')
+def transaction(conn, isolation='mvcc'):
+    conn.command('beginTransaction', isolation=isolation)
     try:
         yield conn
         conn.command('commitTransaction')
     except:
         conn.command('rollbackTransaction')
         raise
-        

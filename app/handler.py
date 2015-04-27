@@ -45,7 +45,7 @@ class BlockStoreHandler:
 
     def addBlock(self, nettype, block, txids):
         conn = network_conn(nettype)
-        with database.transaction(conn) as conn:
+        with database.transaction(conn, isolation='serializable') as conn:
             add_block(conn, block, txids)
 
     def rewindTip(self, nettype, height):

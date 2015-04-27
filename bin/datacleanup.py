@@ -1,15 +1,33 @@
-from app.database import conn as dbconn
-from app.misc import itercol
+import logging
+logging.basicConfig()
 
-def cleanup_database(netname):
-    conn = dbconn(netname)
-    for block in itercol(conn, conn.block, 'check_block._id', 1000):
-        cnt_txes = conn.tx.find({'bhs': block['hash']}).count()
-        print block['hash'].encode('hex')
-        if cnt_txes != block['cntTxes']:
-            print 'cnt txes mismatch', block['hash'].encode('hex'), cnt_txes, 'vs.', block['cntTxes']
+from app.database import conn as dbconn
+from app.database import transaction
+from app.misc import itercol, idslice
+from app.block import remove_block, get_tip_block
+from app.helper import generated_seconds
+from app.tx import remove_db_tx, get_tx_db_block
+
+def cleanup_blocks(conn):
+    tip_block = get_tip_block(conn)
+    if not tip_block:
+        return
+    for block in idslice(conn.block, 86400 * 2, 86300):
+        if not block['isMain']:
+            logging.warn('block %s is outdated, cleaning up', block['hash'].encode('hex'))
+            with transaction(conn) as conn:
+                remove_block(conn, block['hash'], cleanup_txes=True)
+
+def cleanup_txes(conn):
+    for dtx in idslice(conn.tx, 86400 * 2, 86300):
+        b, _ = get_tx_db_block(conn, dtx)
+        if not b:
+            with transaction(conn) as conn:
+                remove_db_tx(conn, dtx)
 
 if __name__ == '__main__':
     for netname in ['bitcoin']:
-        cleanup_database(netname)
-
+        conn = dbconn(netname)
+        cleanup_blocks(conn)
+        cleanup_txes(conn)
+        
