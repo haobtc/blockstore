@@ -2,6 +2,8 @@ from blockstore import BlockStoreService, ttypes
 from pymongo import DESCENDING, ASCENDING
 from bson.binary import Binary
 from bson.objectid import ObjectId
+from misc import get_var, set_var, clear_var
+from helper import generated_seconds
 import database
 
 def db2t_block(conn, block):
@@ -52,9 +54,9 @@ def get_block(conn, blockhash):
         return db2t_block(conn, b)
 
 def get_tip_block(conn):
-    tip = conn.var.find_one({'key': 'tip'})
-    if tip:
-        return get_block(conn, tip['blockHash'])
+    v = get_var(conn, 'tip')
+    if v:
+        return get_block(conn, v['blockHash'])
 
 def verify_block(conn, tblock):
     b = get_block(conn, tblock.hash)
@@ -135,9 +137,12 @@ def save_block(conn, b):
     conn.block.update({'hash': db_block['hash']}, {'$set': db_block}, upsert=True)
 
 def set_tip_block(conn, new_tip):
-    new_tip.isMain = True
-    save_block(conn, new_tip)
-    conn.var.update({'key': 'tip'}, {'$set': {'blockHash': Binary(new_tip.hash)}}, upsert=True)
+    if new_tip:
+        new_tip.isMain = True
+        save_block(conn, new_tip)
+        set_var(conn, 'tip', blockHash=Binary(new_tip.hash))
+    else:
+        clear_var(conn, 'tip')
 
 def get_missing_block_hash_list(conn, bhashes):
     if not bhashes:
@@ -156,3 +161,48 @@ def get_tail_block_list(conn, n):
     arr.reverse()
     return [db2t_block(conn, b) for b in arr]
 
+def remove_block(conn, bhash, remove_txes=True):
+    binary_phash = Binary(bhash)
+
+    arr = list(conn.block.find({'prev_hash': binary_phash}))
+    for b in arr:
+        remove_block(conn, b['hash'])
+
+    # unlink txes with this 
+    for dtx in conn.tx.find({'bhs': binary_phash}):
+        new_bhs = []
+        new_bis = []
+        for h, i in zip(dtx['bhs'], dtx['bis']):
+            if h != binary_phash:
+                new_bhs.append(h)
+                new_bis.append(i)
+        dtx['bhs'] = new_bhs
+        dtx['bis'] = new_bis
+        conn.tx.update({'hash': dtx['hash']},
+                       {'$set': {'bhs': new_bhs, 'bis': new_bis}})
+        if (not new_bhs
+            and generated_seconds(dtx['_id'].generation_time) > 10
+            and remove_txes):
+            from tx import remove_db_tx
+            remove_db_tx(conn, dtx)
+
+    # remove the block its self
+    conn.block.remove({'hash': binary_phash})
+    
+def rewind_tip(conn, height):
+    tip = get_tip_block(conn)
+    if not tip:
+        return False, 'no tip block'
+    print 'current tip height is', tip.height
+    if tip.height <= height:
+        return False, 'height >= tip'
+
+    p = tip
+    while p and p.height > height:
+        prev = get_block(conn, p.prevHash)
+            
+        remove_block(conn, p.hash)
+        set_tip_block(conn, prev)
+        p = prev
+    return True, 'ok'
+            

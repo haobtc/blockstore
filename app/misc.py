@@ -9,6 +9,9 @@ def get_var(conn, key):
 def set_var(conn, key, **kw):
     conn.var.update({'key': key}, {'$set': kw}, upsert=True)
 
+def clear_var(conn, key):
+    conn.var.remove({'key': key})
+
 def set_peers(conn, peers):
     set_var(conn, 'peers', peers=peers)
 

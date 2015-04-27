@@ -10,7 +10,7 @@ from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_t
 from tx import save_tx, update_addrs
 
 from block import get_block, get_tip_block, verify_block, get_missing_block_hash_list, add_block
-from block import get_tail_block_list
+from block import get_tail_block_list, rewind_tip
 from misc import set_peers, get_peers, itercol
 
 def network_conn(nettype):
@@ -48,6 +48,13 @@ class BlockStoreHandler:
         with database.transaction(conn) as conn:
             add_block(conn, block, txids)
 
+    def rewindTip(self, nettype, height):
+        conn = network_conn(nettype)
+        with database.transaction(conn) as conn:
+            v, m = rewind_tip(conn, height)
+            if not v:
+                raise ttypes.AppException(code='rewind_failed', message=m)
+            
     def getTx(self, nettype, txid):
         conn = network_conn(nettype)
         dtx = get_tx(conn, txid)

@@ -58,6 +58,14 @@ class Iface:
     """
     pass
 
+  def rewindTip(self, network, height):
+    """
+    Parameters:
+     - network
+     - height
+    """
+    pass
+
   def getTx(self, network, txid):
     """
     Parameters:
@@ -365,6 +373,39 @@ class Client(Iface):
       iprot.readMessageEnd()
       raise x
     result = addBlock_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.e is not None:
+      raise result.e
+    return
+
+  def rewindTip(self, network, height):
+    """
+    Parameters:
+     - network
+     - height
+    """
+    self.send_rewindTip(network, height)
+    self.recv_rewindTip()
+
+  def send_rewindTip(self, network, height):
+    self._oprot.writeMessageBegin('rewindTip', TMessageType.CALL, self._seqid)
+    args = rewindTip_args()
+    args.network = network
+    args.height = height
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_rewindTip(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = rewindTip_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.e is not None:
@@ -940,6 +981,7 @@ class Processor(Iface, TProcessor):
     self._processMap["getTailBlockList"] = Processor.process_getTailBlockList
     self._processMap["verifyBlock"] = Processor.process_verifyBlock
     self._processMap["addBlock"] = Processor.process_addBlock
+    self._processMap["rewindTip"] = Processor.process_rewindTip
     self._processMap["getTx"] = Processor.process_getTx
     self._processMap["getTxList"] = Processor.process_getTxList
     self._processMap["getMissingTxIdList"] = Processor.process_getMissingTxIdList
@@ -1033,6 +1075,20 @@ class Processor(Iface, TProcessor):
     except AppException, e:
       result.e = e
     oprot.writeMessageBegin("addBlock", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_rewindTip(self, seqid, iprot, oprot):
+    args = rewindTip_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = rewindTip_result()
+    try:
+      self._handler.rewindTip(args.network, args.height)
+    except AppException, e:
+      result.e = e
+    oprot.writeMessageBegin("rewindTip", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -1971,6 +2027,150 @@ class addBlock_result:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('addBlock_result')
+    if self.e is not None:
+      oprot.writeFieldBegin('e', TType.STRUCT, 1)
+      self.e.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.e)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class rewindTip_args:
+  """
+  Attributes:
+   - network
+   - height
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'network', None, None, ), # 1
+    (2, TType.I32, 'height', None, None, ), # 2
+  )
+
+  def __init__(self, network=None, height=None,):
+    self.network = network
+    self.height = height
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.network = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.height = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('rewindTip_args')
+    if self.network is not None:
+      oprot.writeFieldBegin('network', TType.I32, 1)
+      oprot.writeI32(self.network)
+      oprot.writeFieldEnd()
+    if self.height is not None:
+      oprot.writeFieldBegin('height', TType.I32, 2)
+      oprot.writeI32(self.height)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.network)
+    value = (value * 31) ^ hash(self.height)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class rewindTip_result:
+  """
+  Attributes:
+   - e
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'e', (AppException, AppException.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, e=None,):
+    self.e = e
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.e = AppException()
+          self.e.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('rewindTip_result')
     if self.e is not None:
       oprot.writeFieldBegin('e', TType.STRUCT, 1)
       self.e.write(oprot)

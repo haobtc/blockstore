@@ -25,7 +25,5 @@ def transaction(conn):
         conn.command('commitTransaction')
     except:
         conn.command('rollbackTransaction')
-        import traceback
-        traceback.print_exc()
         raise
         

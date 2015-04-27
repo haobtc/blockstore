@@ -255,7 +255,7 @@ def verify_tx_chain(conn, t):
 def check_removing(conn, dtx):
     b, _ = get_tx_db_block(conn, dtx)
     if b:
-        logging.warn('try to delete a tx in block %s', dtx['hash'])
+        logging.warn('try to delete a tx in block %s at height %d tx %s', b['hash'].encode('hex'), b['height'], dtx['hash'].encode('hex'))
         return False
     for ctx in conn.tx.find({'vin.hash': dtx['hash']}):
         if not check_removing(conn, ctx):
@@ -265,8 +265,11 @@ def check_removing(conn, dtx):
 def do_remove_tx(conn, dtx):
     for ctx in conn.tx.find({'vin.hash': dtx['hash']}):
         do_remove_tx(conn, ctx)
-        
-    conn['tx.removed'].save(dtx)
+    
+    dtx.pop('_id', None)
+    conn['removedtx'].save(dtx)
+    print 'do remove tx',  dtx['hash'].encode('hex')
+
     conn.tx.remove({'hash': dtx['hash']})
     for input in dtx['vin']:
         if not input.get('hash'):
@@ -280,7 +283,7 @@ def remove_tx(conn, tx):
     return remove_db_tx(conn, dtx)
 
 def remove_db_tx(conn, dtx):
-    if not check_removing(dtx):
+    if not check_removing(conn, dtx):
         return False
     do_remove_tx(conn, dtx)
 

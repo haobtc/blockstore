@@ -112,6 +112,7 @@ service BlockStoreService
   list<Block> getTailBlockList(1:Network network, 2:i32 n);
   Verification verifyBlock(1:Network network, 2:Block block);
   void addBlock(1:Network network, 2:Block block, 3:list<binary> txIds) throws (1:AppException e);
+  void rewindTip(1:Network network, 2:i32 height) throws (1:AppException e);
 
   /* tx related methods */	
   Tx getTx(1:Network network, 2:binary txid) throws (1:NotFound notfound);
