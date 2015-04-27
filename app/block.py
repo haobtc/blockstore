@@ -1,3 +1,4 @@
+import logging
 from blockstore import BlockStoreService, ttypes
 from pymongo import DESCENDING, ASCENDING
 from bson.binary import Binary
@@ -89,7 +90,7 @@ def add_block(conn, new_tip, txids):
     if not old_tip:
         # genesis block
         new_tip.height = 0
-        print 'save tip block', new_tip
+        logging.info('save tip block %s', new_tip)
         set_tip_block(conn, new_tip)
         link_txes(conn, new_tip, txids)
         return
@@ -194,12 +195,14 @@ def rewind_tip(conn, height):
     tip = get_tip_block(conn)
     if not tip:
         return False, 'no tip block'
-    print 'current tip height is', tip.height
+    #print 'current tip height is', tip.height
     if tip.height <= height:
         return False, 'height >= tip'
 
     p = tip
     while p and p.height > height:
+        logging.info('rewind tip to %s', p.height)
+        print 'rewind tip to', p.height
         prev = get_block(conn, p.prevHash)
             
         remove_block(conn, p.hash)
