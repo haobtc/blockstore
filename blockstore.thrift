@@ -103,6 +103,12 @@ struct Inventory {
   2:binary hash
 }
 
+struct Peer {
+  1:string host,
+  2:i32 port,
+  3:i32 time
+}
+
 service BlockStoreService
 {
 
@@ -140,4 +146,7 @@ service BlockStoreService
   /* Misc methods */
   list<string> getPeers(1:Network network);
   void setPeers(1:Network network, 2:list<string> peers);
+  
+  void pushPeers(1:Network network, 2:list<Peer> peers);
+  list<Peer> popPeers(1:Network network, 2:i32 n);
 }

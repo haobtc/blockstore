@@ -202,6 +202,22 @@ class Iface:
     """
     pass
 
+  def pushPeers(self, network, peers):
+    """
+    Parameters:
+     - network
+     - peers
+    """
+    pass
+
+  def popPeers(self, network, n):
+    """
+    Parameters:
+     - network
+     - n
+    """
+    pass
+
 
 class Client(Iface):
   def __init__(self, iprot, oprot=None):
@@ -971,6 +987,70 @@ class Client(Iface):
     iprot.readMessageEnd()
     return
 
+  def pushPeers(self, network, peers):
+    """
+    Parameters:
+     - network
+     - peers
+    """
+    self.send_pushPeers(network, peers)
+    self.recv_pushPeers()
+
+  def send_pushPeers(self, network, peers):
+    self._oprot.writeMessageBegin('pushPeers', TMessageType.CALL, self._seqid)
+    args = pushPeers_args()
+    args.network = network
+    args.peers = peers
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_pushPeers(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = pushPeers_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    return
+
+  def popPeers(self, network, n):
+    """
+    Parameters:
+     - network
+     - n
+    """
+    self.send_popPeers(network, n)
+    return self.recv_popPeers()
+
+  def send_popPeers(self, network, n):
+    self._oprot.writeMessageBegin('popPeers', TMessageType.CALL, self._seqid)
+    args = popPeers_args()
+    args.network = network
+    args.n = n
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_popPeers(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = popPeers_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "popPeers failed: unknown result");
+
 
 class Processor(Iface, TProcessor):
   def __init__(self, handler):
@@ -999,6 +1079,8 @@ class Processor(Iface, TProcessor):
     self._processMap["getMissingInvList"] = Processor.process_getMissingInvList
     self._processMap["getPeers"] = Processor.process_getPeers
     self._processMap["setPeers"] = Processor.process_setPeers
+    self._processMap["pushPeers"] = Processor.process_pushPeers
+    self._processMap["popPeers"] = Processor.process_popPeers
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -1285,6 +1367,28 @@ class Processor(Iface, TProcessor):
     result = setPeers_result()
     self._handler.setPeers(args.network, args.peers)
     oprot.writeMessageBegin("setPeers", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_pushPeers(self, seqid, iprot, oprot):
+    args = pushPeers_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = pushPeers_result()
+    self._handler.pushPeers(args.network, args.peers)
+    oprot.writeMessageBegin("pushPeers", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_popPeers(self, seqid, iprot, oprot):
+    args = popPeers_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = popPeers_result()
+    result.success = self._handler.popPeers(args.network, args.n)
+    oprot.writeMessageBegin("popPeers", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -4755,6 +4859,290 @@ class setPeers_result:
 
   def __hash__(self):
     value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class pushPeers_args:
+  """
+  Attributes:
+   - network
+   - peers
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'network', None, None, ), # 1
+    (2, TType.LIST, 'peers', (TType.STRUCT,(Peer, Peer.thrift_spec)), None, ), # 2
+  )
+
+  def __init__(self, network=None, peers=None,):
+    self.network = network
+    self.peers = peers
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.network = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.peers = []
+          (_etype171, _size168) = iprot.readListBegin()
+          for _i172 in xrange(_size168):
+            _elem173 = Peer()
+            _elem173.read(iprot)
+            self.peers.append(_elem173)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('pushPeers_args')
+    if self.network is not None:
+      oprot.writeFieldBegin('network', TType.I32, 1)
+      oprot.writeI32(self.network)
+      oprot.writeFieldEnd()
+    if self.peers is not None:
+      oprot.writeFieldBegin('peers', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.peers))
+      for iter174 in self.peers:
+        iter174.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.network)
+    value = (value * 31) ^ hash(self.peers)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class pushPeers_result:
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('pushPeers_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class popPeers_args:
+  """
+  Attributes:
+   - network
+   - n
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'network', None, None, ), # 1
+    (2, TType.I32, 'n', None, None, ), # 2
+  )
+
+  def __init__(self, network=None, n=None,):
+    self.network = network
+    self.n = n
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.network = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.n = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('popPeers_args')
+    if self.network is not None:
+      oprot.writeFieldBegin('network', TType.I32, 1)
+      oprot.writeI32(self.network)
+      oprot.writeFieldEnd()
+    if self.n is not None:
+      oprot.writeFieldBegin('n', TType.I32, 2)
+      oprot.writeI32(self.n)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.network)
+    value = (value * 31) ^ hash(self.n)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class popPeers_result:
+  """
+  Attributes:
+   - success
+  """
+
+  thrift_spec = (
+    (0, TType.LIST, 'success', (TType.STRUCT,(Peer, Peer.thrift_spec)), None, ), # 0
+  )
+
+  def __init__(self, success=None,):
+    self.success = success
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.LIST:
+          self.success = []
+          (_etype178, _size175) = iprot.readListBegin()
+          for _i179 in xrange(_size175):
+            _elem180 = Peer()
+            _elem180.read(iprot)
+            self.success.append(_elem180)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('popPeers_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.LIST, 0)
+      oprot.writeListBegin(TType.STRUCT, len(self.success))
+      for iter181 in self.success:
+        iter181.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
     return value
 
   def __repr__(self):

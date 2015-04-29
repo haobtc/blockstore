@@ -1,7 +1,10 @@
+import time
+from pymongo import DESCENDING, ASCENDING
 from datetime  import datetime, timedelta
 from bson.binary import Binary
 from bson.objectid import ObjectId
 from helper import resolve_network, utc_now
+from blockstore import BlockStoreService, ttypes
 import database  
 
 
@@ -57,4 +60,28 @@ def idslice(col, start_seconds, end_seconds=0):
     for obj in col.find({'_id': {'$gte': start_objid,
                                  '$lt': end_objid}}).sort('_id'):
         yield obj
+
+
+def push_peers(conn, peers):
+    for peer in peers:
+        conn.peerpool.update({'host': peer.host, 'port': peer.port},
+                              {'$set': {
+                                  'time': peer.time,
+                                  'available': 1,
+                                  'uptime': int(time.time())}},
+                              upsert=True)
+
+def pop_peers(conn, n):
+    arr = list(conn.peerpool.find().sort([('available', DESCENDING),
+                                          ('uptime', ASCENDING)]).limit(n))
+    peers = []
+    for p in arr:
+        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['time'])
+        peers.append(peer)
+        conn.peerpool.update({'host': peer.host, 'port': peer.port},
+                             {'$set': {
+                                 'time': peer.time,
+                                 'available': 0,
+                                 'uptime': int(time.time())}})
+    return peers
 

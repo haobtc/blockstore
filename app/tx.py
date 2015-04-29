@@ -148,10 +148,8 @@ def get_tx_list(conn, txids):
     if not txids:
         return []        
     txids = [Binary(txid) for txid in txids]
-    print 'xxxxx', txids
     arr = conn.tx.find({'hash': {'$in': txids}})
     arr = list(arr)
-    print 'yyyy', arr
     return db2t_tx_list(conn, arr)
 
 def get_tail_tx_list(conn, n):
@@ -309,7 +307,8 @@ def save_tx(conn, t):
         update['$push'] = {'bhs': bhash, 'bis': bindex}
     
     update['$set'] = dtx
-    print 'saving', txhash.encode('hex')
+    logging.info('saving tx %s', txhash.encode('hex'))
+    #print('saving tx %s' % txhash.encode('hex'))
     old_tx = conn.tx.find_one_and_update(
         {'hash': txhash},
         update,
@@ -450,12 +449,18 @@ def update_addrs(conn, dtx):
 
     if 'ia' not in dtx:
         ia = set([])
-        for output in dtx['vin']:
-            addrs = output.get('addrs')
+        hs = []
+        for input in dtx['vin']:
+            h = input.get('hash')
+            if h:
+                hs.append(h)
+            addrs = input.get('addrs')
             if addrs:
                 for a in addrs:
                     ia.add(a)
         if ia:
             update['ia'] = list(ia)
+            update['vh'] = hs
+
     if update:    
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})

@@ -125,6 +125,8 @@ def add_block(conn, new_tip, txids):
 
     set_tip_block(conn, new_tip)
     link_txes(conn, new_tip, txids)
+    logging.info('saved block %s at height %s', new_tip.hash.encode('hex'), new_tip.height)
+    print 'saved block tx %s with %d txes at height %s' % (new_tip.hash.encode('hex'), len(txids), new_tip.height)
 
 
 def link_txes(conn, block, txids):

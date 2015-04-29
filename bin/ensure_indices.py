@@ -8,19 +8,24 @@ def ensure_indices(c):
     c.tx.ensure_index('hash', unique=True)
     c.tx.ensure_index('bhs')
     c.tx.ensure_index('oa')
-    c.tx.ensure_index('vin.hash')
+    c.tx.ensure_index('ia')
+    c.tx.ensure_index('vh')
+    #c.tx.ensure_index('vin.hash')
     
     #nc.tx.ensure_index([('vin.hash', 1), ('vin.n', 1)])
     #c.tx.ensure_index('vin.k')
     #c.tx.ensure_index('vin.addrs')
-    c.tx.ensure_index('vout.addrs')
+    #c.tx.ensure_index('vout.addrs')
     #c.tx.ensure_index('vout.w')
 
     c.var.ensure_index('key', unique=True)
     c.sendtx.ensure_index('hash',  unique=True)
+    c.peerpool.ensure_index([('host', 1), ('port', 1)], unique=True)
+    c.peerpool.ensure_index([('available', -1), ('uptime', 1)])
+    
 
 def main():
-    for netname in ['bitcoin', 'dogecoin', 'darkcoin']:
+    for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
         c = conn(netname)
         ensure_indices(c)
 
