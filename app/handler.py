@@ -101,10 +101,11 @@ class BlockStoreHandler:
                     v, m = verify_tx_chain(conn, tx)
                 if v:
                     verified_txes.append(tx)
+                    save_tx(conn, tx)
                 else:
                     logging.warn('verify tx failed %s, message=%s', tx.hash.encode('hex'), m)
-            for tx in verified_txes:
-                save_tx(conn, tx)
+            #for tx in verified_txes:
+            #    save_tx(conn, tx)
 
         for dtx in itercol(conn, conn.tx, 
                            'update_addrs.tx._id',

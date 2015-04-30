@@ -21,7 +21,9 @@ def ensure_indices(c):
     c.var.ensure_index('key', unique=True)
     c.sendtx.ensure_index('hash',  unique=True)
     c.peerpool.ensure_index([('host', 1), ('port', 1)], unique=True)
-    c.peerpool.ensure_index([('available', -1), ('uptime', 1)])
+    c.peerpool.ensure_index([('borrowed', -1)])
+    c.peerpool.ensure_index([('borrowed', -1), ('lastSeen', -1)])
+    c.peerpool.ensure_index([('borrowed', -1), ('lastBorrowed', -1)])
     
 
 def main():

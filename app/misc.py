@@ -62,26 +62,33 @@ def idslice(col, start_seconds, end_seconds=0):
         yield obj
 
 
+def return_borrowed_peers(conn):
+    # return the borrowed pool
+    now_time = int(time.time())
+    conn.peerpool.update({'borrowed': 1, 'lastBorrowed': {'$lt': now_time - 300}},
+                         {'$set': {'borrowed': 0}})
+    
 def push_peers(conn, peers):
+    now_time = int(time.time())
     for peer in peers:
         conn.peerpool.update({'host': peer.host, 'port': peer.port},
-                              {'$set': {
-                                  'time': peer.time,
-                                  'available': 1,
-                                  'uptime': int(time.time())}},
-                              upsert=True)
+                             {'$set': {'lastSeen': now_time}},
+                             upsert=True)
+
+    return_borrowed_peers(conn)
 
 def pop_peers(conn, n):
-    arr = list(conn.peerpool.find().sort([('available', DESCENDING),
-                                          ('uptime', ASCENDING)]).limit(n))
+    return_borrowed_peers(conn)
+    now_time = int(time.time())
+    arr = list(conn.peerpool.find().sort([('borrowed', DESCENDING),
+                                          ('lastSeen', DESCENDING)]).limit(n))
     peers = []
     for p in arr:
-        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['time'])
+        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['lastSeen'])
         peers.append(peer)
         conn.peerpool.update({'host': peer.host, 'port': peer.port},
                              {'$set': {
-                                 'time': peer.time,
-                                 'available': 0,
-                                 'uptime': int(time.time())}})
+                                 'borrowed': 1,
+                                 'lastBorrowed': now_time}})
     return peers
 

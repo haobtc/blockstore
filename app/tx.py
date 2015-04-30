@@ -185,6 +185,8 @@ def ensure_input_addrs(conn, dtx, input, i):
         return source_tx
     
 def verify_tx_mempool(conn, t):
+    if get_db_tx(conn, t.hash):
+        return True, 'ok'
     sum_output = 0
     sum_input = 0
     for i, output in enumerate(t.outputs):
@@ -221,6 +223,9 @@ def verify_tx_mempool(conn, t):
     return True, 'ok'
 
 def verify_tx_chain(conn, t):
+    if get_db_tx(conn, t.hash):
+        return True, 'ok'
+
     for i, inp in enumerate(t.inputs):
         if not inp.hash:
             continue
@@ -425,7 +430,6 @@ def get_related_txid_list(conn, addresses):
             {'ia': {'$in': addresses}}]},
                                projection=['hash'])
     return [tx['hash'] for tx in txes]
-
 
 def get_related_tx_list(conn, addresses):
     addr_set = set(addresses)
