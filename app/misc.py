@@ -1,7 +1,10 @@
+import time
+from pymongo import DESCENDING, ASCENDING
 from datetime  import datetime, timedelta
 from bson.binary import Binary
 from bson.objectid import ObjectId
 from helper import resolve_network, utc_now
+from blockstore import BlockStoreService, ttypes
 import database  
 
 
@@ -57,4 +60,35 @@ def idslice(col, start_seconds, end_seconds=0):
     for obj in col.find({'_id': {'$gte': start_objid,
                                  '$lt': end_objid}}).sort('_id'):
         yield obj
+
+
+def return_borrowed_peers(conn):
+    # return the borrowed pool
+    now_time = int(time.time())
+    conn.peerpool.update({'borrowed': 1, 'lastBorrowed': {'$lt': now_time - 300}},
+                         {'$set': {'borrowed': 0}})
+    
+def push_peers(conn, peers):
+    now_time = int(time.time())
+    for peer in peers:
+        conn.peerpool.update({'host': peer.host, 'port': peer.port},
+                             {'$set': {'lastSeen': now_time}},
+                             upsert=True)
+
+    return_borrowed_peers(conn)
+
+def pop_peers(conn, n):
+    return_borrowed_peers(conn)
+    now_time = int(time.time())
+    arr = list(conn.peerpool.find().sort([('borrowed', DESCENDING),
+                                          ('lastSeen', DESCENDING)]).limit(n))
+    peers = []
+    for p in arr:
+        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['lastSeen'])
+        peers.append(peer)
+        conn.peerpool.update({'host': peer.host, 'port': peer.port},
+                             {'$set': {
+                                 'borrowed': 1,
+                                 'lastBorrowed': now_time}})
+    return peers
 

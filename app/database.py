@@ -13,9 +13,8 @@ def dbclient():
         db_client = pymongo.MongoClient(url, maxPoolSize=1)
     return db_client
 
-
 def conn(netname):
-    return dbclient()['blocks_%s' % netname]
+    return dbclient()['blockstore_%s' % netname]
 
 @contextmanager
 def transaction(conn, isolation='mvcc'):

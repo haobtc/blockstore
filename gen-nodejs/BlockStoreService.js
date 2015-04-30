@@ -700,6 +700,130 @@ blockstore.BlockStoreService_addBlock_result.prototype.write = function(output) 
   return;
 };
 
+blockstore.BlockStoreService_rewindTip_args = function(args) {
+  this.network = null;
+  this.height = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.height !== undefined) {
+      this.height = args.height;
+    }
+  }
+};
+blockstore.BlockStoreService_rewindTip_args.prototype = {};
+blockstore.BlockStoreService_rewindTip_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I32) {
+        this.height = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_rewindTip_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_rewindTip_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.height !== null && this.height !== undefined) {
+    output.writeFieldBegin('height', Thrift.Type.I32, 2);
+    output.writeI32(this.height);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_rewindTip_result = function(args) {
+  this.e = null;
+  if (args instanceof ttypes.AppException) {
+    this.e = args;
+    return;
+  }
+  if (args) {
+    if (args.e !== undefined) {
+      this.e = args.e;
+    }
+  }
+};
+blockstore.BlockStoreService_rewindTip_result.prototype = {};
+blockstore.BlockStoreService_rewindTip_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.e = new ttypes.AppException();
+        this.e.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_rewindTip_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_rewindTip_result');
+  if (this.e !== null && this.e !== undefined) {
+    output.writeFieldBegin('e', Thrift.Type.STRUCT, 1);
+    this.e.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 blockstore.BlockStoreService_getTx_args = function(args) {
   this.network = null;
   this.txid = null;
@@ -3161,6 +3285,265 @@ blockstore.BlockStoreService_setPeers_result.prototype.write = function(output) 
   return;
 };
 
+blockstore.BlockStoreService_pushPeers_args = function(args) {
+  this.network = null;
+  this.peers = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.peers !== undefined) {
+      this.peers = args.peers;
+    }
+  }
+};
+blockstore.BlockStoreService_pushPeers_args.prototype = {};
+blockstore.BlockStoreService_pushPeers_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size192 = 0;
+        var _rtmp3196;
+        this.peers = [];
+        var _etype195 = 0;
+        _rtmp3196 = input.readListBegin();
+        _etype195 = _rtmp3196.etype;
+        _size192 = _rtmp3196.size;
+        for (var _i197 = 0; _i197 < _size192; ++_i197)
+        {
+          var elem198 = null;
+          elem198 = new ttypes.Peer();
+          elem198.read(input);
+          this.peers.push(elem198);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_pushPeers_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_pushPeers_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.peers !== null && this.peers !== undefined) {
+    output.writeFieldBegin('peers', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRUCT, this.peers.length);
+    for (var iter199 in this.peers)
+    {
+      if (this.peers.hasOwnProperty(iter199))
+      {
+        iter199 = this.peers[iter199];
+        iter199.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_pushPeers_result = function(args) {
+};
+blockstore.BlockStoreService_pushPeers_result.prototype = {};
+blockstore.BlockStoreService_pushPeers_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    input.skip(ftype);
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_pushPeers_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_pushPeers_result');
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_popPeers_args = function(args) {
+  this.network = null;
+  this.n = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.n !== undefined) {
+      this.n = args.n;
+    }
+  }
+};
+blockstore.BlockStoreService_popPeers_args.prototype = {};
+blockstore.BlockStoreService_popPeers_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I32) {
+        this.n = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_popPeers_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_popPeers_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.n !== null && this.n !== undefined) {
+    output.writeFieldBegin('n', Thrift.Type.I32, 2);
+    output.writeI32(this.n);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_popPeers_result = function(args) {
+  this.success = null;
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+  }
+};
+blockstore.BlockStoreService_popPeers_result.prototype = {};
+blockstore.BlockStoreService_popPeers_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size200 = 0;
+        var _rtmp3204;
+        this.success = [];
+        var _etype203 = 0;
+        _rtmp3204 = input.readListBegin();
+        _etype203 = _rtmp3204.etype;
+        _size200 = _rtmp3204.size;
+        for (var _i205 = 0; _i205 < _size200; ++_i205)
+        {
+          var elem206 = null;
+          elem206 = new ttypes.Peer();
+          elem206.read(input);
+          this.success.push(elem206);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_popPeers_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_popPeers_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter207 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter207))
+      {
+        iter207 = this.success[iter207];
+        iter207.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 blockstore.BlockStoreServiceClient = exports.Client = function(output, pClass) {
     this.output = output;
     this.pClass = pClass;
@@ -3408,6 +3791,54 @@ blockstore.BlockStoreServiceClient.prototype.recv_addBlock = function(input,mtyp
     return callback(x);
   }
   var result = new blockstore.BlockStoreService_addBlock_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.e) {
+    return callback(result.e);
+  }
+  callback(null)
+};
+blockstore.BlockStoreServiceClient.prototype.rewindTip = function(network, height, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_rewindTip(network, height);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_rewindTip(network, height);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_rewindTip = function(network, height) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('rewindTip', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_rewindTip_args();
+  args.network = network;
+  args.height = height;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_rewindTip = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_rewindTip_result();
   result.read(input);
   input.readMessageEnd();
 
@@ -4229,6 +4660,99 @@ blockstore.BlockStoreServiceClient.prototype.recv_setPeers = function(input,mtyp
 
   callback(null)
 };
+blockstore.BlockStoreServiceClient.prototype.pushPeers = function(network, peers, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_pushPeers(network, peers);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_pushPeers(network, peers);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_pushPeers = function(network, peers) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('pushPeers', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_pushPeers_args();
+  args.network = network;
+  args.peers = peers;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_pushPeers = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_pushPeers_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  callback(null)
+};
+blockstore.BlockStoreServiceClient.prototype.popPeers = function(network, n, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_popPeers(network, n);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_popPeers(network, n);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_popPeers = function(network, n) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('popPeers', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_popPeers_args();
+  args.network = network;
+  args.n = n;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_popPeers = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_popPeers_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('popPeers failed: unknown result');
+};
 blockstore.BlockStoreServiceProcessor = exports.Processor = function(handler) {
   this._handler = handler
 }
@@ -4390,6 +4914,36 @@ blockstore.BlockStoreServiceProcessor.prototype.process_addBlock = function(seqi
     this._handler.addBlock(args.network, args.block, args.txIds,  function (err, result) {
       var result = new blockstore.BlockStoreService_addBlock_result((err != null ? err : {success: result}));
       output.writeMessageBegin("addBlock", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_rewindTip = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_rewindTip_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.rewindTip.length === 2) {
+    Q.fcall(this._handler.rewindTip, args.network, args.height)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_rewindTip_result({success: result});
+        output.writeMessageBegin("rewindTip", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_rewindTip_result(err);
+        output.writeMessageBegin("rewindTip", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.rewindTip(args.network, args.height,  function (err, result) {
+      var result = new blockstore.BlockStoreService_rewindTip_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("rewindTip", Thrift.MessageType.REPLY, seqid);
       result.write(output);
       output.writeMessageEnd();
       output.flush();
@@ -4900,6 +5454,66 @@ blockstore.BlockStoreServiceProcessor.prototype.process_setPeers = function(seqi
     this._handler.setPeers(args.network, args.peers,  function (err, result) {
       var result = new blockstore.BlockStoreService_setPeers_result((err != null ? err : {success: result}));
       output.writeMessageBegin("setPeers", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_pushPeers = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_pushPeers_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.pushPeers.length === 2) {
+    Q.fcall(this._handler.pushPeers, args.network, args.peers)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_pushPeers_result({success: result});
+        output.writeMessageBegin("pushPeers", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_pushPeers_result(err);
+        output.writeMessageBegin("pushPeers", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.pushPeers(args.network, args.peers,  function (err, result) {
+      var result = new blockstore.BlockStoreService_pushPeers_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("pushPeers", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_popPeers = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_popPeers_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.popPeers.length === 2) {
+    Q.fcall(this._handler.popPeers, args.network, args.n)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_popPeers_result({success: result});
+        output.writeMessageBegin("popPeers", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_popPeers_result(err);
+        output.writeMessageBegin("popPeers", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.popPeers(args.network, args.n,  function (err, result) {
+      var result = new blockstore.BlockStoreService_popPeers_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("popPeers", Thrift.MessageType.REPLY, seqid);
       result.write(output);
       output.writeMessageEnd();
       output.flush();

@@ -1220,3 +1220,85 @@ blockstore.Inventory.prototype.write = function(output) {
   return;
 };
 
+blockstore.Peer = module.exports.Peer = function(args) {
+  this.host = null;
+  this.port = null;
+  this.time = null;
+  if (args) {
+    if (args.host !== undefined) {
+      this.host = args.host;
+    }
+    if (args.port !== undefined) {
+      this.port = args.port;
+    }
+    if (args.time !== undefined) {
+      this.time = args.time;
+    }
+  }
+};
+blockstore.Peer.prototype = {};
+blockstore.Peer.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.host = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I32) {
+        this.port = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.I32) {
+        this.time = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.Peer.prototype.write = function(output) {
+  output.writeStructBegin('Peer');
+  if (this.host !== null && this.host !== undefined) {
+    output.writeFieldBegin('host', Thrift.Type.STRING, 1);
+    output.writeString(this.host);
+    output.writeFieldEnd();
+  }
+  if (this.port !== null && this.port !== undefined) {
+    output.writeFieldBegin('port', Thrift.Type.I32, 2);
+    output.writeI32(this.port);
+    output.writeFieldEnd();
+  }
+  if (this.time !== null && this.time !== undefined) {
+    output.writeFieldBegin('time', Thrift.Type.I32, 3);
+    output.writeI32(this.time);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+

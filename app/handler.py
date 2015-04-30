@@ -11,7 +11,7 @@ from tx import save_tx, update_addrs
 
 from block import get_block, get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list, rewind_tip
-from misc import set_peers, get_peers, itercol
+from misc import set_peers, get_peers, itercol, push_peers, pop_peers
 
 def network_conn(nettype):
     netname = resolve_network(nettype)
@@ -101,10 +101,11 @@ class BlockStoreHandler:
                     v, m = verify_tx_chain(conn, tx)
                 if v:
                     verified_txes.append(tx)
+                    save_tx(conn, tx)
                 else:
-                    logging.warn('verify tx failed %s, message=%s', tx.txid, m)
-            for tx in verified_txes:
-                save_tx(conn, tx)
+                    logging.warn('verify tx failed %s, message=%s', tx.hash.encode('hex'), m)
+            #for tx in verified_txes:
+            #    save_tx(conn, tx)
 
         for dtx in itercol(conn, conn.tx, 
                            'update_addrs.tx._id',
@@ -159,3 +160,11 @@ class BlockStoreHandler:
     def setPeers(self, nettype, peers):
         conn = network_conn(nettype)
         return set_peers(conn, peers)
+
+    def pushPeers(self, nettype, peers):
+        conn = network_conn(nettype)
+        return push_peers(conn, peers)
+
+    def popPeers(self, nettype, n):
+        conn = network_conn(nettype)
+        return pop_peers(conn, n)

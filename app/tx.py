@@ -148,10 +148,8 @@ def get_tx_list(conn, txids):
     if not txids:
         return []        
     txids = [Binary(txid) for txid in txids]
-    print 'xxxxx', txids
     arr = conn.tx.find({'hash': {'$in': txids}})
     arr = list(arr)
-    print 'yyyy', arr
     return db2t_tx_list(conn, arr)
 
 def get_tail_tx_list(conn, n):
@@ -187,6 +185,8 @@ def ensure_input_addrs(conn, dtx, input, i):
         return source_tx
     
 def verify_tx_mempool(conn, t):
+    if get_db_tx(conn, t.hash):
+        return True, 'ok'
     sum_output = 0
     sum_input = 0
     for i, output in enumerate(t.outputs):
@@ -223,6 +223,9 @@ def verify_tx_mempool(conn, t):
     return True, 'ok'
 
 def verify_tx_chain(conn, t):
+    if get_db_tx(conn, t.hash):
+        return True, 'ok'
+
     for i, inp in enumerate(t.inputs):
         if not inp.hash:
             continue
@@ -309,7 +312,8 @@ def save_tx(conn, t):
         update['$push'] = {'bhs': bhash, 'bis': bindex}
     
     update['$set'] = dtx
-    print 'saving', txhash.encode('hex')
+    logging.info('saving tx %s', txhash.encode('hex'))
+    #print('saving tx %s' % txhash.encode('hex'))
     old_tx = conn.tx.find_one_and_update(
         {'hash': txhash},
         update,
@@ -427,7 +431,6 @@ def get_related_txid_list(conn, addresses):
                                projection=['hash'])
     return [tx['hash'] for tx in txes]
 
-
 def get_related_tx_list(conn, addresses):
     addr_set = set(addresses)
     arr = conn.tx.find({
@@ -449,14 +452,20 @@ def update_addrs(conn, dtx):
             update['oa'] = list(oa)
 
     if 'ia' not in dtx:
+        hs = set([])
         ia = set([])
         for input in dtx['vin']:
+            h = input.get('hash')
+            if h:
+                hs.add(h)
             addrs = input.get('addrs')
             if addrs:
                 for a in addrs:
                     ia.add(a)
         if ia:
             update['ia'] = list(ia)
+            update['vh'] = list(hs)
+
     if update:    
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})
 
