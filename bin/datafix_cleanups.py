@@ -7,7 +7,6 @@ from app.misc import itercol
 from app.helper import generated_seconds
 from app.block import remove_block, get_tip_block
 from app.tx import remove_db_tx, get_db_tx, get_tx_db_block, update_addrs
-from app.tx import update_vin_hash
 
 def logwarn(fmt, *args):
     print fmt % args
@@ -22,9 +21,6 @@ def update_tx_addrs(conn):
     for dtx in itercol(conn, conn.tx, 'update_addrs.tx._id', 100000):
         update_addrs(conn, dtx)
 
-    for dtx in itercol(conn, conn.tx, 'update_vh.tx._id', 100000):
-        update_vin_hash(conn, dtx)
-
 def add_spt(conn):
     for dtx in itercol(conn, conn.tx, 'spt.tx._id', 100000):
         for i, input in enumerate(dtx['vin']):
@@ -33,12 +29,12 @@ def add_spt(conn):
              
             source_tx = get_db_tx(conn, input['hash'], projection=['hash', 'vout'])
             if not source_tx:
-                logwarn('source tx not found %s for %s', input['hash'].encode('hex'), dtx['hash'].encode('hex'))
+                logwarn('source tx not found %s', input['hash'])
                 continue
 
             output = source_tx['vout'][input['n']]
             if not output:
-                logwarn('cannot find output for %s at %s', input['hash'].encode('hex'), input['n'])
+                logwarn('cannot find output for %s at %s', input['hash'], input['n'])
 
             update = {}
             update['vout.%d.w' % input['n']] = True
@@ -46,12 +42,12 @@ def add_spt(conn):
 
             addrs = input.get('addrs')
             if not addrs and output.get('addrs'):
-                input['addrs'] = output['addrs']
+                input['addrs'] = outpt['addrs']
                 input['v'] = output['v']
                 update = {}
                 update['vin.%d.addrs' % i] = input['addrs']
                 update['vin.%d.v' % i] = input['v']
-                logwarn('add vin addrs and v %s %s', dtx['hash'].encode('hex'), i)
+                logging.info('add vin addrs and v %s %s', dtx['hash'], i)
                 conn.tx.update({'hash': dtx['hash']}, {'$set': update})
 
 def cleanup_blocks(conn):
@@ -75,11 +71,11 @@ def cleanup_txes(conn):
 
 if __name__ == '__main__':
     print 'start data fix'
-    for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
+    for netname in ['bitcoin']:
         #cleanup_database(netname)
         conn = dbconn(netname)
         #check_cnt_txes(conn)
-        #add_spt(conn)
+        add_spt(conn)
         #update_tx_addrs(conn)
         cleanup_blocks(conn)
         cleanup_txes(conn)

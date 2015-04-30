@@ -450,12 +450,26 @@ def update_addrs(conn, dtx):
 
     if 'ia' not in dtx:
         ia = set([])
-        for output in dtx['vin']:
-            addrs = output.get('addrs')
+        for input in dtx['vin']:
+            addrs = input.get('addrs')
             if addrs:
                 for a in addrs:
                     ia.add(a)
         if ia:
             update['ia'] = list(ia)
+    if update:    
+        conn.tx.update({'hash': dtx['hash']}, {'$set': update})
+
+def update_vin_hash(conn, dtx):
+    update = {}
+    
+    if 'vh' not in dtx:
+        hs = set([])
+        for input in dtx['vin']:
+            vh = input.get('hash')
+            if vh:
+                hs.add(vh)
+        if hs:
+            update['vh'] = list(hs)
     if update:    
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})
