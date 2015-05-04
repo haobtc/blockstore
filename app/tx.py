@@ -7,11 +7,19 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 from block import db2t_block
 import database
-from misc import get_var, set_var
-from helper import generated_seconds
+from misc import get_var, set_var, get_dbobj_list
+from helper import generated_seconds, get_nettype
+from helper import get_netname, fee_rate_satoshi, minimum_fee_satoshi
 
 def get_tx_db_block(conn, dtx, db_block=None):
-    bhs = dtx.get('bhs')
+    if 'bhs' in dtx:
+        bhs = dtx['bhs']
+        bis = dtx['bis']
+    else:
+        rels = list(conn.txblock.find({'t': dtx['hash']}))
+        bhs = [v['b'] for v in rels]
+        bis = [v['i'] for v in rels]
+
     if not bhs:
         return None, -1
 
@@ -20,12 +28,11 @@ def get_tx_db_block(conn, dtx, db_block=None):
         if i >= 0:
             return db_block, dtx['bis'][i]
 
-    binary_bhs = [Binary(h) for h in bhs]
-    bhs_map = dict((Binary(h), i) for h, i in zip(bhs, dtx['bis']))
+    bhs_map = dict(zip(bhs, bis))
     max_height = -1
     deepest_block = None
     block_index = -1
-    for block in conn.block.find({'hash': {'$in': binary_bhs}}):
+    for block in get_dbobj_list(conn, conn.block, bhs):
         if not block['isMain']:
             continue
         if block['height'] > max_height:
@@ -34,22 +41,17 @@ def get_tx_db_block(conn, dtx, db_block=None):
             block_index = bhs_map[block['hash']]
     return deepest_block, block_index
 
-def get_block_map(conn, txes):
-    all_bhs = set([])
-    for tx in txes:
-        bhs = tx.get('bhs')
-        if bhs:
-            for h in bhs:
-                all_bhs.add(h)
-
-    if all_bhs:
-        return dict((b['hash'], b)
-                    for b in conn.block.find({'hash': {'$in': list(all_bhs)}}))
-    else:
-        return {}
+def get_block_map(conn, dtxs):
+    txids = [dtx['hash'] for dtx in dtxs]
+    bh_set = set(v['b'] for v in conn.txblock.find({'t': {'$in': txids}}))
+    
+    bmap = {}
+    for b in get_dbobj_list(conn, conn.block, list(bh_set)):
+        bmap[b['hash']] = b
+    return bmap
 
 def db2t_tx(conn, dtx, db_block=None):
-    t = ttypes.Tx(nettype=conn.nettype)
+    t = ttypes.Tx(nettype=get_nettype(conn))
     t.hash = dtx['hash']
     if '_id' in dtx:
         t.objId = dtx['_id'].binary
@@ -144,13 +146,13 @@ def get_db_tx(conn, txid, projection=None):
         return None
     return conn.tx.find_one({'hash': Binary(txid)}, projection=projection)
 
-def get_tx_list(conn, txids):
-    if not txids:
-        return []        
-    txids = [Binary(txid) for txid in txids]
-    arr = conn.tx.find({'hash': {'$in': txids}})
-    arr = list(arr)
+def get_tx_list(conn, txids, keep_order=False):
+    arr = get_db_tx_list(conn, txids, keep_order=keep_order)
     return db2t_tx_list(conn, arr)
+
+def get_db_tx_list(conn, txids, keep_order=False):
+    txids = [Binary(txid) for txid in txids]
+    return get_dbobj_list(conn, conn.tx, txids, keep_order=keep_order)
 
 def get_tail_tx_list(conn, n):
     n = min(n, 20)
@@ -175,13 +177,16 @@ def ensure_input_addrs(conn, dtx, input, i):
     if 'addrs' not in input and 'hash' in input:
         source_tx = get_db_tx(conn, input['hash'], projection=['hash', 'vout.addrs', 'vout.v'])
         if source_tx:
-            output = source_tx['vout'][inp.vout]
-            input['addrs'] = output['addrs']
-            input['v'] = output['v']
+            output = source_tx['vout'][input['n']]
             update = {}
-            update['vin.%s.addrs' % i] = output.addrs
-            update['vin.%s.v' % i] = output.v
-            conn.tx.update({'hash': Binary(dtx['hash'])}, {'$set': update})
+            if 'addrs' in output:
+                input['addrs'] = output['addrs']
+                update['vin.%s.addrs' % i] = output['addrs']
+            if 'v' in output:
+                input['v'] = output['v']
+                update['vin.%s.v' % i] = output['v']
+            if update:
+                conn.tx.update({'hash': Binary(dtx['hash'])}, {'$set': update})
         return source_tx
     
 def verify_tx_mempool(conn, t):
@@ -217,8 +222,8 @@ def verify_tx_mempool(conn, t):
         sum_input += long(inp.amountSatoshi)
     
     fee = sum_input - sum_output
-    if fee < 5000:
-        return False, 'fee too small' % i                    
+    if fee < 0.5 * minimum_fee_satoshi(get_netname(conn)):
+        return False, 'fee too small %s at tx %s' % (fee, t.hash.encode('hex'))
             
     return True, 'ok'
 
@@ -236,8 +241,11 @@ def verify_tx_chain(conn, t):
             return False, 'No output matching %s' % i
         if not inp.address:
             source_output = source_tx['vout'][inp.vout]
-            inp.address = ','.join(source_output['addrs'])
-            inp.amountSatoshi = source_output['v']
+            #print source_output, source_tx['hash'].encode('hex')
+            if 'addrs' in source_output:
+                inp.address = ','.join(source_output['addrs'])
+            if 'v' in source_output:
+                inp.amountSatoshi = source_output['v']
             if source_output.get('w'):
                 q = {}
                 q['vin.hash'] = source_tx['hash']
@@ -274,18 +282,19 @@ def check_removing(conn, dtx):
 def do_remove_tx(conn, dtx):
     for ctx in conn.tx.find({'vin.hash': dtx['hash']}):
         do_remove_tx(conn, ctx)
-    
-    dtx.pop('_id', None)
-    conn['removedtx'].save(dtx)
-    print 'do remove tx',  dtx['hash'].encode('hex')
 
-    conn.tx.remove({'hash': dtx['hash']})
     for input in dtx['vin']:
         if not input.get('hash'):
             continue            
         update = {}
         update['vout.%d.w' % input['n']] = False
         conn.tx.update({'hash': input['hash']}, {'$unset': update})
+    
+    dtx.pop('_id', None)
+    conn['removedtx'].save(dtx)
+    print 'do remove tx',  dtx['hash'].encode('hex')
+    conn.txblock.remove({'t': dtx['hash']})
+    conn.tx.remove({'hash': dtx['hash']})
 
 def remove_tx(conn, tx):
     dtx = db2t_tx(conn, tx)
@@ -307,10 +316,6 @@ def save_tx(conn, t):
     bhash = dtx.pop('bhash', None)
     bindex = dtx.pop('bindex', None)
     update = {}
-    if False and bhash:
-        # FIXME: don't push bhs due to a bug on tokumx
-        update['$push'] = {'bhs': bhash, 'bis': bindex}
-    
     update['$set'] = dtx
     logging.info('saving tx %s', txhash.encode('hex'))
     #print('saving tx %s' % txhash.encode('hex'))

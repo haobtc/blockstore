@@ -92,3 +92,19 @@ def pop_peers(conn, n):
                                  'lastBorrowed': now_time}})
     return peers
 
+
+
+def get_dbobj_list(conn, col, objids, keep_order=False, key='hash'):
+    if not objids:
+        return []
+
+    arr = list(col.find({key: {'$in': objids}}))
+    if keep_order:
+        key_map = dict((dobj[key], dobj) for dobj in arr)
+        objs = []
+        for objid in objids:
+            dobj = key_map.get(objid)
+            if dobj:
+                objs.append(dobj)
+        arr = objs
+    return arr

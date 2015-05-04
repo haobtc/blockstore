@@ -10,6 +10,11 @@ def ensure_indices(c):
     c.tx.ensure_index('oa')
     c.tx.ensure_index('ia')
     c.tx.ensure_index('vh')
+
+    c.txblock.ensure_index([('t', 1), ('b', 1)], unique=True)
+    c.txblock.ensure_index('t')
+    c.txblock.ensure_index('b')
+    c.txblock.ensure_index([('t', 1), ('i', 1)])
     #c.tx.ensure_index('vin.hash')
     
     #nc.tx.ensure_index([('vin.hash', 1), ('vin.n', 1)])

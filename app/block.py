@@ -4,11 +4,11 @@ from pymongo import DESCENDING, ASCENDING
 from bson.binary import Binary
 from bson.objectid import ObjectId
 from misc import get_var, set_var, clear_var
-from helper import generated_seconds
+from helper import generated_seconds, get_netname, get_nettype
 import database
 
 def db2t_block(conn, block):
-    b = ttypes.Block(nettype=conn.nettype)
+    b = ttypes.Block(nettype=get_nettype(conn))
     b.hash = block['hash']
     b.version = block['version']
     b.prevHash = block['prev_hash']
@@ -76,6 +76,8 @@ def verify_block(conn, tblock):
 
 def set_block_main(conn, tblock, isMain):
     tblock.isMain = isMain
+    if not isMain:
+        print 'orphaned', get_netname(conn), 'block', tblock.hash.encode('hex'), 'at height', tblock.height
     conn.block.update({'hash': Binary(tblock.hash)}, {'$set': {'isMain': isMain}})
 
 def add_block(conn, new_tip, txids):
@@ -125,16 +127,19 @@ def add_block(conn, new_tip, txids):
 
     set_tip_block(conn, new_tip)
     link_txes(conn, new_tip, txids)
-    logging.info('saved block %s at height %s', new_tip.hash.encode('hex'), new_tip.height)
-    print 'saved block tx %s with %d txes at height %s' % (new_tip.hash.encode('hex'), len(txids), new_tip.height)
-
+    logging.info('saved %s block %s at height %s', get_netname(conn), new_tip.hash.encode('hex'), new_tip.height)
+    print 'saved %s block %s with %d txes at height %s' % (get_netname(conn), new_tip.hash.encode('hex'), len(txids), new_tip.height)
+    return new_tip
 
 def link_txes(conn, block, txids):
     'link txes with this block'
+    binary_bhash = Binary(block.hash)
     for i, txid in enumerate(txids):
-        conn.tx.update({'hash': Binary(txid)}, {'$push': {'bhs': Binary(block.hash), 'bis': i}})
+        conn.txblock.update({'t': Binary(txid), 'b': binary_bhash},
+                            {'$set': {'i': i}},
+                            upsert=True)
 
-    if conn.tx.find({'bhs': Binary(block.hash)}).count() != block.cntTxes:
+    if conn.txblock.find({'b': binary_bhash}).count() != block.cntTxes:
         raise ttypes.AppException(code='tx_failed', message='txes.count != block.cntTxes')
 
 def save_block(conn, b):
@@ -167,6 +172,10 @@ def get_tail_block_list(conn, n):
     arr.reverse()
     return [db2t_block(conn, b) for b in arr]
 
+def get_block_db_tx_list(conn, bhash):
+    txids = [v['t'] for v in conn.txblock.find({'b': bhash})]
+    return get_dbobj_list(conn, conn.tx, txids)
+
 def remove_block(conn, bhash, cleanup_txes=False):
     binary_phash = Binary(bhash)
 
@@ -175,17 +184,11 @@ def remove_block(conn, bhash, cleanup_txes=False):
         remove_block(conn, b['hash'], cleanup_txes=cleanup_txes)
 
     # unlink txes with this 
-    for dtx in conn.tx.find({'bhs': binary_phash}):
-        new_bhs = []
-        new_bis = []
-        for h, i in zip(dtx['bhs'], dtx['bis']):
-            if h != binary_phash:
-                new_bhs.append(h)
-                new_bis.append(i)
-        dtx['bhs'] = new_bhs
-        dtx['bis'] = new_bis
-        conn.tx.update({'hash': dtx['hash']},
-                       {'$set': {'bhs': new_bhs, 'bis': new_bis}})
+    conn.txblock.remove({b: binary_phash})
+    dtxs = get_block_db_tx_list(conn, binary_phash)
+    conn.txblock.remove({'b': binary_phash})
+    #for dtx in conn.tx.find({'bhs': binary_phash}):
+    for dtx in dtxs:
         if not new_bhs and cleanup_txes:
             from tx import remove_db_tx
             remove_db_tx(conn, dtx)

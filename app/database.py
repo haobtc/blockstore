@@ -14,7 +14,8 @@ def dbclient():
     return db_client
 
 def conn(netname):
-    return dbclient()['blockstore_%s' % netname]
+    c = dbclient()['blockstore_%s' % netname]
+    return c
 
 @contextmanager
 def transaction(conn, isolation='mvcc'):
