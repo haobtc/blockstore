@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from block import db2t_block
 import database
 from misc import get_var, set_var, get_dbobj_list
+from block import get_tip_block
 from helper import generated_seconds, get_nettype
 from helper import get_netname, fee_rate_satoshi, minimum_fee_satoshi
 
@@ -395,7 +396,7 @@ def get_utxo(conn, dtx, output, i):
     if b:
         tip = get_tip_block(conn)
         utxo.confirmations = tip.height - b['height'] + 1
-        utxo.timestamp = b.timestamp
+        utxo.timestamp = b['timestamp']
     else:
         utxo.confirmations = 0
         utxo.timestamp = long(time.mktime(dtx['_id'].generation_time.utctimetuple()))
@@ -442,6 +443,7 @@ def get_related_tx_list(conn, addresses):
         '$or': [
             {'oa': {'$in': addresses}},
             {'ia': {'$in': addresses}}]})
+    arr = list(arr)
     return db2t_tx_list(conn, arr)
     
 def update_addrs(conn, dtx):

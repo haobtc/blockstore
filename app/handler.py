@@ -64,7 +64,7 @@ class BlockStoreHandler:
 
     def getTxList(self, nettype, txids):
         conn = network_conn(nettype)
-        return get_tx_list(conn, txids)
+        return get_tx_list(conn, txids, keep_order=True)
 
     def getTxListSince(self, nettype, since):
         conn = network_conn(nettype)
