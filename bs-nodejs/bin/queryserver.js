@@ -263,8 +263,10 @@ function startServer(argv){
   netnames = netnames || helper.netnames();
   var server = http.Server(app);
   server.listen(argv.p || 9000, argv.h || '0.0.0.0');
-  
-  blockstore.keepTip();
+
+  setTimeout(function() {
+    //blockstore.keepTip();
+  }, Math.random() * 3000);
 }
 
 module.exports.start = function(argv){

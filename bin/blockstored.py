@@ -9,10 +9,11 @@ logging.basicConfig()
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer, TProcessPoolServer
+from thrift.server import TServer
+from thrift.server import TProcessPoolServer
+#from TProcessPoolServer import TProcessPoolServer
 from blockstore import BlockStoreService, ttypes
 from app.handler import BlockStoreHandler
-
 
 def setupHandlers():
     signal.signal(signal.SIGINT, handleSIGINT)
@@ -31,15 +32,13 @@ def run(host='localhost', port=19090):
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-    # TODO: Using process poll server
-    #server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-    server = TProcessPoolServer.TProcessPoolServer(processor, transport, tfactory, pfactory)
-    server.setNumWorkers(4)
-    server.setPostForkCallback(setupHandlers)
-    try:
-        server.serve()
-    finally:
-        server.stop()
+
+    server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    #server = TProcessPoolServer.TProcessPoolServer(processor, transport, tfactory, pfactory)
+    #server.setNumWorkers(4)
+    #server.setPostForkCallback(setupHandlers)
+    server.serve()
+
 
 def usage():
     print 'blockstored: thrift server for block db of bitcoin, litecoin and dogecoin'

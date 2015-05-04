@@ -55,7 +55,9 @@ module.exports.getUnspent = function(addressList, callback) {
 
 module.exports.getTxDetails = function(netname, hashList, callback) {
   var rpcClient = blockstore[netname];
+  console.info('get txlist', hashList);
   rpcClient.getTxList(hashList, function(err, arr) {
+    console.info('got ', arr);
     if(!err) {
       arr = arr.map(function(tTx) { return tTx.toJSON();});
     }

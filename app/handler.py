@@ -63,6 +63,7 @@ class BlockStoreHandler:
         return dtx
 
     def getTxList(self, nettype, txids):
+        print 'getting tx list', txids
         conn = network_conn(nettype)
         return get_tx_list(conn, txids, keep_order=True)
 

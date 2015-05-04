@@ -19,7 +19,7 @@ protocol = TBinaryProtocol.TBinaryProtocol(transport)
 c = BlockStoreService.Client(protocol)
 transport.open()
 
-if False:
+if True:
     txid = '64a9a0935f50a809b6889f30957c50d4ed5385d4a99e2493118ac5c6fab31b46'.decode('hex')
     txid1 = '64a9a0935f50a809b6889f30957c50d4ed5385d4a99e2493118ac5c6fab31b47'.decode('hex')
     tx = c.getTx(ttypes.Network.BITCOIN, txid)
@@ -54,6 +54,6 @@ if False:
     blockid1 = '000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce267'.decode('hex')
     print c.getMissingInvList(ttypes.Network.BITCOIN, [ttypes.Inventory(type=ttypes.InvType.BLOCK, hash=blockid), ttypes.Inventory(type=ttypes.InvType.BLOCK, hash=blockid1), ttypes.Inventory(type=ttypes.InvType.TX, hash=txid), ttypes.Inventory(type=ttypes.InvType.TX, hash=txid1)])
 
-if True:
+if False:
     print c.pushPeers(ttypes.Network.BITCOIN, ['192.168.6.8:9000', '192.168.3.2:8888'])
     print c.popPeers(ttypes.Network.BITCOIN, 3)

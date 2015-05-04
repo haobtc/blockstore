@@ -1,8 +1,8 @@
 var bitcore = require('bitcore-multicoin');
 var thrift = require('thrift');
 var helper = require('../lib/helper');
-var BlockStoreService = require('./gen-bs/BlockStoreService');
-var ttypes = require('./gen-bs/blockstore_types');
+var BlockStoreService = require('./gen-nodejs/BlockStoreService');
+var ttypes = require('./gen-nodejs/blockstore_types');
 
 // Initialize 
 var networkType2NameMap = {};
@@ -154,7 +154,7 @@ ttypes.Peer.prototype.toPeer = function(p) {
 transport = thrift.TBufferedTransport()
 protocol = thrift.TBinaryProtocol()
 
-var connection = thrift.createConnection("localhost", 19090, {
+var connection = thrift.createConnection("127.0.0.1", 19090, {
   transport : transport,
   protocol : protocol,
   max_attempts: 1000000
@@ -202,6 +202,7 @@ RPCWrapper.prototype.keepTip = function() {
     for(var i=0; i<arguments.length; i++) {
       args.push(arguments[i]);
     }
+    console.info('call', clientRpc);
     return thriftClient[clientRpc].apply(thriftClient, args);
   };
 });
