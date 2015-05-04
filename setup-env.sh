@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ENVDIR=$PWD/../ENV2
-export PYTHONPATH="$PWD/gen-py:$ENVDIR:$PYTHONPATH"
+export PYTHONPATH="$PWD/lib:$ENVDIR:$PYTHONPATH"
 export PATH="$ENVDIR/bin:$PATH"
 
 function project-install() {

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec /usr/local/bin/run-service haobtc 'node start.js -s mnode -r 300 -c bitcoin:2 -c dogecoin -c litecoin -c darkcoin --denyMempool'
