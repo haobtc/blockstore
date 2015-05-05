@@ -108,7 +108,7 @@ function getTxTimelineForNetwork(req, res) {
   var netname = req.params.netname;
   var since = req.query.since;
   var startTime = new Date();
-  Query.getTxDetailsSinceID(netname, since, function(err, arr) {
+  Query.getTxListSinceId(netname, since, function(err, arr) {
     if(err) throw err;
     var txlist = arr || [];
     console.info('get timeline', req.params.netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
@@ -265,7 +265,7 @@ function startServer(argv){
   server.listen(argv.p || 9000, argv.h || '0.0.0.0');
 
   setTimeout(function() {
-    //blockstore.keepTip();
+    blockstore.keepTip();
   }, Math.random() * 3000);
 }
 

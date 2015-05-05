@@ -1,8 +1,9 @@
 var bitcore = require('bitcore-multicoin');
 var thrift = require('thrift');
-var helper = require('../lib/helper');
+var helper = require('./helper');
 var BlockStoreService = require('./gen-nodejs/BlockStoreService');
 var ttypes = require('./gen-nodejs/blockstore_types');
+var config = require('./config');
 
 // Initialize 
 var networkType2NameMap = {};
@@ -154,7 +155,7 @@ ttypes.Peer.prototype.toPeer = function(p) {
 transport = thrift.TBufferedTransport()
 protocol = thrift.TBinaryProtocol()
 
-var connection = thrift.createConnection("127.0.0.1", 19090, {
+var connection = thrift.createConnection(config.blockstore.host, config.blockstore.port, {
   transport : transport,
   protocol : protocol,
   max_attempts: 1000000
@@ -165,8 +166,9 @@ connection.on('error', function(err) {
   console.error('thrift error', err);
 });
 
-var thriftClient = module.exports.thriftClient = thrift.createClient(BlockStoreService, connection);
 module.exports.ttypes = ttypes;
+
+var thriftClient = module.exports.thriftClient = thrift.createClient(BlockStoreService, connection);
 
 /* RPC wrapper */
 function RPCWrapper(netname) {
@@ -202,7 +204,6 @@ RPCWrapper.prototype.keepTip = function() {
     for(var i=0; i<arguments.length; i++) {
       args.push(arguments[i]);
     }
-    console.info('call', clientRpc);
     return thriftClient[clientRpc].apply(thriftClient, args);
   };
 });
@@ -216,7 +217,7 @@ module.exports.keepTip = function() {
   helper.netnames().forEach(function(netname) {
     var rpcClient = module.exports[netname];
     if(rpcClient) {
-	rpcClient.keepTip();
+      setTimeout(rpcClient.keepTip.bind(rpcClient), Math.random() * 2000);
     }
   });
 }

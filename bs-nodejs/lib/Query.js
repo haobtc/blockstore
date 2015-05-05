@@ -76,7 +76,8 @@ module.exports.getTxListSinceId = function(netname, sinceObjId, colname, callbac
       return callback(err, arr);
     });
   } else {
-    rpcClient.getTailTxList(20, function(err, arr) {
+    //rpcClient.getTailTxList(20, function(err, arr) {
+    blockstore.thriftClient.getTailTxList(1, 20, function(err, arr) {
       if(!err) {
 	arr = arr.map(function(tTx) { return tTx.toJSON();});
       }

@@ -512,7 +512,6 @@ Node.prototype.discoverPeers = function(callback) {
     var n = self.peerman.peerLimit - self.peerman.peers.length;
 
     this.rpcClient.popPeers(n, function(err, arr) {
-      console.info('pop peers', arr);
       if(err) return callback(err);
       arr.forEach(function(tPeer) {
 	if(self.peerman.peers.length >= self.peerman.peerLimit) return;

@@ -73,7 +73,7 @@ class BlockStoreHandler:
 
     def getTailTxList(self, nettype, n):
         conn = network_conn(nettype)
-        return get_latest_tx_list(conn, n)
+        return get_tail_tx_list(conn, n)
 
     def getRelatedTxIdList(self, nettype, addresses):
         conn = network_conn(nettype)
