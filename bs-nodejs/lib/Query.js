@@ -55,9 +55,7 @@ module.exports.getUnspent = function(addressList, callback) {
 
 module.exports.getTxDetails = function(netname, hashList, callback) {
   var rpcClient = blockstore[netname];
-  console.info('get txlist', hashList);
   rpcClient.getTxList(hashList, function(err, arr) {
-    console.info('got ', arr);
     if(!err) {
       arr = arr.map(function(tTx) { return tTx.toJSON();});
     }
@@ -96,7 +94,6 @@ module.exports.getTxListOfAddresses = function(addresses, requireDetail, callbac
       var rpcClient = blockstore[netname];
       if(requireDetail) {
 	rpcClient.getRelatedTxList(s.arr, function(err, arr) {
-	  console.info('related arr', arr);
 	  if(!err && arr.length > 0) {
 	    arr = arr.map(function(tx){return tx.toJSON();});
 	    results.push({netname: netname, txList: arr});

@@ -8,19 +8,25 @@ install
 ```
 % . setup-env.sh
 % project-install
-% thrift -r --gen py -out lib blockstore.thrift 
-% thrift -r --gen js:node -out bs-nodejs/lib/gen-nodejs blockstore.thrift 
-
 ```
 
-run
+run blockstored
 ==========
 ```
 % . setup-env.sh
 % bin/blockstored.py
 ```
 
-Install Services
+Optional: generate thrift libraries
+==========
+```
+% thrift -r --gen py -out lib etc/blockstore.thrift 
+% thrift -r --gen js:node -o bs-nodejs/lib etc/blockstore.thrift 
+
+```
+
+
+Optional: Install daemontools Services
 ===========
 ```
 cd <path/to/blockstore>
@@ -34,5 +40,18 @@ if [ ! -f /usr/local/bin/run-service ]; then
 fi
 
 sudo ln -s $PWD/service/blockstore.tserver /etc/service/blockstore.tserver
+
+```
+
+Optional: Install supervisor services
+===========
+```
+% cd <path/to/blockstore>
+% cd etc/supervisor
+% cp blockstore.example.conf blockstore.conf  
+
+edit blockstore.conf to fit your settings
+% cd ../..
+% sudo ln -s /path/to/blockstore/etc/supervisor/blockstore.conf /etc/supervisor/conf.d/blockstore.conf
 
 ```

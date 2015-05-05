@@ -80,6 +80,9 @@ ttypes.Tx.prototype.toJSON = function() {
     txid: this.hash.toString('hex'),
     confirmations: 0
   };
+  if(this.objId) {
+    obj.id = this.objId.toString('hex');
+  }
   if(this.block) {
     obj.blockhash = this.block.hash.toString('hex');
     obj.blockheight = this.block.height;
