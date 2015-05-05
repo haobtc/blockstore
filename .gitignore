@@ -4,5 +4,4 @@ tmp
 dump
 logs
 supervise
-
-
+blockstore.conf

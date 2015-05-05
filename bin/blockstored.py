@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 import signal
 import getopt, sys
 
@@ -10,7 +10,7 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
-from thrift.server import TProcessPoolServer
+from thrift.server.TProcessPoolServer import TProcessPoolServer
 #from TProcessPoolServer import TProcessPoolServer
 from blockstore import BlockStoreService, ttypes
 from app.handler import BlockStoreHandler
@@ -25,6 +25,12 @@ def handleSIGINT(sig, frame):
      #clean up state or what ever is necessary
      sys.exit(0)
 
+pgid = os.getpgid(0)
+
+def assign_pgid():
+    gid = os.getpgid(0)
+    print os.getpid(), gid
+    
 def run(host='localhost', port=19090):
     handler = BlockStoreHandler()
     processor = BlockStoreService.Processor(handler)
@@ -32,10 +38,10 @@ def run(host='localhost', port=19090):
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-
-    server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-    #server = TProcessPoolServer.TProcessPoolServer(processor, transport, tfactory, pfactory)
-    #server.setNumWorkers(4)
+    #server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    server = TProcessPoolServer(processor, transport, tfactory, pfactory)
+    server.setNumWorkers(4)
+    server.setPostForkCallback(assign_pgid)
     #server.setPostForkCallback(setupHandlers)
     server.serve()
 

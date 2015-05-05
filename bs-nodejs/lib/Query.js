@@ -66,7 +66,7 @@ module.exports.getTxDetails = function(netname, hashList, callback) {
 };
 
 // Get TxList via ID
-module.exports.getTxListSinceId = function(netname, sinceObjId, colname, callback) {
+module.exports.getTxListSinceId = function(netname, sinceObjId, callback) {
   var rpcClient = blockstore[netname];
   if(sinceObjId) {
     rpcClient.getTxListSince(sinceObjId, function(err, arr) {
