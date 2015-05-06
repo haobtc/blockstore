@@ -1,9 +1,9 @@
-from app.database import conn as dbconn
-from app.database import transaction
+from bsd.database import conn as dbconn
+from bsd.database import transaction
 from bson.binary import Binary
 import json
-from app.tx import update_addrs
-from app.misc import itercol
+from bsd.tx import update_addrs
+from bsd.misc import itercol
 import datetime, pytz
 
 conn = dbconn('bitcoin')

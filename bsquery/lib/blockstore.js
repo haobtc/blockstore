@@ -45,7 +45,7 @@ ttypes.Tx.prototype.setBlock = function(block, blockIndex) {
   }
 };
 
-ttypes.Tx.prototype.fromTxObj = function(txObj) {
+ttypes.Tx.prototype.fromTxObj = function(txObj, netname) {
   var self = this;
   this.hash = helper.reverseBuffer(txObj.hash);
   this.version = txObj.version;
@@ -78,7 +78,8 @@ ttypes.Tx.prototype.toJSON = function() {
   var self = this;
   var obj = {
     txid: this.hash.toString('hex'),
-    confirmations: 0
+    confirmations: 0,
+    network: this.netname()
   };
   if(this.objId) {
     obj.id = this.objId.toString('hex');
@@ -128,8 +129,17 @@ ttypes.Tx.prototype.toJSON = function() {
   return obj;
 };
 
+ttypes.UTXO.prototype.netname = function(netname) {
+  if(!netname) {
+    return networkType2NameMap[this.nettype];
+  } else {
+    this.nettype = ttypes.Network[netname.toUpperCase()];
+  }
+};
+
 ttypes.UTXO.prototype.toJSON = function() {
   var obj = {
+    network: this.netname(),
     address: this.address,
     txid: this.txid.toString('hex'),
     amountSatoshi: this.amountSatoshi,

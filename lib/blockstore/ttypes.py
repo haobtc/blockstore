@@ -971,6 +971,7 @@ class TxVerification:
 class UTXO:
   """
   Attributes:
+   - nettype
    - address
    - amountSatoshi
    - txid
@@ -982,16 +983,18 @@ class UTXO:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'address', None, None, ), # 1
-    (2, TType.STRING, 'amountSatoshi', None, None, ), # 2
-    (3, TType.STRING, 'txid', None, None, ), # 3
-    (4, TType.I32, 'vout', None, None, ), # 4
-    (5, TType.I32, 'confirmations', None, None, ), # 5
-    (6, TType.STRING, 'scriptPubKey', None, None, ), # 6
-    (7, TType.I32, 'timestamp', None, None, ), # 7
+    (1, TType.I32, 'nettype', None, None, ), # 1
+    (2, TType.STRING, 'address', None, None, ), # 2
+    (3, TType.STRING, 'amountSatoshi', None, None, ), # 3
+    (4, TType.STRING, 'txid', None, None, ), # 4
+    (5, TType.I32, 'vout', None, None, ), # 5
+    (6, TType.I32, 'confirmations', None, None, ), # 6
+    (7, TType.STRING, 'scriptPubKey', None, None, ), # 7
+    (8, TType.I32, 'timestamp', None, None, ), # 8
   )
 
-  def __init__(self, address=None, amountSatoshi=None, txid=None, vout=None, confirmations=None, scriptPubKey=None, timestamp=None,):
+  def __init__(self, nettype=None, address=None, amountSatoshi=None, txid=None, vout=None, confirmations=None, scriptPubKey=None, timestamp=None,):
+    self.nettype = nettype
     self.address = address
     self.amountSatoshi = amountSatoshi
     self.txid = txid
@@ -1010,36 +1013,41 @@ class UTXO:
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.address = iprot.readString();
+        if ftype == TType.I32:
+          self.nettype = iprot.readI32();
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRING:
-          self.amountSatoshi = iprot.readString();
+          self.address = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRING:
-          self.txid = iprot.readString();
+          self.amountSatoshi = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.I32:
-          self.vout = iprot.readI32();
+        if ftype == TType.STRING:
+          self.txid = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.I32:
-          self.confirmations = iprot.readI32();
+          self.vout = iprot.readI32();
         else:
           iprot.skip(ftype)
       elif fid == 6:
+        if ftype == TType.I32:
+          self.confirmations = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
         if ftype == TType.STRING:
           self.scriptPubKey = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 7:
+      elif fid == 8:
         if ftype == TType.I32:
           self.timestamp = iprot.readI32();
         else:
@@ -1054,32 +1062,36 @@ class UTXO:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('UTXO')
+    if self.nettype is not None:
+      oprot.writeFieldBegin('nettype', TType.I32, 1)
+      oprot.writeI32(self.nettype)
+      oprot.writeFieldEnd()
     if self.address is not None:
-      oprot.writeFieldBegin('address', TType.STRING, 1)
+      oprot.writeFieldBegin('address', TType.STRING, 2)
       oprot.writeString(self.address)
       oprot.writeFieldEnd()
     if self.amountSatoshi is not None:
-      oprot.writeFieldBegin('amountSatoshi', TType.STRING, 2)
+      oprot.writeFieldBegin('amountSatoshi', TType.STRING, 3)
       oprot.writeString(self.amountSatoshi)
       oprot.writeFieldEnd()
     if self.txid is not None:
-      oprot.writeFieldBegin('txid', TType.STRING, 3)
+      oprot.writeFieldBegin('txid', TType.STRING, 4)
       oprot.writeString(self.txid)
       oprot.writeFieldEnd()
     if self.vout is not None:
-      oprot.writeFieldBegin('vout', TType.I32, 4)
+      oprot.writeFieldBegin('vout', TType.I32, 5)
       oprot.writeI32(self.vout)
       oprot.writeFieldEnd()
     if self.confirmations is not None:
-      oprot.writeFieldBegin('confirmations', TType.I32, 5)
+      oprot.writeFieldBegin('confirmations', TType.I32, 6)
       oprot.writeI32(self.confirmations)
       oprot.writeFieldEnd()
     if self.scriptPubKey is not None:
-      oprot.writeFieldBegin('scriptPubKey', TType.STRING, 6)
+      oprot.writeFieldBegin('scriptPubKey', TType.STRING, 7)
       oprot.writeString(self.scriptPubKey)
       oprot.writeFieldEnd()
     if self.timestamp is not None:
-      oprot.writeFieldBegin('timestamp', TType.I32, 7)
+      oprot.writeFieldBegin('timestamp', TType.I32, 8)
       oprot.writeI32(self.timestamp)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1091,6 +1103,7 @@ class UTXO:
 
   def __hash__(self):
     value = 17
+    value = (value * 31) ^ hash(self.nettype)
     value = (value * 31) ^ hash(self.address)
     value = (value * 31) ^ hash(self.amountSatoshi)
     value = (value * 31) ^ hash(self.txid)

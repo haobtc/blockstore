@@ -1,12 +1,12 @@
 import logging
 logging.basicConfig()
 
-from app.database import conn as dbconn
-from app.database import transaction
-from app.misc import itercol, idslice
-from app.block import remove_block, get_tip_block
-from app.helper import generated_seconds
-from app.tx import remove_db_tx, get_tx_db_block
+from bsd.database import conn as dbconn
+from bsd.database import transaction
+from bsd.misc import itercol, idslice
+from bsd.block import remove_block, get_tip_block
+from bsd.helper import generated_seconds
+from bsd.tx import remove_db_tx, get_tx_db_block
 
 def cleanup_blocks(conn):
     tip_block = get_tip_block(conn)

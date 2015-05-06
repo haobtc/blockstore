@@ -7,6 +7,7 @@ dbconns = {}
 
 db_client = None
 def dbclient():
+    # TODO: configurable database settings
     global db_client
     if db_client is None:
         url = 'mongodb://localhost:27017/'

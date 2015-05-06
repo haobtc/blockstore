@@ -1,7 +1,7 @@
 import logging
 logging.basicConfig()
 
-from app.database import conn as dbconn
+from bsd.database import conn as dbconn
 from datafix import update_tx_addrs
 
 def logwarn(fmt, *args):

@@ -21,7 +21,7 @@ Optional: generate thrift libraries
 ==========
 ```
 % thrift -r --gen py -out lib etc/blockstore.thrift 
-% thrift -r --gen js:node -o bs-nodejs/lib etc/blockstore.thrift 
+% thrift -r --gen js:node -o bsquery/lib etc/blockstore.thrift 
 
 ```
 

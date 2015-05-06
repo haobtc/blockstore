@@ -34,7 +34,7 @@ module.exports.getUnspent = function(addressList, callback) {
 	if(!err) {
 	  arr = arr.map(function(utxo) {
 	    var q = utxo.toJSON();
-	    q.network = netname; 
+	    q.network = netname;
 	    return q;});
 	}
 	return cb(err, arr);

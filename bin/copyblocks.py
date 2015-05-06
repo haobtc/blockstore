@@ -1,11 +1,11 @@
 import sys
 
-import app.tx as apptx
-import app.misc as appmisc
-import app.block as appblock
+import bsd.tx as apptx
+import bsd.misc as appmisc
+import bsd.block as appblock
 
-from app.database import conn as dbconn
-from app.database import dbclient, transaction
+from bsd.database import conn as dbconn
+from bsd.database import dbclient, transaction
 from bson.binary import Binary
 def copy_blocks(netname, nblocks):
     sc = dbclient()['blocks_%s' % netname]

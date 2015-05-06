@@ -386,7 +386,7 @@ def get_send_tx_list(conn, txids):
 
 # UTXO related
 def get_utxo(conn, dtx, output, i):
-    utxo = ttypes.UTXO()
+    utxo = ttypes.UTXO(nettype=get_nettype(conn))
     utxo.address = output['addrs'][0]
     utxo.amountSatoshi = output['v']
     utxo.txid = dtx['hash']

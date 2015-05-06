@@ -927,6 +927,7 @@ blockstore.TxVerification.prototype.write = function(output) {
 };
 
 blockstore.UTXO = module.exports.UTXO = function(args) {
+  this.nettype = null;
   this.address = null;
   this.amountSatoshi = null;
   this.txid = null;
@@ -935,6 +936,9 @@ blockstore.UTXO = module.exports.UTXO = function(args) {
   this.scriptPubKey = null;
   this.timestamp = null;
   if (args) {
+    if (args.nettype !== undefined) {
+      this.nettype = args.nettype;
+    }
     if (args.address !== undefined) {
       this.address = args.address;
     }
@@ -973,48 +977,55 @@ blockstore.UTXO.prototype.read = function(input) {
     switch (fid)
     {
       case 1:
-      if (ftype == Thrift.Type.STRING) {
-        this.address = input.readString();
+      if (ftype == Thrift.Type.I32) {
+        this.nettype = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.amountSatoshi = input.readString();
+        this.address = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRING) {
-        this.txid = input.readBinary();
+        this.amountSatoshi = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
-      if (ftype == Thrift.Type.I32) {
-        this.vout = input.readI32();
+      if (ftype == Thrift.Type.STRING) {
+        this.txid = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I32) {
-        this.confirmations = input.readI32();
+        this.vout = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
+      if (ftype == Thrift.Type.I32) {
+        this.confirmations = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 7:
       if (ftype == Thrift.Type.STRING) {
         this.scriptPubKey = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
-      case 7:
+      case 8:
       if (ftype == Thrift.Type.I32) {
         this.timestamp = input.readI32();
       } else {
@@ -1032,38 +1043,43 @@ blockstore.UTXO.prototype.read = function(input) {
 
 blockstore.UTXO.prototype.write = function(output) {
   output.writeStructBegin('UTXO');
+  if (this.nettype !== null && this.nettype !== undefined) {
+    output.writeFieldBegin('nettype', Thrift.Type.I32, 1);
+    output.writeI32(this.nettype);
+    output.writeFieldEnd();
+  }
   if (this.address !== null && this.address !== undefined) {
-    output.writeFieldBegin('address', Thrift.Type.STRING, 1);
+    output.writeFieldBegin('address', Thrift.Type.STRING, 2);
     output.writeString(this.address);
     output.writeFieldEnd();
   }
   if (this.amountSatoshi !== null && this.amountSatoshi !== undefined) {
-    output.writeFieldBegin('amountSatoshi', Thrift.Type.STRING, 2);
+    output.writeFieldBegin('amountSatoshi', Thrift.Type.STRING, 3);
     output.writeString(this.amountSatoshi);
     output.writeFieldEnd();
   }
   if (this.txid !== null && this.txid !== undefined) {
-    output.writeFieldBegin('txid', Thrift.Type.STRING, 3);
+    output.writeFieldBegin('txid', Thrift.Type.STRING, 4);
     output.writeBinary(this.txid);
     output.writeFieldEnd();
   }
   if (this.vout !== null && this.vout !== undefined) {
-    output.writeFieldBegin('vout', Thrift.Type.I32, 4);
+    output.writeFieldBegin('vout', Thrift.Type.I32, 5);
     output.writeI32(this.vout);
     output.writeFieldEnd();
   }
   if (this.confirmations !== null && this.confirmations !== undefined) {
-    output.writeFieldBegin('confirmations', Thrift.Type.I32, 5);
+    output.writeFieldBegin('confirmations', Thrift.Type.I32, 6);
     output.writeI32(this.confirmations);
     output.writeFieldEnd();
   }
   if (this.scriptPubKey !== null && this.scriptPubKey !== undefined) {
-    output.writeFieldBegin('scriptPubKey', Thrift.Type.STRING, 6);
+    output.writeFieldBegin('scriptPubKey', Thrift.Type.STRING, 7);
     output.writeBinary(this.scriptPubKey);
     output.writeFieldEnd();
   }
   if (this.timestamp !== null && this.timestamp !== undefined) {
-    output.writeFieldBegin('timestamp', Thrift.Type.I32, 7);
+    output.writeFieldBegin('timestamp', Thrift.Type.I32, 8);
     output.writeI32(this.timestamp);
     output.writeFieldEnd();
   }

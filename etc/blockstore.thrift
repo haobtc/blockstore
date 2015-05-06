@@ -76,13 +76,14 @@ struct TxVerification {
 
 /* UTXO related */
 struct UTXO {
-  1:string address,
-  2:string amountSatoshi,
-  3:binary txid,
-  4:i32 vout
-  5:i32 confirmations,
-  6:binary scriptPubKey,
-  7:i32 timestamp
+  1:Network nettype,
+  2:string address,
+  3:string amountSatoshi,
+  4:binary txid,
+  5:i32 vout
+  6:i32 confirmations,
+  7:binary scriptPubKey,
+  8:i32 timestamp
 }
 
 /* Sending TX */

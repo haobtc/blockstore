@@ -1,12 +1,12 @@
 import logging
 logging.basicConfig()
 
-from app.database import conn as dbconn
-from app.database import transaction
-from app.misc import itercol
-from app.helper import generated_seconds
-from app.block import remove_block, get_tip_block
-from app.tx import remove_db_tx, get_db_tx, get_tx_db_block, update_addrs
+from bsd.database import conn as dbconn
+from bsd.database import transaction
+from bsd.misc import itercol
+from bsd.helper import generated_seconds
+from bsd.block import remove_block, get_tip_block
+from bsd.tx import remove_db_tx, get_db_tx, get_tx_db_block, update_addrs
 
 def logwarn(fmt, *args):
     print fmt % args

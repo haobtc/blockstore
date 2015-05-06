@@ -1,4 +1,4 @@
-from app.database import conn
+from bsd.database import conn
 
 def ensure_indices(c):
     c.block.ensure_index('hash', unique=True)

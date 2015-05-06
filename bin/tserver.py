@@ -13,24 +13,8 @@ from thrift.server import TServer
 from thrift.server.TProcessPoolServer import TProcessPoolServer
 #from TProcessPoolServer import TProcessPoolServer
 from blockstore import BlockStoreService, ttypes
-from app.handler import BlockStoreHandler
+from bsd.handler import BlockStoreHandler
 
-def setupHandlers():
-    signal.signal(signal.SIGINT, handleSIGINT)
-    #Optionally if you want to keep the current socket connection open and working
-    #tell python to make system calls non-interruptable, which is probably what you want.
-    signal.siginterrupt(signal.SIGINT, False)
-
-def handleSIGINT(sig, frame):
-     #clean up state or what ever is necessary
-     sys.exit(0)
-
-pgid = os.getpgid(0)
-
-def assign_pgid():
-    gid = os.getpgid(0)
-    print os.getpid(), gid
-    
 def run(host='localhost', port=19090):
     handler = BlockStoreHandler()
     processor = BlockStoreService.Processor(handler)
@@ -40,9 +24,7 @@ def run(host='localhost', port=19090):
 
     #server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
     server = TProcessPoolServer(processor, transport, tfactory, pfactory)
-    server.setNumWorkers(4)
-    server.setPostForkCallback(assign_pgid)
-    #server.setPostForkCallback(setupHandlers)
+    server.setNumWorkers(10)
     server.serve()
 
 

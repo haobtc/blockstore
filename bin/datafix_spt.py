@@ -1,4 +1,4 @@
-from app.database import conn as dbconn
+from bsd.database import conn as dbconn
 from datafix import add_spt
 
 if __name__ == '__main__':
