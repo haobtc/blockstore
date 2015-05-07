@@ -52,6 +52,6 @@ Optional: Install supervisor services
 
 edit blockstore.conf to fit your settings
 % cd ../..
-% sudo ln -s /path/to/blockstore/etc/supervisor/blockstore.conf /etc/supervisor/conf.d/blockstore.conf
+% sudo ln -s $PWD/etc/supervisor/blockstore.conf /etc/supervisor/conf.d/blockstore.conf
 
 ```

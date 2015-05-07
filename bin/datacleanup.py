@@ -1,6 +1,7 @@
 import logging
 logging.basicConfig()
 
+import time
 from bsd.database import conn as dbconn
 from bsd.database import transaction
 from bsd.misc import itercol, idslice
@@ -25,9 +26,13 @@ def cleanup_txes(conn):
             with transaction(conn) as conn:
                 remove_db_tx(conn, dtx)
 
-if __name__ == '__main__':
-    for netname in ['bitcoin']:
+def main():
+    for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
         conn = dbconn(netname)
         cleanup_blocks(conn)
         cleanup_txes(conn)
-        
+
+if __name__ == '__main__':
+    for  _ in xrange(1000):
+        main()
+        time.sleep(5 * 60)

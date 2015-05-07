@@ -156,7 +156,6 @@ def get_db_tx_list(conn, txids, keep_order=False):
     return get_dbobj_list(conn, conn.tx, txids, keep_order=keep_order)
 
 def get_tail_tx_list(conn, n):
-    print 'get tail tx list', n
     n = min(n, 20)
     arr = list(conn.tx.find().sort([('_id', DESCENDING)]).limit(n))
     arr.reverse()
@@ -164,7 +163,7 @@ def get_tail_tx_list(conn, n):
 
 def get_tx_list_since(conn, since):
     since_id = ObjectId(since)
-    arr = list(conn.tx.find({'_id': {'$gt': since_id}}).sort({'_id': ASCENDING}).limit(20))
+    arr = list(conn.tx.find({'_id': {'$gt': since_id}}).sort([('_id', ASCENDING)]).limit(20))
     return db2t_tx_list(conn, arr)
 
 def get_missing_txid_list(conn, txids):
@@ -425,8 +424,10 @@ def get_unspent(conn, addresses):
                 continue
             #FIXME: consider multiple addrs
             addr = output['addrs'][0]
-            if (dtx['hash'], i) not in spent_set:
-                utxos.append(get_utxo(conn, dtx, output, i))
+            if addr in addr_set:
+                if (dtx['hash'], i) not in spent_set:
+                    utxos.append(get_utxo(conn, dtx, output, i))
+
     return utxos
 
 def get_related_txid_list(conn, addresses):

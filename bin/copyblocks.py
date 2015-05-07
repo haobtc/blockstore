@@ -1,8 +1,11 @@
 import sys
 
+import pymongo
+
 import bsd.tx as apptx
 import bsd.misc as appmisc
 import bsd.block as appblock
+
 
 from bsd.database import conn as dbconn
 from bsd.database import dbclient, transaction
@@ -32,9 +35,30 @@ def copy_blocks(netname, nblocks):
         txs = list(sc.tx.find({'bhs': nb['hash']}))
         if len(txs) != nb['cntTxes']:
             raise Exception('unmatched tx length %s %s %s', (len(txs), nb['cntTxes'], tb.hash.encode('hex')))
-        
-        for dtx in txs:
-            dtx.pop('_id', None)
+
+        if False:
+            presert_times = 0
+            for dtx in txs:
+                dtx.pop('_id', None)
+            
+                ddtx = dtx.copy()
+                ddtx.pop('bhs', None)
+                ddtx.pop('bis', None)
+                # simple verification
+                verified = True
+                for input in ddtx['vin']:
+                    input.pop('k', None)
+                    if 'hash' in input and 'addrs' not in input:
+                        verified = False
+                        break
+
+                if verified:
+                    try:
+                        dc.tx.insert(ddtx)
+                        presert_times += 1
+                    except pymongo.errors.DuplicateKeyError:
+                        print 'tx exists %s' % ddtx['hash'].encode('hex')
+            #print 'pre insert times', presert_times
 
         txs = [apptx.db2t_tx(sc, tx, db_block=nb)
                for tx in txs]

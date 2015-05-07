@@ -3,7 +3,8 @@ from datafix import add_spt
 
 if __name__ == '__main__':
     print 'start data spt fix'
-    for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
+    #for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
+    for netname in ['bitcoin']:
         #cleanup_database(netname)
         conn = dbconn(netname)
         #check_cnt_txes(conn)
