@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+#import eventlet
+#eventlet.monkey_patch()
+
 import os
 import signal
 import getopt, sys
@@ -9,11 +13,13 @@ logging.basicConfig()
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+#from thrift.server.TServer import TSimpleServer
 from thrift.server.TProcessPoolServer import TProcessPoolServer
-#from TProcessPoolServer import TProcessPoolServer
+from TGEventServer import TProcessPoolGEventServer, TSimpleGEventServer, patch_thrift
 from blockstore import BlockStoreService, ttypes
 from bsd.handler import BlockStoreHandler
+
+patch_thrift()
 
 def run(host='localhost', port=19090):
     handler = BlockStoreHandler()
@@ -23,8 +29,9 @@ def run(host='localhost', port=19090):
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
     #server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-    server = TProcessPoolServer(processor, transport, tfactory, pfactory)
-    server.setNumWorkers(10)
+    #server = TProcessPoolServer(processor, transport, tfactory, pfactory)
+    server = TSimpleGEventServer(processor, transport, tfactory, pfactory)
+    #server.setNumWorkers(2)
     server.serve()
 
 

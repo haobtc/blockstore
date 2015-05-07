@@ -168,20 +168,29 @@ ttypes.Peer.prototype.toPeer = function(p) {
 transport = thrift.TBufferedTransport()
 protocol = thrift.TBinaryProtocol()
 
-var connection = thrift.createConnection(config.blockstore.host, config.blockstore.port, {
-  transport : transport,
-  protocol : protocol,
-  max_attempts: 1000000
-});
 
+function makeConnection() {
+  var bsConfig = config.blockstore;
+  if(bsConfig instanceof Array) {
+    bsConfig = bsConfig[Math.floor(Math.random() * bsConfig.length)];
+  }
 
-connection.on('error', function(err) {
-  console.error('thrift error', err);
-});
+  var connection = thrift.createConnection(bsConfig.host, bsConfig.port, {
+    transport : transport,
+    protocol : protocol,
+    max_attempts: 1000000
+  });
+
+  connection.on('error', function(err) {
+    console.error('thrift error', err);
+  });
+  return connection;
+}
+
 
 module.exports.ttypes = ttypes;
 
-var thriftClient = module.exports.thriftClient = thrift.createClient(BlockStoreService, connection);
+var thriftClient = module.exports.thriftClient = thrift.createClient(BlockStoreService, makeConnection());
 
 /* RPC wrapper */
 function RPCWrapper(netname) {

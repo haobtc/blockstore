@@ -46,7 +46,7 @@ module.exports.start = function(argv){
   var tmp = [];
   var coinNProcesses = {};
   coins.forEach(function(netname) {
-    var idx = netname.indexOf(':');
+    var idx = netname.indexOf('*');
     var n = 1;
     if(idx >= 0) {
       n = parseInt(netname.substr(idx+1));

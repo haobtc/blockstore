@@ -1,3 +1,5 @@
 pytz
 thrift
 pymongo
+gevent
+eventlet

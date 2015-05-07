@@ -17,6 +17,7 @@
 # under the License.
 #
 
+import gevent
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,9 +26,14 @@ from multiprocessing import  Process, Value, Condition, reduction
 
 from thrift.server.TServer import TServer
 from thrift.transport.TTransport import TTransportException
+from thrift.transport import TTransport
 
+def patch_thrift():
+    import gevent.socket
+    from thrift.transport import TSocket
+    TSocket.socket = gevent.socket
 
-class TProcessPoolServer(TServer):
+class TProcessPoolGEventServer(TServer):
     """Server with a fixed size pool of worker subprocesses to service requests
 
     Note that if you need shared state between the handlers - it's up to you!
@@ -54,13 +60,14 @@ class TProcessPoolServer(TServer):
         """Loop getting clients from the shared queue and process them"""
         if self.postForkCallback:
             self.postForkCallback()
-
+        print 'worker'
         while self.isRunning.value:
             try:
                 client = self.serverTransport.accept()
                 if not client:
                   continue
-                self.serveClient(client)
+                #self.serveClient(client)
+                gevent.spawn(self.serveClient, client)
             except (KeyboardInterrupt, SystemExit):
                 return 0
             except Exception, x:
@@ -125,3 +132,32 @@ class TProcessPoolServer(TServer):
         self.stopCondition.acquire()
         self.stopCondition.notify()
         self.stopCondition.release()
+
+
+class TSimpleGEventServer(TServer):
+    """Simple single-threaded server that just pumps around one transport."""
+
+
+    def serve(self):
+        self.serverTransport.listen()
+        while True:
+            client = self.serverTransport.accept()
+            if not client:
+                continue
+            gevent.spawn(self.serveClient, client)
+
+    def serveClient(self, client):
+        itrans = self.inputTransportFactory.getTransport(client)
+        otrans = self.outputTransportFactory.getTransport(client)
+        iprot = self.inputProtocolFactory.getProtocol(itrans)
+        oprot = self.outputProtocolFactory.getProtocol(otrans)
+        try:
+            while True:
+                self.processor.process(iprot, oprot)
+        except TTransport.TTransportException, tx:
+            pass
+        except Exception, x:
+            logger.exception(x)
+
+        itrans.close()
+        otrans.close()
