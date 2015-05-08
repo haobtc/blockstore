@@ -3,7 +3,7 @@ from blockstore import BlockStoreService, ttypes
 from pymongo import DESCENDING, ASCENDING
 from bson.binary import Binary
 from bson.objectid import ObjectId
-from misc import get_var, set_var, clear_var
+from misc import get_var, set_var, clear_var, get_dbobj_list
 from helper import generated_seconds, get_netname, get_nettype
 import database
 
@@ -184,12 +184,11 @@ def remove_block(conn, bhash, cleanup_txes=False):
         remove_block(conn, b['hash'], cleanup_txes=cleanup_txes)
 
     # unlink txes with this 
-    conn.txblock.remove({b: binary_phash})
     dtxs = get_block_db_tx_list(conn, binary_phash)
     conn.txblock.remove({'b': binary_phash})
     #for dtx in conn.tx.find({'bhs': binary_phash}):
     for dtx in dtxs:
-        if not new_bhs and cleanup_txes:
+        if cleanup_txes:
             from tx import remove_db_tx
             remove_db_tx(conn, dtx)
 

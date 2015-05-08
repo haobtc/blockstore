@@ -357,7 +357,7 @@ def get_sending_tx_list(conn):
 
 def send_tx(conn, stx):
     if get_db_tx(conn, stx.hash, projection=['hash']):
-        raise ttypes.AppException(code="tx_block_chain")
+        raise ttypes.AppException(code="tx_exist", message="tx already exists in the blockchain")
 
     if conn.sendtx.find_one({'hash': Binary(stx.hash)}):
         raise ttypes.AppException(code="sending")

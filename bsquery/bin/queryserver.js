@@ -247,10 +247,12 @@ app.get('/:netname/nodes.json', function(req, res) {
 });
 
 app.use(function(err, req, res, next){
-  if(err instanceof helper.UserError) {
+  if(err instanceof blockstore.ttypes.AppException) {
+    res.status(400).send({code: err.code, error: err.message});
+  } else if(err instanceof helper.UserError) {
     res.status(400).send({code: err.code, error: err.message});
   } else {
-    console.error('EEE', err.stack);
+    console.error('EEE', err, err.stack);
     res.status(500).send({error: err.message});
   }
 });
