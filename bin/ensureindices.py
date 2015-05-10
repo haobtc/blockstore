@@ -6,7 +6,6 @@ def ensure_indices(c):
     c.block.ensure_index([('height', -1)])
 
     c.tx.ensure_index('hash', unique=True)
-    c.tx.ensure_index('bhs')
     c.tx.ensure_index('oa')
     c.tx.ensure_index('ia')
     c.tx.ensure_index('vh')

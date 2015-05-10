@@ -131,16 +131,17 @@ module.exports.getTxListOfAddresses = function(addresses, requireDetail, callbac
 };
 
 var decodeRawTx = module.exports.decodeRawTx = function(netname, rawtx) {
-  var parser = new bitcore.BinaryParser(new Buffer(rawtx, 'hex'));
+  var parser = new bitcore.BinaryParser(rawtx);
   var tx = new bitcore.Transaction();
   tx.parse(parser);
-  if(tx.serialize().toString('hex') !== rawtx) {
-    return c(new helper.UserError('tx_rejected', 'Tx rejected'));
+  if(tx.serialize().toString('hex') !== rawtx.toString("hex")) {
+    throw new helper.UserError('tx_rejected', 'Tx rejected');
   }
   return tx;
 };
 
 module.exports.addRawTx = function(netname, rawtx, info, callback) {
+  rawtx = new Buffer(rawtx, 'hex');
   try {
     var tx = decodeRawTx(netname, rawtx);
     var tTx = new blockstore.ttypes.Tx();

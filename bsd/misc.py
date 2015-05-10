@@ -31,8 +31,10 @@ def get_peers(conn):
 
 # cursor on collections
 
-def itercol(conn, col, key, n):
-    for _ in xrange(n):
+def itercol(conn, col, key, n, batch=1):
+    #for _ in xrange(n):
+    total = 0
+    while total <= n:
         v = get_var(conn, key)
         obj = None
         t = 0
@@ -41,15 +43,19 @@ def itercol(conn, col, key, n):
             t = v.get('times', 0)
             objs = list(col.
                         find({'_id': {'$gt': objid}}).
-                        sort([('_id', 1)]).limit(1))
-            if objs:
-                obj = objs[0]
+                        sort([('_id', 1)]).
+                        limit(batch))
         else:
-            obj = col.find_one()
-        if not obj:
+            objs = list(col.find().
+                        sort([('_id', 1)]).
+                        limit(batch))
+        if len(objs) == 0:
             break
-        yield obj
-        set_var(conn, key, objid=obj['_id'], times=t+1)
+        total += len(objs)
+        t += len(objs)
+        for obj in objs:
+            yield obj
+        set_var(conn, key, objid=obj['_id'], times=t)
 
 def idslice(col, start_seconds, end_seconds=0):
     start_delta = timedelta(seconds=start_seconds)
@@ -66,7 +72,8 @@ def return_borrowed_peers(conn):
     # return the borrowed pool
     now_time = int(time.time())
     conn.peerpool.update({'borrowed': 1, 'lastBorrowed': {'$lt': now_time - 300}},
-                         {'$set': {'borrowed': 0}})
+                         {'$set': {'borrowed': 0}},
+                         multi=True)
     
 def push_peers(conn, peers):
     now_time = int(time.time())

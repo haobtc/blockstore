@@ -312,6 +312,7 @@ def save_tx(conn, t):
     TX must be verified first
     '''
     dtx = t2db_tx(conn, t)
+    dtx.pop('_id', None)
     txhash = dtx.pop('hash')
 
     bhash = dtx.pop('bhash', None)
@@ -360,11 +361,11 @@ def send_tx(conn, stx):
         raise ttypes.AppException(code="tx_exist", message="tx already exists in the blockchain")
 
     if conn.sendtx.find_one({'hash': Binary(stx.hash)}):
-        raise ttypes.AppException(code="sending")
+        raise ttypes.AppException(code="sending existing")
     
     sendtx = {}
-    sendtx['hash'] = stx.hash
-    sendtx['raw'] = stx.raw
+    sendtx['hash'] = Binary(stx.hash)
+    sendtx['raw'] = Binary(stx.raw)
     sendtx['sent'] = False
     if stx.remoteAddress:
         sendtx['info'] = {'remoteAddress': stx.remoteAddress}

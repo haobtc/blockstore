@@ -1,3 +1,4 @@
+var argv = require('optimist').argv;
 var bitcore = require('bitcore-multicoin');
 var thrift = require('thrift');
 var helper = require('./helper');
@@ -81,6 +82,7 @@ ttypes.Tx.prototype.toJSON = function() {
     confirmations: 0,
     network: this.netname()
   };
+  obj.hash = obj.txid;
   if(this.objId) {
     obj.id = this.objId.toString('hex');
   }
@@ -168,14 +170,55 @@ ttypes.Peer.prototype.toPeer = function(p) {
 transport = thrift.TBufferedTransport()
 protocol = thrift.TBinaryProtocol()
 
-
-function makeConnection() {
-  var bsConfig = config.blockstore;
-  if(bsConfig instanceof Array) {
-    bsConfig = bsConfig[Math.floor(Math.random() * bsConfig.length)];
+function tServerConfigList() {
+  function parseTServerString(s) {
+    var t = s.split(':', 2);
+    if(t.length < 2)
+      throw new Error('Illegal tserver string ' + s);
+    var host = t[0];
+    var port = parseInt(t[1]);
+    if(isNaN(port))
+      throw new Error('Illegal port ' + s);
+    return {host: host, port: port};
   }
 
-  var connection = thrift.createConnection(bsConfig.host, bsConfig.port, {
+  var srvs = [];
+
+  if(srvs.length == 0) {
+    if(argv.tserver instanceof Array) {
+      srvs = argv.tserver.map(parseTServerString);
+    } else if(argv.tserver) {
+      srvs = [parseTServerString(argv.tserver)];
+    }
+  }
+  
+  if(srvs.length == 0) {
+    var tserver = process.env.BLOCKSTORE_TSERVER;
+    if(tserver) {
+      srvs = tserver.split(';').map(parseTServerString);
+    }
+  }
+
+  if(srvs.length == 0) {
+    srvs = config.blockstore;
+    if(!(srvs instanceof Array)) {
+      srvs = [srvs];
+    }
+  }
+
+  if(srvs.length == 0) {
+    throw new Error('No tserver found');
+  }
+  return srvs;
+}
+
+function makeConnection() {
+  var tServers = tServerConfigList();
+  console.info('tservers', tServers);
+  var tServerConfig = tServers[Math.floor(Math.random() * tServers.length)];
+
+  var connection = thrift.createConnection(tServerConfig.host,
+					   tServerConfig.port, {
     transport : transport,
     protocol : protocol,
     max_attempts: 1000000
@@ -186,7 +229,6 @@ function makeConnection() {
   });
   return connection;
 }
-
 
 module.exports.ttypes = ttypes;
 
@@ -204,7 +246,12 @@ RPCWrapper.prototype.keepTip = function() {
   var self = this;
   function getTip() {
     self.getTipBlock(function(err, block) {
-      if(err) throw err;
+      if(err instanceof ttypes.NotFound) {
+	err = null;
+      }
+      if(err) {
+	throw err;
+      }
       if(block) {
 	self.tipBlock = block;
       }

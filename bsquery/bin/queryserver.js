@@ -43,7 +43,7 @@ function getTxDetails(req, res) {
       var startTime = new Date();
       Query.getTxDetails(netname, hashList, function(err, txes) {
 	if(err) return c(err);
-	console.info('getTxDetails', netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
+	//console.info('getTxDetails', netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
 	results = results.concat(txes||[]);
 	c();
       });
@@ -111,7 +111,7 @@ function getTxTimelineForNetwork(req, res) {
   Query.getTxListSinceId(netname, since, function(err, arr) {
     if(err) throw err;
     var txlist = arr || [];
-    console.info('get timeline', req.params.netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
+    //console.info('get timeline', req.params.netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
     sendJSONP(req, res, txlist);
   });
 }
@@ -145,7 +145,7 @@ function getUnspent(req, res) {
   var startTime = new Date();
   Query.getUnspent(addressList, function(err, results) {
     if(err) throw err;
-    console.info('getUnspent takes', (new Date() - startTime)/1000.0, 'secs');
+    //console.info('getUnspent takes', (new Date() - startTime)/1000.0, 'secs');
     sendJSONP(req, res, results);
   });
 }
@@ -175,7 +175,7 @@ function getTxList(req, res) {
   var startTime = new Date();
   Query.getTxListOfAddresses(addressList, query.detail == 'yes', function(err, results) {
     if(err) throw err;
-    console.info('getTXList takes', (new Date() - startTime)/1000.0, 'secs');
+    //console.info('getTXList takes', (new Date() - startTime)/1000.0, 'secs');
     sendJSONP(req, res, results);
   });
 }

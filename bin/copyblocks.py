@@ -11,7 +11,8 @@ from bsd.database import conn as dbconn
 from bsd.database import dbclient, transaction
 from bson.binary import Binary
 def copy_blocks(netname, nblocks):
-    sc = dbclient()['blocks_%s' % netname]
+    #sc = dbclient()['blocks_%s' % netname]
+    sc = pymongo.MongoClient('mongodb://localhost:27017', maxPoolSize=1)['blocks_%s' % netname]
     dc  = dbconn(netname)
     
     tip = appblock.get_tip_block(dc)
@@ -30,7 +31,7 @@ def copy_blocks(netname, nblocks):
             raise Exception('No sorce block found')
         tb = appblock.db2t_block(sc, nb)
         if tip:
-            assert tb.prevHash == tip.hash
+            assert tb.prevHash == tip.hash, 'tip=%s tb=%s prevHash=%s' % (tip.hash.encode('hex'), tb.hash.encode('hex'), tb.prevHash.encode('hex'))
 
         txs = list(sc.tx.find({'bhs': nb['hash']}))
         if len(txs) != nb['cntTxes']:

@@ -26,7 +26,7 @@ def update_tx_addrs(conn):
         update_vin_hash(conn, dtx)
 
 def add_spt(conn):
-    for dtx in itercol(conn, conn.tx, 'spt.tx._id', 100000):
+    for dtx in itercol(conn, conn.tx, 'spt.tx._id', 100000, batch=100):
         for i, input in enumerate(dtx['vin']):
             if not input.get('hash'):
                 continue

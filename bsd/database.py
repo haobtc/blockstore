@@ -1,4 +1,5 @@
 import pymongo
+import os, sys
 
 from pymongo import DESCENDING, ASCENDING
 from contextlib import contextmanager
@@ -10,7 +11,7 @@ def dbclient():
     # TODO: configurable database settings
     global db_client
     if db_client is None:
-        url = 'mongodb://localhost:27017/'
+        url = os.getenv('BLOCKSTORE_DB_CONN', 'mongodb://localhost:27017')
         db_client = pymongo.MongoClient(url, maxPoolSize=1)
     return db_client
 

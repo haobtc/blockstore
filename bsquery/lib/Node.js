@@ -429,7 +429,7 @@ Node.prototype.sendRawTx = function(callback) {
   function deliverSendTxes() {
     var conns = self.peerman.getActiveConnections();
     sendTxList.forEach(function(sendtx) {
-      console.warn('broadcast tx', self.netname, sendtx.hash, 'to', conns.length, 'peers');
+      console.warn('broadcast tx', self.netname, sendtx.hash.toString("hex"), 'to', conns.length, 'peers');
       conns.forEach(function(conn) {
 	conn.sendMessage('tx', sendtx.raw);
       });
