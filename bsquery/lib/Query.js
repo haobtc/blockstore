@@ -169,6 +169,9 @@ module.exports.addRawTx = function(netname, rawtx, info, callback) {
 	sendTx.remoteAddress = info.remoteAddress;
       rpcClient.sendTx(sendTx, c);
     },
+    function(c) {
+      rpcClient.addTxList([tTx], true, c);
+    }
   ], function(err){
     if(err) return callback(err);
     callback(undefined, tTx.hash.toString('hex'));

@@ -95,6 +95,8 @@ ttypes.Tx.prototype.toJSON = function() {
     if(rpcClient.tipBlock) {
       obj.confirmations = Math.max(0, rpcClient.tipBlock.height - this.block.height + 1);
     }
+  } else {
+    obj.time = Math.floor(new Date().getTime()/1000);
   }
   if(this.blockIndex != null) {
     obj.blockindex = this.blockIndex;
@@ -214,7 +216,7 @@ function tServerConfigList() {
 
 function makeConnection() {
   var tServers = tServerConfigList();
-  console.info('tservers', tServers);
+  //console.info('tservers', tServers);
   var tServerConfig = tServers[Math.floor(Math.random() * tServers.length)];
 
   var connection = thrift.createConnection(tServerConfig.host,

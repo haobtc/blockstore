@@ -135,9 +135,11 @@ def link_txes(conn, block, txids):
     'link txes with this block'
     binary_bhash = Binary(block.hash)
     for i, txid in enumerate(txids):
-        conn.txblock.update({'t': Binary(txid), 'b': binary_bhash},
+        binary_txid = Binary(txid)
+        conn.txblock.update({'t': binary_txid, 'b': binary_bhash},
                             {'$set': {'i': i}},
                             upsert=True)
+        conn.sendtx.update({'hash': binary_txid}, {'$set': {'sent': True}})
 
     if conn.txblock.find({'b': binary_bhash}).count() != block.cntTxes:
         raise ttypes.AppException(code='tx_failed', message='txes.count != block.cntTxes')

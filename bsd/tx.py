@@ -1,4 +1,5 @@
 import time
+import pytz
 import logging
 from blockstore import BlockStoreService, ttypes
 from pymongo import DESCENDING, ASCENDING
@@ -293,8 +294,11 @@ def do_remove_tx(conn, dtx):
     
     dtx.pop('_id', None)
     conn['removedtx'].save(dtx)
-    print 'do remove tx',  dtx['hash'].encode('hex')
+    #print 'do remove tx',  dtx['hash'].encode('hex')
     conn.txblock.remove({'t': dtx['hash']})
+    conn.sendtx.update({'hash': dtx['hash']}, 
+                       {'$set': {'sent': True,
+                                 'by_removed': True}})
     conn.tx.remove({'hash': dtx['hash']})
 
 def remove_tx(conn, tx):
@@ -329,7 +333,7 @@ def save_tx(conn, t):
     )
     if not old_tx:
         # New object inserted
-        conn.sendtx.update({'hash': txhash}, {'$set': {'sent': True}})
+        #conn.sendtx.update({'hash': txhash}, {'$set': {'sent': True}})
         for input in dtx['vin']:
             if not input.get('hash'):
                 continue
@@ -400,7 +404,8 @@ def get_utxo(conn, dtx, output, i):
         utxo.timestamp = b['timestamp']
     else:
         utxo.confirmations = 0
-        utxo.timestamp = long(time.mktime(dtx['_id'].generation_time.utctimetuple()))
+        utxo.timestamp = int(time.mktime(dtx['_id'].generation_time.replace(tzinfo=pytz.utc).utctimetuple()))
+        #utxo.timestamp = int(time.time())
     return utxo
 
 def get_unspent(conn, addresses):
