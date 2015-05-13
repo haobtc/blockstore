@@ -265,6 +265,13 @@ function startServer(argv){
   netnames = netnames || helper.netnames();
   var server = http.Server(app);
   server.listen(argv.p || 9000, argv.h || '0.0.0.0');
+  
+  setTimeout(function() {
+    server.close(function() {
+      process.exit();
+    });
+//  }, 5000 + Math.random() * 2000);
+  }, 360 * 1000 + Math.random() * 60000);
 
   setTimeout(function() {
     blockstore.keepTip();
@@ -274,15 +281,26 @@ function startServer(argv){
 module.exports.start = function(argv){
   var numWorkers = argv.n || 1;
   numWorkers = parseInt(numWorkers);
+  var workers = [];
   if(cluster.isMaster) {
     console.info('start', numWorkers, 'workers');
     for(var i=0; i<numWorkers; i++) {
-      cluster.fork();
+      var worker = cluster.fork();
+      workers.push(worker);
     }
     cluster.on('exit', function(worker, code, signal) {
       console.log('work ' + worker.process.pid + ' died');
+      if(!worker.suicide) {
+	for(var i = 0; i<workers.length; i++) {
+	  if(workers[i].id == worker.id) {
+	    workers[i] = cluster.fork();
+	    console.log('work ', workers[i].process.pid, 'retarted');
+	    break;
+	  }
+	}
+      }
     });
   } else {
     startServer(argv);
   }
-}
+};
