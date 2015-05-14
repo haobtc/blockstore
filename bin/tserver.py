@@ -8,7 +8,9 @@ import signal
 import getopt, sys
 
 import logging
-logging.basicConfig()
+import logging.config
+logging.config.fileConfig('etc/logging.conf')
+
 
 from thrift.transport import TSocket
 from thrift.transport import TTransport

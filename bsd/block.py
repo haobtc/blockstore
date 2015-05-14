@@ -77,7 +77,7 @@ def verify_block(conn, tblock):
 def set_block_main(conn, tblock, isMain):
     tblock.isMain = isMain
     if not isMain:
-        print 'orphaned', get_netname(conn), 'block', tblock.hash.encode('hex'), 'at height', tblock.height
+        logging.info('orphaned %s block %s at height %s', get_netname(conn), tblock.hash.encode('hex'), tblock.height)
     conn.block.update({'hash': Binary(tblock.hash)}, {'$set': {'isMain': isMain}})
 
 def add_block(conn, new_tip, txids):
@@ -127,8 +127,8 @@ def add_block(conn, new_tip, txids):
 
     set_tip_block(conn, new_tip)
     link_txes(conn, new_tip, txids)
-    logging.info('saved %s block %s at height %s', get_netname(conn), new_tip.hash.encode('hex'), new_tip.height)
-    print 'saved %s block %s with %d txes at height %s' % (get_netname(conn), new_tip.hash.encode('hex'), len(txids), new_tip.height)
+    logging.info('saved %s block %s with %s txes at height %s', get_netname(conn), new_tip.hash.encode('hex'), len(txids), new_tip.height)
+    #print 'saved %s block %s with %d txes at height %s' % (get_netname(conn), new_tip.hash.encode('hex'), len(txids), new_tip.height)
     return new_tip
 
 def link_txes(conn, block, txids):

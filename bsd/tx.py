@@ -10,7 +10,7 @@ from block import db2t_block
 import database
 from misc import get_var, set_var, get_dbobj_list
 from block import get_tip_block
-from helper import generated_seconds, get_nettype
+from helper import generated_seconds, get_nettype, get_netname
 from helper import get_netname, fee_rate_satoshi, minimum_fee_satoshi
 
 def get_tx_db_block(conn, dtx, db_block=None):
@@ -87,7 +87,7 @@ def db2t_tx(conn, dtx, db_block=None):
 
     for output in dtx['vout']:
         outp = ttypes.TxOutput()
-        outp.address = ','.join(output['addrs'])
+        outp.address = ','.join(output.get('addrs', []))
         outp.amountSatoshi = output['v']
         outp.script = output['s']
         t.outputs.append(outp)
@@ -249,10 +249,7 @@ def verify_tx_chain(conn, t):
             if 'v' in source_output:
                 inp.amountSatoshi = source_output['v']
             if source_output.get('w'):
-                q = {}
-                q['vin.hash'] = source_tx['hash']
-                q['vin.n'] = inp.vout
-                ya_tx = conn.tx.find_one({'vin.hash': source_tx['hash'],
+                ya_tx = conn.tx.find_one({'vh': source_tx['hash'],
                                           'vin.n': inp.vout})
                 if ya_tx:
                     ya_b, _ = get_tx_db_block(conn, ya_tx)
@@ -274,15 +271,15 @@ def verify_tx_chain(conn, t):
 def check_removing(conn, dtx):
     b, _ = get_tx_db_block(conn, dtx)
     if b:
-        logging.warn('try to delete a tx in block %s at height %d tx %s', b['hash'].encode('hex'), b['height'], dtx['hash'].encode('hex'))
+        #logging.warn('try to delete a tx in block %s at height %d tx %s', b['hash'].encode('hex'), b['height'], dtx['hash'].encode('hex'))
         return False
-    for ctx in conn.tx.find({'vin.hash': dtx['hash']}):
+    for ctx in conn.tx.find({'vh': dtx['hash']}):
         if not check_removing(conn, ctx):
             return False
     return True
 
 def do_remove_tx(conn, dtx):
-    for ctx in conn.tx.find({'vin.hash': dtx['hash']}):
+    for ctx in conn.tx.find({'vh': dtx['hash']}):
         do_remove_tx(conn, ctx)
 
     for input in dtx['vin']:
@@ -323,7 +320,7 @@ def save_tx(conn, t):
     bindex = dtx.pop('bindex', None)
     update = {}
     update['$set'] = dtx
-    logging.info('saving tx %s', txhash.encode('hex'))
+
     #print('saving tx %s' % txhash.encode('hex'))
     old_tx = conn.tx.find_one_and_update(
         {'hash': txhash},
@@ -334,6 +331,7 @@ def save_tx(conn, t):
     if not old_tx:
         # New object inserted
         #conn.sendtx.update({'hash': txhash}, {'$set': {'sent': True}})
+        logging.debug('added %s tx %s', get_netname(conn), txhash.encode('hex'))
         for input in dtx['vin']:
             if not input.get('hash'):
                 continue
