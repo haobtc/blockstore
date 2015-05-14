@@ -20,7 +20,8 @@ def cleanup_blocks(conn):
                 remove_block(conn, block['hash'], cleanup_txes=True)
 
 def cleanup_txes(conn):
-    for dtx in idslice(conn.tx, 86400 * 2, 86300):
+    for dtx in idslice(conn.tx, 86400 * 10, 86300):
+        print 'removing', dtx['hash'].encode('hex')
         b, _ = get_tx_db_block(conn, dtx)
         if not b:
             with transaction(conn) as conn:

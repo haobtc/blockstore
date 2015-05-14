@@ -36,7 +36,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('  Verification verifyTx(Network network, Tx tx, bool mempool)')
   print('  void addTxList(Network network,  txes, bool mempool)')
   print('  void removeTx(Network network, string txid)')
-  print('   getTxListSince(Network network, string objId)')
+  print('   getTxListSince(Network network, string objId, i32 n)')
   print('   getTailTxList(Network network, i32 n)')
   print('   getRelatedTxList(Network network,  addresses)')
   print('   getRelatedTxIdList(Network network,  addresses)')
@@ -45,8 +45,6 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('  void sendTx(Network network, SendTx sendTx)')
   print('   getUnspent(Network network,  addresses)')
   print('   getMissingInvList(Network network,  invs)')
-  print('   getPeers(Network network)')
-  print('  void setPeers(Network network,  peers)')
   print('  void pushPeers(Network network,  peers)')
   print('   popPeers(Network network, i32 n)')
   print('')
@@ -178,10 +176,10 @@ elif cmd == 'removeTx':
   pp.pprint(client.removeTx(eval(args[0]),args[1],))
 
 elif cmd == 'getTxListSince':
-  if len(args) != 2:
-    print('getTxListSince requires 2 args')
+  if len(args) != 3:
+    print('getTxListSince requires 3 args')
     sys.exit(1)
-  pp.pprint(client.getTxListSince(eval(args[0]),args[1],))
+  pp.pprint(client.getTxListSince(eval(args[0]),args[1],eval(args[2]),))
 
 elif cmd == 'getTailTxList':
   if len(args) != 2:
@@ -230,18 +228,6 @@ elif cmd == 'getMissingInvList':
     print('getMissingInvList requires 2 args')
     sys.exit(1)
   pp.pprint(client.getMissingInvList(eval(args[0]),eval(args[1]),))
-
-elif cmd == 'getPeers':
-  if len(args) != 1:
-    print('getPeers requires 1 args')
-    sys.exit(1)
-  pp.pprint(client.getPeers(eval(args[0]),))
-
-elif cmd == 'setPeers':
-  if len(args) != 2:
-    print('setPeers requires 2 args')
-    sys.exit(1)
-  pp.pprint(client.setPeers(eval(args[0]),eval(args[1]),))
 
 elif cmd == 'pushPeers':
   if len(args) != 2:

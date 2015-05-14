@@ -64,18 +64,18 @@ module.exports.getTxDetails = function(netname, hashList, callback) {
 };
 
 // Get TxList via ID
-module.exports.getTxListSinceId = function(netname, sinceObjId, callback) {
+module.exports.getTxListSinceId = function(netname, sinceObjId, count, callback) {
   var rpcClient = blockstore[netname];
   if(sinceObjId) {
-    rpcClient.getTxListSince(sinceObjId, function(err, arr) {
+    rpcClient.getTxListSince(sinceObjId, count, function(err, arr) {
       if(!err) {
 	arr = arr.map(function(tTx) { return tTx.toJSON();});
       }
       return callback(err, arr);
     });
   } else {
-    //rpcClient.getTailTxList(20, function(err, arr) {
-    blockstore.thriftClient.getTailTxList(1, 20, function(err, arr) {
+    rpcClient.getTailTxList(count, function(err, arr) {
+    //blockstore.thriftClient.getTailTxList(1, 20, function(err, arr) {
       if(!err) {
 	arr = arr.map(function(tTx) { return tTx.toJSON();});
       }

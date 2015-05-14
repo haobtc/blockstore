@@ -3,4 +3,5 @@ module.exports.reverseBuffer = function(hash) {
   hash.copy(reversed);
   buffertools.reverse(reversed);
   return reversed;
-}
+};
+

@@ -56,7 +56,7 @@ function getTxDetails(req, res) {
   if(tasks.length > 0) {
     async.parallel(tasks, function(err) {
       if(err) throw err;
-      sendJSONP(req, res, results);      
+      sendJSONP(req, res, results);
     });
   } else {
     sendJSONP(req, res, []);
@@ -70,7 +70,7 @@ function getTxDetailsSinceID(req, res) {
   if(req.method == 'POST') {
     query = req.body;
   }
-  
+
   var txlist = [];
 
   function txTask(netname) {
@@ -99,8 +99,9 @@ function getTxDetailsSinceID(req, res) {
     });
   } else {
     sendJSONP(req, res, []);
-  }  
+  }
 }
+// These APIs are depricated, using /queryapi/v1/tx/:netname/timeline instead
 app.get('/queryapi/v1/tx/since', getTxDetailsSinceID);
 app.post('/queryapi/v1/tx/since', getTxDetailsSinceID);
 
@@ -108,7 +109,11 @@ function getTxTimelineForNetwork(req, res) {
   var netname = req.params.netname;
   var since = req.query.since;
   var startTime = new Date();
-  Query.getTxListSinceId(netname, since, function(err, arr) {
+  var count = parseInt(req.query.count);
+  if(isNaN(count) || count > 20 || count <= 0) {
+    count = 20;
+  }
+  Query.getTxListSinceId(netname, since, count, function(err, arr) {
     if(err) throw err;
     var txlist = arr || [];
     //console.info('get timeline', req.params.netname, 'takes', (new Date() - startTime)/1000.0, 'secs');
@@ -200,7 +205,7 @@ function sendTx(req, res, next) {
     if(err) {
       return next(err);
     }
-    
+
     if(ret != undefined) {
       if(req.query.format == 'json') {
 	sendJSONP(req, res, {'txid': ret});
@@ -265,7 +270,7 @@ function startServer(argv){
   netnames = netnames || helper.netnames();
   var server = http.Server(app);
   server.listen(argv.p || 9000, argv.h || '0.0.0.0');
-  
+
   setTimeout(function() {
     server.close(function() {
       process.exit();
@@ -289,12 +294,12 @@ module.exports.start = function(argv){
       workers.push(worker);
     }
     cluster.on('exit', function(worker, code, signal) {
-      console.log('work ' + worker.process.pid + ' died');
+      console.log(new Date(), 'work ' + worker.process.pid + ' died');
       if(!worker.suicide) {
 	for(var i = 0; i<workers.length; i++) {
 	  if(workers[i].id == worker.id) {
 	    workers[i] = cluster.fork();
-	    console.log('work ', workers[i].process.pid, 'retarted');
+	    console.log(new Date(), 'worker ', workers[i].process.pid, 'retarted');
 	    break;
 	  }
 	}

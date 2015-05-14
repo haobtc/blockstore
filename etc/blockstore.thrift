@@ -116,7 +116,10 @@ service BlockStoreService
   /* block related methods */
   Block getBlock(1:Network network, 2:binary blockhash) throws (1:NotFound notfound);
   Block getTipBlock(1:Network network) throws (1:NotFound notfound);
+
+  /* Get the lattest n blocks, n <= 10 */
   list<Block> getTailBlockList(1:Network network, 2:i32 n);
+
   Verification verifyBlock(1:Network network, 2:Block block);
   void addBlock(1:Network network, 2:Block block, 3:list<binary> txIds) throws (1:AppException e);
   void rewindTip(1:Network network, 2:i32 height) throws (1:AppException e);
@@ -128,7 +131,7 @@ service BlockStoreService
   Verification verifyTx(1:Network network, 2:Tx tx, 3:bool mempool);
   void addTxList(1:Network network, 2:list<Tx> txes, 3:bool mempool);
   void removeTx(1:Network network, 2:binary txid) throws (1:NotFound notfound);
-  list<Tx> getTxListSince(1:Network network, 2:binary objId);
+  list<Tx> getTxListSince(1:Network network, 2:binary objId, 3:i32 n);
   list<Tx> getTailTxList(1:Network network, 2:i32 n);
   list<Tx> getRelatedTxList(1:Network network, 2:list<string> addresses);
   list<binary> getRelatedTxIdList(1:Network network, 2:list<string> addresses);
@@ -145,9 +148,11 @@ service BlockStoreService
   list<Inventory> getMissingInvList(1:Network network, 2:list<Inventory> invs);
 
   /* Misc methods */
+  /* Get/Set Peers. depricated!
   list<string> getPeers(1:Network network);
   void setPeers(1:Network network, 2:list<string> peers);
   
+  /* push some peers */
   void pushPeers(1:Network network, 2:list<Peer> peers);
   list<Peer> popPeers(1:Network network, 2:i32 n);
 }

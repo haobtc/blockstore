@@ -162,9 +162,9 @@ def get_tail_tx_list(conn, n):
     arr.reverse()
     return db2t_tx_list(conn, arr)
 
-def get_tx_list_since(conn, since):
+def get_tx_list_since(conn, since, n=20):
     since_id = ObjectId(since)
-    arr = list(conn.tx.find({'_id': {'$gt': since_id}}).sort([('_id', ASCENDING)]).limit(20))
+    arr = list(conn.tx.find({'_id': {'$gt': since_id}}).sort([('_id', ASCENDING)]).limit(n))
     return db2t_tx_list(conn, arr)
 
 def get_missing_txid_list(conn, txids):
