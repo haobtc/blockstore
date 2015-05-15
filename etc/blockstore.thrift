@@ -115,6 +115,7 @@ service BlockStoreService
 
   /* block related methods */
   Block getBlock(1:Network network, 2:binary blockhash) throws (1:NotFound notfound);
+  Block getBlockAtHeight(1:Network network, 2:i32 height) throws (1:NotFound notfound);
   Block getTipBlock(1:Network network) throws (1:NotFound notfound);
 
   /* Get the lattest n blocks, n <= 10 */

@@ -149,6 +149,144 @@ blockstore.BlockStoreService_getBlock_result.prototype.write = function(output) 
   return;
 };
 
+blockstore.BlockStoreService_getBlockAtHeight_args = function(args) {
+  this.network = null;
+  this.height = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.height !== undefined) {
+      this.height = args.height;
+    }
+  }
+};
+blockstore.BlockStoreService_getBlockAtHeight_args.prototype = {};
+blockstore.BlockStoreService_getBlockAtHeight_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I32) {
+        this.height = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getBlockAtHeight_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getBlockAtHeight_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.height !== null && this.height !== undefined) {
+    output.writeFieldBegin('height', Thrift.Type.I32, 2);
+    output.writeI32(this.height);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getBlockAtHeight_result = function(args) {
+  this.success = null;
+  this.notfound = null;
+  if (args instanceof ttypes.NotFound) {
+    this.notfound = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.notfound !== undefined) {
+      this.notfound = args.notfound;
+    }
+  }
+};
+blockstore.BlockStoreService_getBlockAtHeight_result.prototype = {};
+blockstore.BlockStoreService_getBlockAtHeight_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.success = new ttypes.Block();
+        this.success.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.notfound = new ttypes.NotFound();
+        this.notfound.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getBlockAtHeight_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getBlockAtHeight_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRUCT, 0);
+    this.success.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.notfound !== null && this.notfound !== undefined) {
+    output.writeFieldBegin('notfound', Thrift.Type.STRUCT, 1);
+    this.notfound.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 blockstore.BlockStoreService_getTipBlock_args = function(args) {
   this.network = null;
   if (args) {
@@ -3376,6 +3514,57 @@ blockstore.BlockStoreServiceClient.prototype.recv_getBlock = function(input,mtyp
   }
   return callback('getBlock failed: unknown result');
 };
+blockstore.BlockStoreServiceClient.prototype.getBlockAtHeight = function(network, height, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_getBlockAtHeight(network, height);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_getBlockAtHeight(network, height);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_getBlockAtHeight = function(network, height) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getBlockAtHeight', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_getBlockAtHeight_args();
+  args.network = network;
+  args.height = height;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_getBlockAtHeight = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_getBlockAtHeight_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.notfound) {
+    return callback(result.notfound);
+  }
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('getBlockAtHeight failed: unknown result');
+};
 blockstore.BlockStoreServiceClient.prototype.getTipBlock = function(network, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
@@ -4475,6 +4664,36 @@ blockstore.BlockStoreServiceProcessor.prototype.process_getBlock = function(seqi
     this._handler.getBlock(args.network, args.blockhash,  function (err, result) {
       var result = new blockstore.BlockStoreService_getBlock_result((err != null ? err : {success: result}));
       output.writeMessageBegin("getBlock", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getBlockAtHeight = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getBlockAtHeight_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.getBlockAtHeight.length === 2) {
+    Q.fcall(this._handler.getBlockAtHeight, args.network, args.height)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_getBlockAtHeight_result({success: result});
+        output.writeMessageBegin("getBlockAtHeight", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_getBlockAtHeight_result(err);
+        output.writeMessageBegin("getBlockAtHeight", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.getBlockAtHeight(args.network, args.height,  function (err, result) {
+      var result = new blockstore.BlockStoreService_getBlockAtHeight_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("getBlockAtHeight", Thrift.MessageType.REPLY, seqid);
       result.write(output);
       output.writeMessageEnd();
       output.flush();

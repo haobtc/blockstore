@@ -25,6 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('')
   print('Functions:')
   print('  Block getBlock(Network network, string blockhash)')
+  print('  Block getBlockAtHeight(Network network, i32 height)')
   print('  Block getTipBlock(Network network)')
   print('   getTailBlockList(Network network, i32 n)')
   print('  Verification verifyBlock(Network network, Block block)')
@@ -108,6 +109,12 @@ if cmd == 'getBlock':
     print('getBlock requires 2 args')
     sys.exit(1)
   pp.pprint(client.getBlock(eval(args[0]),args[1],))
+
+elif cmd == 'getBlockAtHeight':
+  if len(args) != 2:
+    print('getBlockAtHeight requires 2 args')
+    sys.exit(1)
+  pp.pprint(client.getBlockAtHeight(eval(args[0]),eval(args[1]),))
 
 elif cmd == 'getTipBlock':
   if len(args) != 1:

@@ -26,6 +26,14 @@ class Iface:
     """
     pass
 
+  def getBlockAtHeight(self, network, height):
+    """
+    Parameters:
+     - network
+     - height
+    """
+    pass
+
   def getTipBlock(self, network):
     """
     Parameters:
@@ -246,6 +254,41 @@ class Client(Iface):
     if result.notfound is not None:
       raise result.notfound
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getBlock failed: unknown result");
+
+  def getBlockAtHeight(self, network, height):
+    """
+    Parameters:
+     - network
+     - height
+    """
+    self.send_getBlockAtHeight(network, height)
+    return self.recv_getBlockAtHeight()
+
+  def send_getBlockAtHeight(self, network, height):
+    self._oprot.writeMessageBegin('getBlockAtHeight', TMessageType.CALL, self._seqid)
+    args = getBlockAtHeight_args()
+    args.network = network
+    args.height = height
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_getBlockAtHeight(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = getBlockAtHeight_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.notfound is not None:
+      raise result.notfound
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "getBlockAtHeight failed: unknown result");
 
   def getTipBlock(self, network):
     """
@@ -983,6 +1026,7 @@ class Processor(Iface, TProcessor):
     self._handler = handler
     self._processMap = {}
     self._processMap["getBlock"] = Processor.process_getBlock
+    self._processMap["getBlockAtHeight"] = Processor.process_getBlockAtHeight
     self._processMap["getTipBlock"] = Processor.process_getTipBlock
     self._processMap["getTailBlockList"] = Processor.process_getTailBlockList
     self._processMap["verifyBlock"] = Processor.process_verifyBlock
@@ -1031,6 +1075,20 @@ class Processor(Iface, TProcessor):
     except NotFound, notfound:
       result.notfound = notfound
     oprot.writeMessageBegin("getBlock", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_getBlockAtHeight(self, seqid, iprot, oprot):
+    args = getBlockAtHeight_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = getBlockAtHeight_result()
+    try:
+      result.success = self._handler.getBlockAtHeight(args.network, args.height)
+    except NotFound, notfound:
+      result.notfound = notfound
+    oprot.writeMessageBegin("getBlockAtHeight", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -1423,6 +1481,163 @@ class getBlock_result:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('getBlock_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.STRUCT, 0)
+      self.success.write(oprot)
+      oprot.writeFieldEnd()
+    if self.notfound is not None:
+      oprot.writeFieldBegin('notfound', TType.STRUCT, 1)
+      self.notfound.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    value = (value * 31) ^ hash(self.notfound)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class getBlockAtHeight_args:
+  """
+  Attributes:
+   - network
+   - height
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'network', None, None, ), # 1
+    (2, TType.I32, 'height', None, None, ), # 2
+  )
+
+  def __init__(self, network=None, height=None,):
+    self.network = network
+    self.height = height
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.network = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.height = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('getBlockAtHeight_args')
+    if self.network is not None:
+      oprot.writeFieldBegin('network', TType.I32, 1)
+      oprot.writeI32(self.network)
+      oprot.writeFieldEnd()
+    if self.height is not None:
+      oprot.writeFieldBegin('height', TType.I32, 2)
+      oprot.writeI32(self.height)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.network)
+    value = (value * 31) ^ hash(self.height)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class getBlockAtHeight_result:
+  """
+  Attributes:
+   - success
+   - notfound
+  """
+
+  thrift_spec = (
+    (0, TType.STRUCT, 'success', (Block, Block.thrift_spec), None, ), # 0
+    (1, TType.STRUCT, 'notfound', (NotFound, NotFound.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, success=None, notfound=None,):
+    self.success = success
+    self.notfound = notfound
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.STRUCT:
+          self.success = Block()
+          self.success.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.notfound = NotFound()
+          self.notfound.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('getBlockAtHeight_result')
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.STRUCT, 0)
       self.success.write(oprot)

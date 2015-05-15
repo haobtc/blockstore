@@ -54,6 +54,11 @@ def get_block(conn, blockhash):
     if b:
         return db2t_block(conn, b)
 
+def get_block_at_height(conn, height):
+    b =  conn.block.find_one({'height': height, 'isMain': True})
+    if b:
+        return db2t_block(conn, b)
+
 def get_tip_block(conn):
     v = get_var(conn, 'tip')
     if v:

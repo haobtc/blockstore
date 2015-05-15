@@ -29,6 +29,32 @@ ttypes.Block.prototype.fromBlockObj = function(blockObj) {
   }
 };
 
+ttypes.Block.prototype.toJSON = function() {
+  var obj = {
+    hash: this.hash.toString('hex'),
+    version: this.version,
+    timestamp: this.timestamp,
+    merkle_root: this.merkleRoot.toString('hex'),
+    height: this.height,
+    prev_hash: this.prevHash.toString('hex'),
+    confirmations: 0,
+    tx_cnt: this.cntTxes
+  };
+
+  var rpcClient = module.exports[this.netname()];
+  if(rpcClient.tipBlock) {
+    obj.confirmations = Math.max(0, rpcClient.tipBlock.height - this.height + 1);
+  }
+
+  if(this.nextHash) {
+    obj.next_hash = this.nextHash.toString('hex');
+  }
+  if(this.bits) {
+    obj.bits = this.bits.toNumber();
+  }
+  return obj;
+};
+
 ttypes.Tx.prototype.netname = function(netname) {
   if(!netname) {
     return networkType2NameMap[this.nettype];
@@ -263,7 +289,7 @@ RPCWrapper.prototype.keepTip = function() {
   getTip();
 };
 
-['getBlock', 'getTipBlock', 'verifyBlock', 'addBlock', 'getTailBlockList',
+['getBlock', 'getBlockAtHeight', 'getTipBlock', 'verifyBlock', 'addBlock', 'getTailBlockList',
  'getTx', 'getTxList', 'getMissingTxIdList', 'verifyTx', 'addTxList', 'removeTx',
  'getTxListSince', 'getTailTxList', 'getRelatedTxList', 'getRelatedTxIdList',
  'getSendingTxList', 'getSendTxList', 'sendTx', 'getUnspent', 'getMissingInvList',

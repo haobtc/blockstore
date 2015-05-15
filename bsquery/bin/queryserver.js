@@ -25,6 +25,33 @@ function sendJSONP(req, res, obj) {
   }
 }
 
+// Get Block by tip/height/hash
+app.get('/queryapi/v1/block/:netname/:blk', function(req, res, next) {
+  var blk = req.params.blk;
+  var rpcClient = blockstore[req.params.netname];
+  function returnBlock(err, block) {
+    if(err instanceof blockstore.ttypes.NotFound) {
+      err = null;
+    }
+    if(block) {
+      block.netname(req.params.netname);
+      return sendJSONP(req, res, block.toJSON());
+    } else {
+      res.status(404).send({error: 'not found'});
+    }
+  }
+
+  if(blk == 'tip') {
+    return rpcClient.getTipBlock(returnBlock);
+  } else if(/^[0-9A-Fa-f]{64}$/.test(blk)) {
+    return rpcClient.getBlock(new Buffer(blk, 'hex'), returnBlock);
+  } else if(/^\d+$/.test(blk)) {
+    return rpcClient.getBlockAtHeight(parseInt(blk), returnBlock);
+  } else {
+    return returnBlock(undefined, null);
+  }
+});
+
 // Get TxDetails
 function getTxDetails(req, res) {
   var query = req.query;
