@@ -14,7 +14,7 @@ run blockstored
 ==========
 ```
 % . setup-env.sh
-% bin/blockstored.py
+% bin/blockstored
 ```
 
 Optional: generate thrift libraries
@@ -24,22 +24,6 @@ Optional: generate thrift libraries
 % thrift -r --gen js:node -o bsquery/lib etc/blockstore.thrift 
 
 ```
-
-
-Optional: Install daemontools Services
-===========
-```
-cd <path/to/blockstore>
-mkdir -p service/logs
-if [ ! -f /usr/local/bin/watch-service ]; then
-   sudo ln -s $PWD/service/bin/watch-service /usr/local/bin/watch-service
-fi
-
-if [ ! -f /usr/local/bin/run-service ]; then
-   sudo ln -s $PWD/service/bin/run-service /usr/local/bin/run-service
-fi
-
-sudo ln -s $PWD/service/blockstore.tserver /etc/service/blockstore.tserver
 
 ```
 

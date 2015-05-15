@@ -350,13 +350,13 @@ Node.prototype.onBlock = function(block, opts, callback) {
   if(!this.blockGateDays >= 0 &&
      tipBlock &&
      block.timestamp < tipBlock.timestamp - 86400 * this.blockGateDays) {
-    //console.info('deny old block', this.netname, 'at', new Date(block.timestamp * 1000).toString());
+    console.info('deny old block', this.netname, 'at', new Date(block.timestamp * 1000).toString());
     return callback();
   }
   if(!this.blockGateDays >= 0 &&
      tipBlock &&
      block.timestamp > tipBlock.timestamp + 86400 * this.blockGateDays) {
-    //console.info('deny new block', this.netname, 'at', new Date(block.timestamp * 1000).toString());
+    console.info('deny new block', this.netname, 'at', new Date(block.timestamp * 1000).toString());
     return callback();
   }
 
@@ -375,7 +375,7 @@ Node.prototype.onBlock = function(block, opts, callback) {
 	self.rpcClient.verifyBlock(tBlock, function(err, v) {
 	  blockVerified = v.verified;
 	  if(!v.verified) {
-	    //console.warn('block not verified ' + tBlock.hash.toString('hex') + ' message: ' + v.message);
+	    console.warn('block not verified ' + tBlock.hash.toString('hex') + ' message: ' + v.message);
 	    return c();
 	  }
 	  if(opts.rawMode) block.parseTxes(opts.parser);
