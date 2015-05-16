@@ -480,6 +480,7 @@ def update_addrs(conn, dtx):
             update['vh'] = list(hs)
 
     if update:    
+        print 'updating addrs', dtx['hash'].encode('hex')
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})
 
 def update_vin_hash(conn, dtx):
