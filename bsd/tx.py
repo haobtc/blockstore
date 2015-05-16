@@ -28,7 +28,7 @@ def get_tx_db_block(conn, dtx, db_block=None):
     if db_block is not None:
         i = bhs.index(db_block['hash'])
         if i >= 0:
-            return db_block, dtx['bis'][i]
+            return db_block, bis[i]
 
     bhs_map = dict(zip(bhs, bis))
     max_height = -1
@@ -52,7 +52,7 @@ def get_block_map(conn, dtxs):
         bmap[b['hash']] = b
     return bmap
 
-def db2t_tx(conn, dtx, db_block=None):
+def db2t_tx(conn, dtx, db_block=None, tblock=None, ensure_input=True):
     t = ttypes.Tx(nettype=get_nettype(conn))
     t.hash = dtx['hash']
     if '_id' in dtx:
@@ -63,12 +63,14 @@ def db2t_tx(conn, dtx, db_block=None):
 
     db_block, index = get_tx_db_block(conn, dtx, db_block=db_block)
     if db_block:
-        t.block = db2t_block(conn, db_block)
-        t.blockIndex = index
+        if tblock:
+            t.block = tblock
+            t.blockIndex = index
+        else:
+            t.block = db2t_block(conn, db_block)
+            t.blockIndex = index
 
     for i, input in enumerate(dtx['vin']):
-
-
         inp = ttypes.TxInput()
         if 'hash' in input:
             inp.hash = input['hash']
@@ -79,10 +81,11 @@ def db2t_tx(conn, dtx, db_block=None):
         if 'q' in input:
             inp.q = input['q']
 
-        ensure_input_addrs(conn, dtx, input, i)
-        if input.get('addrs'):
-            inp.address = ','.join(input['addrs'])
-            inp.amountSatoshi = input['v']
+        if ensure_input:
+            ensure_input_addrs(conn, dtx, input, i)
+            if input.get('addrs'):
+                inp.address = ','.join(input['addrs'])
+                inp.amountSatoshi = input['v']
         t.inputs.append(inp)
 
     for output in dtx['vout']:
@@ -91,6 +94,7 @@ def db2t_tx(conn, dtx, db_block=None):
         outp.amountSatoshi = output['v']
         outp.script = output['s']
         t.outputs.append(outp)
+
     return t
 
 def db2t_tx_list(conn, txes):
@@ -138,6 +142,13 @@ def t2db_tx(conn, t):
         dtx['vout'].append(output)
     return dtx
     
+def get_db_tx_list_in_block(conn, block_hash):
+    rels = conn.txblock.find({'b': Binary(block_hash)}).sort('id')
+    tx_hash_list = [r['t'] for r in rels]
+    return get_dbobj_list(conn, conn.tx,
+                          tx_hash_list,
+                          keep_order=True)
+
 def get_tx(conn, txid):
     tx = conn.tx.find_one({'hash': Binary(txid)})
     if tx:
@@ -331,7 +342,7 @@ def save_tx(conn, t):
     if not old_tx:
         # New object inserted
         #conn.sendtx.update({'hash': txhash}, {'$set': {'sent': True}})
-        logging.debug('added %s tx %s', get_netname(conn), txhash.encode('hex'))
+        #logging.debug('added %s tx %s', get_netname(conn), txhash.encode('hex'))
         for input in dtx['vin']:
             if not input.get('hash'):
                 continue
@@ -480,7 +491,7 @@ def update_addrs(conn, dtx):
             update['vh'] = list(hs)
 
     if update:    
-        print 'updating addrs', dtx['hash'].encode('hex')
+        #print 'updating addrs', dtx['hash'].encode('hex')
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})
 
 def update_vin_hash(conn, dtx):

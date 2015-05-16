@@ -1,18 +1,27 @@
 import sys
 
+import logging
+import logging.config
+logging.config.fileConfig('etc/logging.conf')
+
 import pymongo
 
 import bsd.tx as apptx
 import bsd.misc as appmisc
 import bsd.block as appblock
 
+import bsd.helper as helper
 
 from bsd.database import conn as dbconn
 from bsd.database import dbclient, transaction
 from bson.binary import Binary
+
 def copy_blocks(netname, nblocks):
+    helper.get_netname = lambda(conn): netname
+
     #sc = dbclient()['blocks_%s' % netname]
-    sc = pymongo.MongoClient('mongodb://localhost:27017', maxPoolSize=1)['blocks_%s' % netname]
+    #sc = pymongo.MongoClient('mongodb://localhost:27017', maxPoolSize=1)['blocks_%s' % netname]
+    sc = dbclient()['blockdump']
     dc  = dbconn(netname)
     
     tip = appblock.get_tip_block(dc)
@@ -33,7 +42,8 @@ def copy_blocks(netname, nblocks):
         if tip:
             assert tb.prevHash == tip.hash, 'tip=%s tb=%s prevHash=%s' % (tip.hash.encode('hex'), tb.hash.encode('hex'), tb.prevHash.encode('hex'))
 
-        txs = list(sc.tx.find({'bhs': nb['hash']}))
+        #txs = list(sc.tx.find({'bhs': nb['hash']}))
+        txs = apptx.get_db_tx_list_in_block(sc, nb['hash'])
         if len(txs) != nb['cntTxes']:
             raise Exception('unmatched tx length %s %s %s', (len(txs), nb['cntTxes'], tb.hash.encode('hex')))
 
@@ -43,8 +53,12 @@ def copy_blocks(netname, nblocks):
                 dtx.pop('_id', None)
             
                 ddtx = dtx.copy()
-                ddtx.pop('bhs', None)
-                ddtx.pop('bis', None)
+                #ddtx.pop('bhs', None)
+                #ddtx.pop('bis', None)
+                ddtx.pop('vh', None)
+                ddtx.pop('ia', None)
+                ddtx.pop('oa', None)
+
                 # simple verification
                 verified = True
                 for input in ddtx['vin']:
@@ -61,7 +75,10 @@ def copy_blocks(netname, nblocks):
                         print 'tx exists %s' % ddtx['hash'].encode('hex')
             #print 'pre insert times', presert_times
 
-        txs = [apptx.db2t_tx(sc, tx, db_block=nb)
+        tblock = appblock.db2t_block(sc, nb)
+        txs = [apptx.db2t_tx(sc, tx,
+                             db_block=nb, tblock=tblock,
+                             ensure_input=False)
                for tx in txs]
         txs = [(t.blockIndex, t) for t in txs]
         txs.sort()
@@ -73,7 +90,6 @@ def copy_blocks(netname, nblocks):
         for tx in txs:
             if Binary(tx.hash) in missing_txids:
                 missing_txs.append(tx)
-
         with transaction(dc) as dc:
             for tx in missing_txs:
                 v, m = apptx.verify_tx_chain(dc, tx)

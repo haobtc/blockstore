@@ -110,9 +110,8 @@ class BlockStoreHandler:
                     verified_txes.append(tx)
                     save_tx(conn, tx)
                 else:
-                    logging.warn('verify tx failed %s, message=%s', tx.hash.encode('hex'), m)
-            #for tx in verified_txes:
-            #    save_tx(conn, tx)
+                    logging.warn('verify tx failed %s, message=%s',
+                                 tx.hash.encode('hex'), m)
 
         for dtx in itercol(conn, conn.tx, 
                            'update_addrs.tx._id',
