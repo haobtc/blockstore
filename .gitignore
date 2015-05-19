@@ -5,3 +5,4 @@ dump
 logs
 supervise
 blockstore.conf
+local_settings.py

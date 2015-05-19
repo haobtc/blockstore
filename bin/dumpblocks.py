@@ -13,16 +13,15 @@ def main(netname, start_height, stop_height):
     dc.txblock.remove({})
     dc.tx.remove({})
     dc.txblock.ensure_index('b')
+    dc.txblock.ensure_index('t')
     sc = dbconn(netname)
     for height in xrange(start_height, stop_height):
         block = sc.block.find_one({'height': height, 'isMain': True})
-        print 'block', block, height
         if not block:
             break
-        print 'dumping block', block['hash'].encode('hex')
+        print 'dumping block', block['hash'].encode('hex'), 'at', height
         block.pop('_id', None)
         rels = list(sc.txblock.find({'b': block['hash']}))
-        print len(rels)
         for rel in rels:
             rel.pop('_id', None)
 
@@ -31,7 +30,7 @@ def main(netname, start_height, stop_height):
 
         for tx in txes:
             tx.pop('_id', None)
-        print 'begin transaction'
+
         with transaction(dc) as dc:
             dc.block.save(block)
             for rel in rels:
@@ -43,7 +42,7 @@ def main(netname, start_height, stop_height):
 if __name__ == '__main__':
     netname = sys.argv[1]
     start_height = int(sys.argv[2])
-    stop_height = int(sys.argv[3])
+    stop_height = start_height + int(sys.argv[3])
     assert stop_height > start_height
     main(netname, start_height, stop_height)
     
