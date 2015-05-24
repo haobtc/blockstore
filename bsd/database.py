@@ -1,6 +1,6 @@
 import pymongo
 import os, sys
-
+import leveldb
 from pymongo import DESCENDING, ASCENDING
 from contextlib import contextmanager
 import settings
@@ -12,7 +12,6 @@ def dbclient():
     # TODO: configurable database settings
     global db_client
     if db_client is None:
-        #url = os.getenv('BLOCKSTORE_DB_CONN', 'mongodb://localhost:27017')
         url = settings.db_conn
         db_client = pymongo.MongoClient(url, maxPoolSize=1)
     return db_client
@@ -31,11 +30,10 @@ def transaction(conn, isolation='mvcc'):
         conn.command('rollbackTransaction')
         raise
 
-
 # Level db 
 stats_dbs = {}
-def stats_db(netname):
-    if netname not in stats_db:
-        stats_db[netnanme] = leveldb.LevelDB()
-
-    
+def statsdb(netname):
+    if netname not in stats_dbs:
+        stats_db_path = settings.stats_db_path % netname
+        stats_dbs[netname] = leveldb.LevelDB(stats_db_path)
+    return stats_dbs[netname]
