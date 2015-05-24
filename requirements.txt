@@ -3,3 +3,4 @@ thrift
 pymongo
 gevent
 eventlet
+leveldb
