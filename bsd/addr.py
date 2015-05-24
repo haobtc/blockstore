@@ -29,7 +29,7 @@ def gen_tx_stats(conn, sdb, dtx):
         update = {}
         #update['$push'] = {'t': dtx['hash']}
         k = 'T%s:%s' % (addr, dtx['hash'].encode('hex'))
-        v = '1'
+        v = 'ia=%s,oa=%s' % (txstat.input_amount, txstat.output_amount)
         batch.Put(k, v)
         update['$inc'] = {
             'r': txstat.output_amount,                          # received
