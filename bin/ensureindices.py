@@ -22,6 +22,9 @@ def ensure_indices(c):
     #c.tx.ensure_index('vout.addrs')
     #c.tx.ensure_index('vout.w')
 
+    c.addrtx.ensure_index([('a', 1), ('_id', -1)])
+    c.addrtx.ensure_index([('a', 1), ('t', 1)], unique=True)
+
     c.var.ensure_index('key', unique=True)
     c.sendtx.ensure_index('hash',  unique=True)
     c.peerpool.ensure_index([('host', 1), ('port', 1)], unique=True)

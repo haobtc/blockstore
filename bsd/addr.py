@@ -1,6 +1,8 @@
 import database
+from struct import pack
 from collections import defaultdict
 from tx import get_tx_db_block
+from pymongo import ReturnDocument
 import leveldb
 
 class TxStat:
@@ -8,7 +10,7 @@ class TxStat:
         self.input_amount = 0
         self.output_amount = 0
         
-def gen_tx_stats(conn, sdb, dtx):
+def gen_tx_stats(conn, dtx):
     changes = defaultdict(TxStat)
     for input in dtx.get('vin', []):
         addrs = input.get('addrs')
@@ -23,23 +25,21 @@ def gen_tx_stats(conn, sdb, dtx):
             addr = addrs[0]
             changes[addr].output_amount += long(output['v'])
         
-    batch = leveldb.WriteBatch()
     for addr, txstat in changes.iteritems():
         query = {'_id': addr}
         update = {}
-        #update['$push'] = {'t': dtx['hash']}
-        k = 'T%s:%s' % (addr, dtx['hash'].encode('hex'))
-        v = 'ia=%s,oa=%s' % (txstat.input_amount, txstat.output_amount)
-        batch.Put(k, v)
         update['$inc'] = {
             'r': txstat.output_amount,                          # received
             'b': txstat.output_amount - txstat.input_amount,    # balance
             'n': 1                                              # number of txes
         }
         conn.addrstat.update(query, update, upsert=True)
-    sdb.Write(batch, sync=True)
+        query = {'a': addr, 't': dtx['hash']}
+        update = {'$set': {'i': txstat.input_amount, 'o': txstat.output_amount}}
+        conn.addrtx.update(query, update, upsert=True)
+        
 
-def undo_tx_stats(conn, sdb, dtx):
+def undo_tx_stats(conn, dtx):
     changes = defaultdict(TxStat)
     for input in dtx.get('vin', []):
         addrs = input.get('addrs')
@@ -55,13 +55,14 @@ def undo_tx_stats(conn, sdb, dtx):
             changes[addr].output_amount += long(output['v'])
             
     for addr, txstat in changes.iteritems():
-        k = 'T%s:%s' % (addr, dtx['hash'].encode('hex'))
-        if not sdb.Get(k):
+        addrtx = conn.addrtx.find_one({'a': addr, 't': dtx['hash']})
+        if not addrtx:
             continue
-        sdb.Delete(k)
+
+        conn.addrtx.remove({_id: addrtx['_id']})
+
         query = {'_id': addr, 't': dtx['hash']}
         update = {}
-        #update['$pullAll'] = {'t': dtx['hash']}
         update['$inc'] = {'r': -txstat.output_amount,
                           'n': -1,
                           'b': txstat.input_amount - txstat.output_amount}

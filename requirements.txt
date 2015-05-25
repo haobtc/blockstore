@@ -1,6 +1,6 @@
+ipython
 pytz
 thrift
 pymongo
 gevent
 eventlet
-leveldb

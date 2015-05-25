@@ -180,8 +180,8 @@ def get_tail_block_list(conn, n):
     return [db2t_block(conn, b) for b in arr]
 
 def get_block_db_tx_list(conn, bhash):
-    txids = [v['t'] for v in conn.txblock.find({'b': bhash})]
-    return get_dbobj_list(conn, conn.tx, txids)
+    txids = [v['t'] for v in conn.txblock.find({'b': bhash}).sort([('i', 1)])]
+    return get_dbobj_list(conn, conn.tx, txids, keep_order=True)
 
 def remove_block(conn, bhash, cleanup_txes=False):
     binary_phash = Binary(bhash)

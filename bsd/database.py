@@ -29,11 +29,3 @@ def transaction(conn, isolation='mvcc'):
     except:
         conn.command('rollbackTransaction')
         raise
-
-# Level db 
-stats_dbs = {}
-def statsdb(netname):
-    if netname not in stats_dbs:
-        stats_db_path = settings.stats_db_path % netname
-        stats_dbs[netname] = leveldb.LevelDB(stats_db_path)
-    return stats_dbs[netname]
