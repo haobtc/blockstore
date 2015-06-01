@@ -1,7 +1,6 @@
 var bitcore = require('bitcore-multicoin');
+var underscore = require('underscore');
 var async = require('async');
-var MongoStore = require('./MongoStore');
-var BlockChain = require('./BlockChain');
 var util = bitcore.util;
 var helper = require('./helper');
 var config = require('./config');
@@ -16,50 +15,43 @@ var Skip = helper.Skip;
 
 var hex = function(hex) {return new Buffer(hex, 'hex');};
 
-function BlockFetcher(netname, blockHashes) {
+function BlockFetcher(netname, blockHash) {
   this.netname = netname;
-  this.blockHashes = blockHashes;
+  this.waitingBlockHash = blockHash;
 
   this.peerman = new PeerManager({
     network: this.netname
   });
   this.peerman.peerDiscovery = true;
-  this.rpcClient = blockstore[this.netname];
-  this.pendingBlocks = [];
 }
 
 BlockFetcher.prototype.checkBlockHashes = function(callback) {
   var self = this;
-
-  fns = this.blockHashes.map(function(bHash) {
-    return function(c) {
-      self.rpcClient.getBlock(bhash, function(err, b) {
-	if(err) {
-	  if(err instanceof blockstore.ttypes.NotFound) {
-	    b = null;
-	  } else{
-	    return c(err);
-	  }
-	}
-	if(b && b.isMain) {
-	  self.pendingBlocks = b;
-	}
-	c();
-      });
-    };
-  });
-  async.series(fns, function(err) {
-    if(err) return callback(err);
-    if(self.pendingBlocks.length == 0) {
-      return c(new Error('No valid block hash given'));
+  var rpcClient = blockstore[this.netname];
+  rpcClient.getBlock(this.waitingBlockHash, function(err, b) {
+    console.info('got block', b);
+    if(err) {
+      if(err instanceof blockstore.ttypes.NotFound) {
+	b = null;
+      } else{
+	return callback(err);
+      }
     }
-    return c();
+    if(b && b.isMain) {
+      self.waitingBlockHash = b.hash;
+      return callback();
+    } else {
+      callback(new Error('Canot find block'));
+    }
   });
 };
 
 BlockFetcher.prototype.run = function(callback) {
   var self = this;
-  this.rpcClient.getPeers(function(err, v) {
+  var rpcClient = blockstore[this.netname];
+  console.info('rpcClient', rpcClient);
+  rpcClient.getPeers(function(err, v) {
+    console.info('got peers', err, v);
     if(err) return callback(err);
     var peers = config.networks[self.netname].peers;
     if(v && v.peers && v.peers.length > 0) {
@@ -83,6 +75,9 @@ BlockFetcher.prototype.run = function(callback) {
       if(typeof callback == 'function') {
 	callback();
       }
+      setInterval(function() {
+        self.fetchBlock();
+      }, 3000);
     });
     self.peerman.start();
     callback();
@@ -95,30 +90,77 @@ BlockFetcher.prototype.stop = function(cb) {
 
 BlockFetcher.prototype.handleBlock = function(info) {
   var block = info.message.block;
-  var bHash = blockObj.calcHash(bitcore.networks[self.netname()].blockHashFunc);
-  
-  
+  var bHash = block.calcHash(bitcore.networks[self.netname()].blockHashFunc);
+  bHash = helper.reverseBuffer(bHash);
+  console.info('bb', bHash);
+  if(bHash.toString() == this.watingBlockHash.toString()) {
+    this.onBlock(block, {rawMode: false}, function(err, q) {
+      if(err) throw err;
+    });
+  }
+};
 
-  this.onBlock(block, {rawMode: false}, function(err, q) {
-    if(err) throw err;
+BlockFetcher.prototype.handleRawBlock = function(info) {
+  var self = this;
+  this.stopOnTimeout();
+   var block = new bitcore.Block();
+  block.parse(info.message.parser, true);
+  var bHash = block.calcHash(bitcore.networks[this.netname].blockHashFunc);
+  bHash = helper.reverseBuffer(bHash);
+  console.info('bb', bHash);
+  if(bHash.toString() == this.watingBlockHash.toString()) {
+    this.onBlock(block, {rawMode: true}, function(err, q) {
+      if(err) throw err;
+    });
+  }
+};
+
+
+BlockFetcher.prototype.fetchBlock = function() {
+  var self = this;
+  var invs = [{
+    'type': 2,
+    'hash': helper.reverseBuffer(this.waitingBlockHash)
+  }];
+
+  console.info('fetch block', invs);
+
+  var conns = this.randomConns();
+  if(!conns || conns.length == 0) {
+    console.warn(this.netname, 'No active connections');
+    return;
+  }
+
+  conns.forEach(function(conn) {
+    console.info(self.netname, 'getting invs', invs, 'from', conn.peer.host);
+    conn.sendGetData(invs);
   });
+};
+
+BlockFetcher.prototype.randomConns = function(n) {
+  var activeConnections = this.peerman.getActiveConnections();
+  if(activeConnections.length == 0) {
+    console.warn(this.netname, 'No active connections');
+    return;
+  }
+  var len = activeConnections.length;
+  var indexes = [];
+  for(var i=0; i<n; i++) {
+    var idx = Math.floor(Math.random() * len);
+    indexes.push(idx);
+  }
+  indexes = underscore.uniq(indexes);
+  var conns = indexes.map(function(idx) {
+    return activeConnections[idx];
+  });
+  console.info('dddd', conns);
+  return conns;
 };
 
 BlockFetcher.prototype.handleInv = function(info) {
   var invs = info.message.invs;
   info.conn.sendGetData(invs);
 };
-
-BlockFetcher.prototype.randomConn = function() {
-  var activeConnections = this.peerman.getActiveConnections();
-  if(activeConnections.length == 0) {
-    console.warn(this.netname, 'No active connections');
-    return;
-  }
-  var conn = activeConnections[Math.floor(Math.random() * activeConnections.length)];
-  return conn;
-};
-
 
 BlockFetcher.prototype.onBlock = function(block, opts, callback) {
   var self = this;
@@ -128,6 +170,8 @@ BlockFetcher.prototype.onBlock = function(block, opts, callback) {
   var tBlock = new blockstore.ttypes.Block();
   tBlock.netname(this.netname);
   tBlock.fromBlockObj(block);
+
+  var rpcClient = blockstore[this.netname];
 
   if(opts.rawMode) block.parseTxes(opts.parser);
   tBlock.cntTxes = block.txs.length;
@@ -143,7 +187,7 @@ BlockFetcher.prototype.onBlock = function(block, opts, callback) {
     [
       function(c) {
 	if(txIdList.length ==0) return c();
-	self.rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
+	rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
 	  if(err) return c(err);
 	  newTxIdList = arr;
 	  c();
@@ -160,19 +204,17 @@ BlockFetcher.prototype.onBlock = function(block, opts, callback) {
 	  return !!newTxIdMap[tTx.hash.toString('hex')];
 	});
 	if(newTxList.length == 0) return c();
-	self.rpcClient.addTxList(newTxList, false, c);
+	rpcClient.addTxList(newTxList, false, c);
       },
       function(c) {
-	self.rpcClient.linkBlock(tBlock.hash, txIdList, c);
+	rpcClient.linkBlock(tBlock.hash, txIdList, c);
       }
     ],
     callback);
 };
 
-BlockFetcher.prototype.start = function(hash, callback) {
+BlockFetcher.prototype.start = function(callback) {
   var self = this;
-
-
   async.series([
     function(c) {
       return self.checkBlockHashes(c);
@@ -180,22 +222,7 @@ BlockFetcher.prototype.start = function(hash, callback) {
     function(c) {
       return self.run(c);
     },
-  ]);
-
-  this.run(function(){
-    self.fetchBlock(blockHash, function(blockObj) {
-      console.info('got block w/', blockObj.txes.length, 'txes');
-      
-      self.blockChain.updateBlock(blockObj, function(err) {
-	if(err) {
-	  console.info(err);
-	  throw err;
-	}
-	console.info('updated');
-	process.exit();
-      });
-      });
-  });
+  ], callback);
 };
 
 module.exports = BlockFetcher;

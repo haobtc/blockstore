@@ -43,6 +43,8 @@ function Node(netname) {
   this.peerDiscovery = true;
   
   this.blockQueue = new Queue();
+
+  this.waitingBlockHash = null;
 }
 
 Node.prototype.run = function(callback) {
@@ -84,6 +86,9 @@ Node.prototype.run = function(callback) {
     self.peerman.on('netConnected', function(info) {
       if(self.updateBlockChain) {
 	self.startSync();
+      }
+      if(self.waitingBlockHash) {
+        self.startFetching();
       }
       //self.rpcClient.keepTip();
 
@@ -153,18 +158,26 @@ Node.prototype.handleRawBlock = function(info) {
    var block = new bitcore.Block();
   block.parse(info.message.parser, true);
   var bHash = block.calcHash(bitcore.networks[this.netname].blockHashFunc);
-  this.blockQueue.task(
-    {timestamp:block.timestamp, hexHash: bHash.toString('hex')},
-    function(c) {
-      self.onBlock(block,
-		   {rawMode: true, parser: info.message.parser}, 
-		   function(err) {
-		     if(err) {
-		       console.error('error on raw block', err, err.stack);
-		     }
-		     c();
-		   });
-    }, null);
+  if(bHash.toString("hex") == helper.reverseBuffer(this.waitingBlockHash).toString('hex')) {
+    this.gotWaitingBlock(block,
+                         {rawMode: true, parser:info.message.parser}, 
+                         function(err, q) {
+      if(err) throw err;
+    });
+  } else if(this.updateBlockChain) {
+    this.blockQueue.task(
+      {timestamp:block.timestamp, hexHash: bHash.toString('hex')},
+      function(c) {
+        self.onBlock(block,
+		     {rawMode: true, parser: info.message.parser}, 
+		     function(err) {
+		       if(err) {
+		         console.error('error on raw block', err, err.stack);
+		       }
+		       c();
+		     });
+      }, null);
+  }
 };
 
 Node.prototype.handleTx = function(info) {
@@ -334,6 +347,38 @@ Node.prototype.requireBlocks = function() {
   });  
 };
 
+Node.prototype.startFetching = function() {
+  var self = this;
+  if(this.fetchTimer) {
+    return;
+  }
+  this.fetchTimer = setInterval(function() {
+    self.fetchBlock();
+  }, 3000);
+};
+
+Node.prototype.fetchBlock = function() {
+  var self = this;
+  
+  if(!this.waitingBlockHash) {
+    console.warn(this.netname, 'No waiting Block hash');
+    return;
+  }
+
+  var conns = this.randomConns(10);
+  if(!conns||conns.length == 0) {
+    console.warn(this.netname, 'No active connections');
+    return;
+  }
+
+  conns.forEach(function(c) {
+    var wHash = helper.reverseBuffer(self.waitingBlockHash);
+    console.info(self.netname, 'getting wanted block', self.waitingBlockHash.toString('hex'), 'from', c.peer.host);
+    var inv = {type: 2, hash:wHash};
+    c.sendGetData([inv]);
+  });
+};
+
 Node.prototype.onBlock = function(block, opts, callback) {
   var self = this;
   var txList;
@@ -452,8 +497,8 @@ Node.prototype.sendRawTx = function(callback) {
 };
 
 Node.prototype.start = function(argv) {
-  this.updateMempool = !argv.denyMempool;
-  this.updateBlockChain = true;
+  //this.updateMempool = !argv.denyMempool;
+  //this.updateBlockChain = true;
 };
 
 Node.prototype.stopOnTimeout = function() {
@@ -523,6 +568,58 @@ Node.prototype.discoverPeers = function(callback) {
   } else {
     return callback();
   }
+};
+
+
+Node.prototype.gotWaitingBlock = function(block, opts, callback) {
+  var self = this;
+  var txIdList = [];
+  var newTxIdList;
+  var blockVerified;
+  var tBlock = new blockstore.ttypes.Block();
+  tBlock.netname(this.netname);
+  tBlock.fromBlockObj(block);
+  
+  var rpcClient = this.rpcClient;
+
+  if(opts.rawMode) block.parseTxes(opts.parser);
+  tBlock.cntTxes = block.txs.length;
+  var txList = block.txs.map(function(tx) {
+    var tTx = new blockstore.ttypes.Tx();
+    tTx.netname(self.netname);
+    tTx.fromTxObj(tx);
+    txIdList.push(tTx.hash);
+    return tTx;
+  });
+  
+  async.series(
+    [
+      function(c) {
+	if(txIdList.length ==0) return c();
+	rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
+	  if(err) return c(err);
+	  newTxIdList = arr;
+	  c();
+	});
+      },
+      function(c) {
+	if(!newTxIdList || newTxIdList.length == 0) return c();
+	var newTxIdMap = {};
+	newTxIdList.forEach(function(txId) {
+	  newTxIdMap[txId.toString('hex')] = true;
+	});
+
+	var newTxList = txList.filter(function(tTx) {
+	  return !!newTxIdMap[tTx.hash.toString('hex')];
+	});
+	if(newTxList.length == 0) return c();
+	rpcClient.addTxList(newTxList, false, c);
+      },
+      function(c) {
+	rpcClient.linkBlock(tBlock.hash, txIdList, c);
+      }
+    ],
+    callback);
 };
 
 module.exports = Node;

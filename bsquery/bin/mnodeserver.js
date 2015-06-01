@@ -17,6 +17,7 @@ function startNode(netname, argv) {
     }
   }
   nodeSet.run([netname], function(node) {
+    node.updateMempool = !argv.denyMempool;
     node.start(argv);
   }, function(err) {
     if(err) throw err;

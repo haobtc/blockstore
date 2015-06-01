@@ -289,7 +289,7 @@ RPCWrapper.prototype.keepTip = function() {
   getTip();
 };
 
-['getBlock', 'getBlockAtHeight', 'getTipBlock', 'verifyBlock', 'addBlock', 'getTailBlockList',
+['getBlock', 'getBlockAtHeight', 'getTipBlock', 'verifyBlock', 'addBlock', 'getTailBlockList', 'linkBlock',
  'getTx', 'getTxList', 'getMissingTxIdList', 'verifyTx', 'addTxList', 'removeTx',
  'getTxListSince', 'getTailTxList', 'getRelatedTxList', 'getRelatedTxIdList',
  'getSendingTxList', 'getSendTxList', 'sendTx', 'getUnspent', 'getMissingInvList',

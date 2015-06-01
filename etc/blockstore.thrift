@@ -123,6 +123,7 @@ service BlockStoreService
 
   Verification verifyBlock(1:Network network, 2:Block block);
   void addBlock(1:Network network, 2:Block block, 3:list<binary> txIds) throws (1:AppException e);
+  void linkBlock(1:Network network, 2:binary blockhash, 3:list<binary> txIds) throws (1:NotFound e);
   void rewindTip(1:Network network, 2:i32 height) throws (1:AppException e);
 
   /* tx related methods */	
@@ -149,7 +150,7 @@ service BlockStoreService
   list<Inventory> getMissingInvList(1:Network network, 2:list<Inventory> invs);
 
   /* Misc methods */
-  /* Get/Set Peers. depricated!
+  /* Get/Set Peers. depricated! */
   list<string> getPeers(1:Network network);
   void setPeers(1:Network network, 2:list<string> peers);
   

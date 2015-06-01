@@ -10,7 +10,7 @@ from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_t
 from tx import save_tx, update_addrs
 
 from block import get_block, get_block_at_height,  get_tip_block, verify_block, get_missing_block_hash_list, add_block
-from block import get_tail_block_list, rewind_tip
+from block import get_tail_block_list, rewind_tip, link_txes
 from misc import set_peers, get_peers, itercol, push_peers, pop_peers
 
 def network_conn(nettype):
@@ -54,6 +54,14 @@ class BlockStoreHandler:
         conn = network_conn(nettype)
         with database.transaction(conn, isolation='serializable') as conn:
             add_block(conn, block, txids)
+
+    def linkBlock(self, nettype, blockhash, txids):
+        conn = network_conn(nettype)
+        with database.transaction(conn, isolation='serializable') as conn:
+            block = get_block(conn, blockhash)
+            if not block:
+                raise ttypes.NotFound()
+            link_txes(conn, block, txids)
 
     def rewindTip(self, nettype, height):
         conn = network_conn(nettype)

@@ -1,5 +1,4 @@
 var async = require('async');
-//var MongoStore = require('./MongoStore');
 var Node = require('./Node');
 
 function NodeSet() {

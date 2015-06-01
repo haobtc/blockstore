@@ -1,7 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var bitcore = require('bitcore-multicoin');
-//var MongoStore = require('../lib/MongoStore');
 var NodeSet = require('../lib/NodeSet');
 var helper = require('../lib/helper');
 var config = require('../lib/config');
@@ -22,6 +21,8 @@ module.exports.start = function(argv){
   }
   nodeSet.run(coins||helper.netnames(), function(node) {
     node.peerman.peerLimit = 100;
+    node.updateMempool = !argv.denyMempool;
+    node.updateBlockChain = true;
     node.start(argv);
     stopTime = node.stopTime;
   }, function(err) {
