@@ -37,7 +37,7 @@ def cleanup_txes(conn):
 def main():
     for netname in ['litecoin', 'darkcoin', 'dogecoin', 'bitcoin']:
         conn = dbconn(netname)
-        cleanup_blocks(conn)
+        #cleanup_blocks(conn)
         cleanup_txes(conn)
 
 if __name__ == '__main__':

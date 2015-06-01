@@ -158,11 +158,13 @@ Node.prototype.handleRawBlock = function(info) {
    var block = new bitcore.Block();
   block.parse(info.message.parser, true);
   var bHash = block.calcHash(bitcore.networks[this.netname].blockHashFunc);
-  if(bHash.toString("hex") == helper.reverseBuffer(this.waitingBlockHash).toString('hex')) {
+  if(this.waitingBlockHash &&
+     bHash.toString("hex") == helper.reverseBuffer(this.waitingBlockHash).toString('hex')) {
     this.gotWaitingBlock(block,
                          {rawMode: true, parser:info.message.parser}, 
                          function(err, q) {
-      if(err) throw err;
+			   if(err) throw err;
+			   process.exit();
     });
   } else if(this.updateBlockChain) {
     this.blockQueue.task(
@@ -438,6 +440,7 @@ Node.prototype.onBlock = function(block, opts, callback) {
       function(c) {
 	if(!blockVerified) return c();
 	if(txIdList.length ==0) return c();
+	console.info('tx id list', txIdList.length);
 	self.rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
 	  if(err) return c(err);
 	  newTxIdList = arr;
@@ -456,6 +459,7 @@ Node.prototype.onBlock = function(block, opts, callback) {
 	  return !!newTxIdMap[tTx.hash.toString('hex')];
 	});
 	if(newTxList.length == 0) return c();
+	console.info('addeding tx list', newTxList.length);
 	self.rpcClient.addTxList(newTxList, false, c);
       },
       function(c) {
@@ -572,18 +576,25 @@ Node.prototype.discoverPeers = function(callback) {
 
 
 Node.prototype.gotWaitingBlock = function(block, opts, callback) {
+  if(!this.waitingBlockHash)
+    return;
+
+  this.waitingBlockHash = null;
   var self = this;
   var txIdList = [];
   var newTxIdList;
   var blockVerified;
+
   var tBlock = new blockstore.ttypes.Block();
   tBlock.netname(this.netname);
   tBlock.fromBlockObj(block);
   
+  console.info('got wanted block');
   var rpcClient = this.rpcClient;
 
   if(opts.rawMode) block.parseTxes(opts.parser);
   tBlock.cntTxes = block.txs.length;
+  
   var txList = block.txs.map(function(tx) {
     var tTx = new blockstore.ttypes.Tx();
     tTx.netname(self.netname);
@@ -591,6 +602,8 @@ Node.prototype.gotWaitingBlock = function(block, opts, callback) {
     txIdList.push(tTx.hash);
     return tTx;
   });
+
+  console.info('txList ', txList.length, txIdList.length);
   
   async.series(
     [
@@ -598,6 +611,7 @@ Node.prototype.gotWaitingBlock = function(block, opts, callback) {
 	if(txIdList.length ==0) return c();
 	rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
 	  if(err) return c(err);
+	  console.info('missing txList ', arr.length);
 	  newTxIdList = arr;
 	  c();
 	});
@@ -608,14 +622,16 @@ Node.prototype.gotWaitingBlock = function(block, opts, callback) {
 	newTxIdList.forEach(function(txId) {
 	  newTxIdMap[txId.toString('hex')] = true;
 	});
-
+	
 	var newTxList = txList.filter(function(tTx) {
 	  return !!newTxIdMap[tTx.hash.toString('hex')];
 	});
+	console.info('new txlist', newTxList.length);
 	if(newTxList.length == 0) return c();
 	rpcClient.addTxList(newTxList, false, c);
       },
       function(c) {
+	console.info('linking block');
 	rpcClient.linkBlock(tBlock.hash, txIdList, c);
       }
     ],

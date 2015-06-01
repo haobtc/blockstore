@@ -218,7 +218,7 @@ def verify_tx_mempool(conn, t):
             continue
         source_tx = get_db_tx(conn, inp.hash, projection=['hash', 'vout'])
         if not source_tx:
-            return False, 'No input tx at %s' % i
+            return False, 'No input tx at %s for %s' % (i, inp.hash.encode('hex'))
         if len(source_tx['vout']) <= inp.vout:
             return False, 'No output matching %s' % i
 
@@ -249,7 +249,7 @@ def verify_tx_chain(conn, t):
             continue
         source_tx = get_db_tx(conn, inp.hash, projection=['hash', 'vout.addrs', 'vout.v'])
         if not source_tx:
-            return False, 'No input tx at %s' % i
+            return False, 'No input tx at %s for %s' % (i, inp.hash.encode('hex'))
         if len(source_tx['vout']) <= inp.vout:
             return False, 'No output matching %s' % i
         if not inp.address:

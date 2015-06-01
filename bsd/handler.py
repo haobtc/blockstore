@@ -110,6 +110,7 @@ class BlockStoreHandler:
         with database.transaction(conn) as conn:
             verified_txes = []
             for tx in txes:
+                print 'saving', tx.hash.encode('hex')
                 if mempool:
                     v, m = verify_tx_mempool(conn, tx)
                 else:

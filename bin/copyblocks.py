@@ -37,7 +37,7 @@ def copy_blocks(netname, nblocks):
             h = 0
         nb = sc.block.find_one({'height': h, 'isMain': True})
         if not nb:
-            raise Exception('No sorce block found')
+            raise Exception('No sorce block at %d found' %  h)
         tb = appblock.db2t_block(sc, nb)
         if tip:
             assert tb.prevHash == tip.hash, 'tip=%s tb=%s prevHash=%s' % (tip.hash.encode('hex'), tb.hash.encode('hex'), tb.prevHash.encode('hex'))
@@ -94,6 +94,8 @@ def copy_blocks(netname, nblocks):
             for tx in missing_txs:
                 v, m = apptx.verify_tx_chain(dc, tx)
                 if not v:
+                    for input in tx.inputs:
+                        print 'ss', input.hash.encode('hex'), input.vout
                     raise Exception('not verified %s %s' % (tx.hash.encode('hex'), m))
                 apptx.save_tx(dc, tx)
 

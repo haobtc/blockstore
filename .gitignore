@@ -2,6 +2,7 @@
 *~
 tmp
 dump
+bdump
 logs
 supervise
 blockstore.conf
