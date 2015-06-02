@@ -2,8 +2,11 @@
 
 netname=$1
 tohost=$2
-height=$3
-count=$4
+count=$3
+
+height=`ssh $tohost "cd blockstore && source setup-env.sh && python bin/get_tip_height.py $netname"`
+
+echo remote tip height is $height
 
 function check_exit() {
     if [ $? -ne 0 ]; then
@@ -19,8 +22,8 @@ if [ -z $REMOTE_MONGODB_HOST ]; then
     export REMOTE_MONGODB_HOST='localhost:27017'
 fi
 
-start_height=`expr $height - 2`
-r_count=`expr $count + 2`
+start_height=`expr $height - 1`
+r_count=`expr $count + 1`
 
 python bin/dumpblocks.py $netname $start_height $r_count
 
@@ -37,5 +40,4 @@ rsync -avz bdump $tohost:~/blockstore/
 
 check_exit
 
-ssh $tohost "cd ~/blockstore && mongorestore --host $REMOTE_MONGODB_HOST -d blockdump --drop bdump/blockdump"
-
+ssh $tohost "cd ~/blockstore && mongorestore --host $REMOTE_MONGODB_HOST -d blockdump --drop bdump/blockdump && source setup-env.sh  && python bin/copyblocks.py $netname $count"
