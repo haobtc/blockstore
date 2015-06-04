@@ -229,7 +229,8 @@ def verify_tx_mempool(conn, t):
         if not inp.address:
             output = source_tx['vout'][inp.vout]
             if output.get('w'):
-                return False, 'Double spent at %s' % i
+                logging.warn('Double spent for %s at input %s with source %s at %s', t.hash.encode('hex'), i, source_tx['hash'].encode('hex'), inp.vout)
+                return False, 'Double spent at %s with %s' % (i, inp.hash.encode('hex'))
             inp.address = ','.join(output['addrs'])
             inp.amountSatoshi = output['v']
         sum_input += long(inp.amountSatoshi)
@@ -308,6 +309,7 @@ def do_remove_tx(conn, dtx):
                        {'$set': {'sent': True,
                                  'by_removed': True}})
     conn.tx.remove({'hash': dtx['hash']})
+    logging.info('removed tx %s', dtx['hash'])
 
 def remove_tx(conn, tx):
     dtx = db2t_tx(conn, tx)

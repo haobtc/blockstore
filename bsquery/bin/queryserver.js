@@ -230,6 +230,7 @@ function sendTx(req, res, next) {
   }
   Query.addRawTx(req.params.netname, query.rawtx, info, function(err, ret) {
     if(err) {
+      console.error('send raw tx failed', query.rawtx);
       return next(err);
     }
 
