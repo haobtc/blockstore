@@ -5,8 +5,7 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 from helper import resolve_network, utc_now
 from blockstore import BlockStoreService, ttypes
-import database  
-
+import database
 
 def get_var(conn, key):
     return conn.var.find_one({'key': key})
@@ -98,8 +97,6 @@ def pop_peers(conn, n):
                                  'borrowed': 1,
                                  'lastBorrowed': now_time}})
     return peers
-
-
 
 def get_dbobj_list(conn, col, objids, keep_order=False, key='hash'):
     if not objids:

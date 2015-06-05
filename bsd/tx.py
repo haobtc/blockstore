@@ -309,7 +309,7 @@ def do_remove_tx(conn, dtx):
                        {'$set': {'sent': True,
                                  'by_removed': True}})
     conn.tx.remove({'hash': dtx['hash']})
-    logging.info('removed tx %s', dtx['hash'])
+    logging.info('removed tx %s', dtx['hash'].encode('hex'))
 
 def remove_tx(conn, tx):
     dtx = db2t_tx(conn, tx)
@@ -368,6 +368,9 @@ def get_sending_tx_list(conn):
         info = sendtx.get('info')
         if info and info.get('remoteAddress'):
             stx.remoteAddress = info['remoteAddress']
+        if info and info.get('sequence'):
+            stx.sequence = info['sequence']
+
         send_tx_list.append(stx)
     return send_tx_list
 
@@ -377,6 +380,9 @@ def send_tx(conn, stx):
 
     if conn.sendtx.find_one({'hash': Binary(stx.hash)}):
         raise ttypes.AppException(code="sending existing")
+
+    if conn.sendtx.find_one({'sequence': stx.sequence}):
+        raise ttypes.AppException(code="sequence_exist")
     
     sendtx = {}
     sendtx['hash'] = Binary(stx.hash)
@@ -384,6 +390,8 @@ def send_tx(conn, stx):
     sendtx['sent'] = False
     if stx.remoteAddress:
         sendtx['info'] = {'remoteAddress': stx.remoteAddress}
+    if stx.sequence:
+        sendtx['sequence'] = stx.sequence
     conn.sendtx.save(sendtx)
 
 def get_send_tx_list(conn, txids):
@@ -396,6 +404,8 @@ def get_send_tx_list(conn, txids):
         info = sendtx.get('info')
         if info and info.get('remoteAddress'):
             stx.remoteAddress = info['remoteAddress']
+        if info and info.get('sequence'):
+            stx.sequence = info['sequence']
         send_tx_list.append(stx)
     return send_tx_list
 

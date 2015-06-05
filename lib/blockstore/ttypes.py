@@ -1130,6 +1130,7 @@ class SendTx:
    - hash
    - raw
    - remoteAddress
+   - sequence
   """
 
   thrift_spec = (
@@ -1138,12 +1139,15 @@ class SendTx:
     (2, TType.STRING, 'raw', None, None, ), # 2
     None, # 3
     (4, TType.STRING, 'remoteAddress', None, None, ), # 4
+    None, # 5
+    (6, TType.STRING, 'sequence', None, None, ), # 6
   )
 
-  def __init__(self, hash=None, raw=None, remoteAddress=None,):
+  def __init__(self, hash=None, raw=None, remoteAddress=None, sequence=None,):
     self.hash = hash
     self.raw = raw
     self.remoteAddress = remoteAddress
+    self.sequence = sequence
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1169,6 +1173,11 @@ class SendTx:
           self.remoteAddress = iprot.readString();
         else:
           iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRING:
+          self.sequence = iprot.readString();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1191,6 +1200,10 @@ class SendTx:
       oprot.writeFieldBegin('remoteAddress', TType.STRING, 4)
       oprot.writeString(self.remoteAddress)
       oprot.writeFieldEnd()
+    if self.sequence is not None:
+      oprot.writeFieldBegin('sequence', TType.STRING, 6)
+      oprot.writeString(self.sequence)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -1203,6 +1216,7 @@ class SendTx:
     value = (value * 31) ^ hash(self.hash)
     value = (value * 31) ^ hash(self.raw)
     value = (value * 31) ^ hash(self.remoteAddress)
+    value = (value * 31) ^ hash(self.sequence)
     return value
 
   def __repr__(self):

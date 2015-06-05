@@ -90,7 +90,8 @@ struct UTXO {
 struct SendTx {
   1:binary hash,
   2:binary raw,
-  4:optional string remoteAddress
+  4:optional string remoteAddress,
+  6:optional string sequence
 }
 
 /* INV */

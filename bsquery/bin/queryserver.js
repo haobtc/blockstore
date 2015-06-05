@@ -225,6 +225,7 @@ function sendTx(req, res, next) {
   } else {
     info.remoteAddress = req.remoteAddress;
   }
+  info.sequence = query.sequence;
   if(query.note) {
     info.note = query.note;
   }

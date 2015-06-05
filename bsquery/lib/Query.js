@@ -167,6 +167,8 @@ module.exports.addRawTx = function(netname, rawtx, info, callback) {
       sendTx.raw = rawtx;
       if(info.remoteAddress)
 	sendTx.remoteAddress = info.remoteAddress;
+      if(info.sequence)
+	sendTx.sequence = info.sequence;
       rpcClient.sendTx(sendTx, c);
     },
     function(c) {

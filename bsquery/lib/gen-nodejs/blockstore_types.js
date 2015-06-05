@@ -1092,6 +1092,7 @@ blockstore.SendTx = module.exports.SendTx = function(args) {
   this.hash = null;
   this.raw = null;
   this.remoteAddress = null;
+  this.sequence = null;
   if (args) {
     if (args.hash !== undefined) {
       this.hash = args.hash;
@@ -1101,6 +1102,9 @@ blockstore.SendTx = module.exports.SendTx = function(args) {
     }
     if (args.remoteAddress !== undefined) {
       this.remoteAddress = args.remoteAddress;
+    }
+    if (args.sequence !== undefined) {
+      this.sequence = args.sequence;
     }
   }
 };
@@ -1139,6 +1143,13 @@ blockstore.SendTx.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 6:
+      if (ftype == Thrift.Type.STRING) {
+        this.sequence = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1163,6 +1174,11 @@ blockstore.SendTx.prototype.write = function(output) {
   if (this.remoteAddress !== null && this.remoteAddress !== undefined) {
     output.writeFieldBegin('remoteAddress', Thrift.Type.STRING, 4);
     output.writeString(this.remoteAddress);
+    output.writeFieldEnd();
+  }
+  if (this.sequence !== null && this.sequence !== undefined) {
+    output.writeFieldBegin('sequence', Thrift.Type.STRING, 6);
+    output.writeString(this.sequence);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
