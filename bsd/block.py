@@ -142,7 +142,7 @@ def link_txes(conn, block, txids):
     for i, txid in enumerate(txids):
         binary_txid = Binary(txid)
         conn.txblock.update({'t': binary_txid, 'b': binary_bhash},
-                            {'$set': {'i': i}},
+                            {'$set': {'i': i, 'h': block.height}},
                             upsert=True)
         conn.sendtx.update({'hash': binary_txid}, {'$set': {'sent': True}})
 

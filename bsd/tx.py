@@ -311,6 +311,8 @@ def do_remove_tx(conn, dtx):
     conn.tx.remove({'hash': dtx['hash']})
     logging.info('removed tx %s', dtx['hash'].encode('hex'))
 
+    remove_dep(conn, dtx)
+
 def remove_tx(conn, tx):
     dtx = db2t_tx(conn, tx)
     return remove_db_tx(conn, dtx)
@@ -334,7 +336,6 @@ def save_tx(conn, t):
     update = {}
     update['$set'] = dtx
 
-    #print('saving tx %s' % txhash.encode('hex'))
     old_tx = conn.tx.find_one_and_update(
         {'hash': txhash},
         update,
@@ -429,6 +430,18 @@ def get_utxo(conn, dtx, output, i):
         #utxo.timestamp = int(time.time())
     return utxo
 
+def new_get_unspent(conn, addresses):
+    aset = set(addresses)
+    for dtx in get_related_db_addr_tx_list(conn, addresses, id_order=1):
+        for i, output in enumerate(dtx['vout']):
+            addrs = output.get('addrs')
+            if addrs and addrs[0] not in aset:
+                continue
+            spt = output.get('w', False)
+            if not spt:
+                utxo = get_utxo(conn, dtx, output, i)
+                yield utxo
+
 def get_unspent(conn, addresses):
     addr_set = set(addresses)
     output_txes = conn.tx.find({'oa': {'$in': addresses}}, projection=['hash', 'vout'])
@@ -466,13 +479,33 @@ def get_related_txid_list(conn, addresses):
                                projection=['hash'])
     return [tx['hash'] for tx in txes]
 
-def get_related_tx_list(conn, addresses):
+def get_related_db_addr_tx_list(conn, addresses, id_order=DESCENDING, remove_non_existing_tx=True):
+    missing_addrtxs = []
+    for address in addresses:
+        print address
+        for at in conn.addrtx.find({'a': address}).batch_size(30).sort([('_id', id_order)]):
+            dtx = get_db_tx(conn, at['t'])
+            if not dtx:
+                logging.error('No addrtx found %s for address %s', at['t'].encode('hex'), address)
+                missing_addrtxs.append(at['_id'])
+            if dtx:
+                yield dtx
+
+    if remove_non_existing_tx and missing_addrtxs:
+        for atid in missing_addrtxs:
+            conn.addrtx.remove({'_id': atid})
+
+
+def get_related_db_tx_list(conn, addresses):
     addr_set = set(addresses)
     arr = conn.tx.find({
         '$or': [
             {'oa': {'$in': addresses}},
-            {'ia': {'$in': addresses}}]})
-    arr = list(arr)
+            {'ia': {'$in': addresses}}]}).batch_size(30)
+    return list(arr)
+
+def get_related_tx_list(conn, addresses):
+    arr = get_related_db_tx_list(conn, addresses)
     return db2t_tx_list(conn, arr)
     
 def update_addrs(conn, dtx):
@@ -519,3 +552,24 @@ def update_vin_hash(conn, dtx):
             update['vh'] = list(hs)
     if update:    
         conn.tx.update({'hash': dtx['hash']}, {'$set': update})
+
+def add_dep(conn, dtx):
+    '''
+    add dependencies 
+    '''
+    vh = dtx.get('vh')
+    if not vh:
+        vh = set([])
+        for input in dtx['vin']:
+            h = input.get('hash')
+            if h:
+                vh.add(h)
+    if vh:
+        for h in vh:
+            conn.txdep.update({'t': dtx['hash'], 'h': h}, {'$set': {}}, upsert=True)
+
+def remove_dep(conn, dtx):
+    '''
+    remove tx dependencies when dtx is going to be removed/archived
+    '''
+    conn.txdep.remove({'t': dtx['hash']})

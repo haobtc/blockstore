@@ -25,6 +25,9 @@ def ensure_indices(c):
     c.addrtx.ensure_index([('a', 1), ('_id', -1)])
     c.addrtx.ensure_index([('a', 1), ('t', 1)], unique=True)
 
+    c.txdep.ensure_index('h')
+    c.txdep.ensure_index('t')
+
     c.var.ensure_index('key', unique=True)
     c.sendtx.ensure_index('hash',  unique=True)
     c.sendtx.ensure_index('sequence',  unique=True, sparse=True)

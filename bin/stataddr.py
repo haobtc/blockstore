@@ -16,15 +16,15 @@ def stat_addr(conn, n):
             for dtx in itercol(conn, conn.tx, 'addrstat.tx._id', 10):
                 gen_tx_stats(conn, dtx)
     
-    if False:
+    if True:
         for _ in xrange(int(n/10)):
             with transaction(conn) as conn:
                 for dtx in itercol(conn, conn.removedtx, 'undo_addrstat.tx._id', 10):
                     undo_tx_stats(conn, dtx)
                 
 if __name__ == '__main__':
-    #for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
-    for netname in ['bitcoin']:
+    for netname in ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']:
+    #for netname in ['bitcoin']:
         conn = dbconn(netname)
         stat_addr(conn, 1000)
         

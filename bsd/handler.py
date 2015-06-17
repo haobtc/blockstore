@@ -7,10 +7,12 @@ from helper import resolve_network
 from tx import get_tx, get_tx_list, get_missing_txid_list, verify_tx_mempool, verify_tx_chain
 from tx import get_sending_tx_list, get_send_tx_list, send_tx, get_tail_tx_list, get_tx_list_since
 from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_tx
-from tx import save_tx, update_addrs
+from tx import save_tx, update_addrs, add_dep
 
 from block import get_block, get_block_at_height,  get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list, rewind_tip, link_txes
+
+from addr import gen_tx_stats
 from misc import set_peers, get_peers, itercol, push_peers, pop_peers
 
 def network_conn(nettype):
@@ -122,10 +124,24 @@ class BlockStoreHandler:
                     logging.warn('verify tx failed %s, message=%s',
                                  tx.hash.encode('hex'), m)
 
+        # POST save methods
         for dtx in itercol(conn, conn.tx, 
                            'update_addrs.tx._id',
                            len(verified_txes)):
             update_addrs(conn, dtx)
+
+        if False:
+            for dtx in itercol(conn, conn.tx, 
+                               'addrstat.tx._id',
+                               len(verified_txes)):
+                with transaction(conn) as conn:
+                    gen_tx_stats(conn, dtx)
+
+            for dtx in itercol(conn, conn.tx, 
+                               'txdep.tx._id',
+                               len(verified_txes)):
+                with transaction(conn) as conn:
+                    add_dep(conn, dtx)
 
     def removeTx(self, nettype, txid):
         conn = network_conn(nettype)

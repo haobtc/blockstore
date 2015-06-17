@@ -29,3 +29,7 @@ def transaction(conn, isolation='mvcc'):
     except:
         conn.command('rollbackTransaction')
         raise
+
+
+def rollback(conn):
+    conn.command('rollbackTransaction')
