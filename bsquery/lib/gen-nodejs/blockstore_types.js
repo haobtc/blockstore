@@ -1334,3 +1334,91 @@ blockstore.Peer.prototype.write = function(output) {
   return;
 };
 
+blockstore.WatchingList = module.exports.WatchingList = function(args) {
+  this.cursor = null;
+  this.txids = null;
+  if (args) {
+    if (args.cursor !== undefined) {
+      this.cursor = args.cursor;
+    }
+    if (args.txids !== undefined) {
+      this.txids = args.txids;
+    }
+  }
+};
+blockstore.WatchingList.prototype = {};
+blockstore.WatchingList.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.cursor = input.readBinary();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size16 = 0;
+        var _rtmp320;
+        this.txids = [];
+        var _etype19 = 0;
+        _rtmp320 = input.readListBegin();
+        _etype19 = _rtmp320.etype;
+        _size16 = _rtmp320.size;
+        for (var _i21 = 0; _i21 < _size16; ++_i21)
+        {
+          var elem22 = null;
+          elem22 = input.readBinary();
+          this.txids.push(elem22);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.WatchingList.prototype.write = function(output) {
+  output.writeStructBegin('WatchingList');
+  if (this.cursor !== null && this.cursor !== undefined) {
+    output.writeFieldBegin('cursor', Thrift.Type.STRING, 1);
+    output.writeBinary(this.cursor);
+    output.writeFieldEnd();
+  }
+  if (this.txids !== null && this.txids !== undefined) {
+    output.writeFieldBegin('txids', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRING, this.txids.length);
+    for (var iter23 in this.txids)
+    {
+      if (this.txids.hasOwnProperty(iter23))
+      {
+        iter23 = this.txids[iter23];
+        output.writeBinary(iter23);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+

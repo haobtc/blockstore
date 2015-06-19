@@ -28,6 +28,11 @@ def ensure_indices(c):
     c.txdep.ensure_index('h')
     c.txdep.ensure_index('t')
 
+    c.watchedaddr.ensure_index([('a', 1), ('g', 1)], unique=True)
+    c.watchedaddrtx.ensure_index([('a', 1), ('_id', 1)])
+    c.watchedaddrtx.ensure_index([('a', 1), ('t', 1)], unique=True)
+    c.watchedaddrtx.ensure_index('t')
+
     c.var.ensure_index('key', unique=True)
     c.sendtx.ensure_index('hash',  unique=True)
     c.sendtx.ensure_index('sequence',  unique=True, sparse=True)

@@ -11,27 +11,9 @@ from bsd.addr import gen_tx_stats, undo_tx_stats
 from bsd.tx import add_dep, remove_dep
 from bsd.tasks import constructive_task, destructive_task
 
-def aux_tasks(conn, n):
+def run_txtasks(conn, n):
     constructive_task(conn, n)
     destructive_task(conn, n)
-    return
-    #for _ in xrange(n):
-    #    with transaction(conn) as conn:
-    #dtx = fetchcol(conn, conn.tx, 'addrstat.tx._id')
-    print 'gen'
-    for dtx in titercol(conn, conn.tx, 'addrstat.tx._id', n):
-        gen_tx_stats(conn, dtx)
-    print 'undo'
-    for dtx in titercol(conn, conn.removedtx, 'addrstat.removedtx._id', n):
-        undo_tx_stats(conn, dtx)
-
-    print 'add dep'
-    for dtx in titercol(conn, conn.tx, 'txdep.tx._id', n):
-        add_dep(conn, dtx)
-
-    print 'remove_dep'
-    for dtx in titercol(conn, conn.removedtx, 'txdep.removedtx._id', n):
-        remove_dep(conn, dtx)
                 
 if __name__ == '__main__':
     all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
@@ -41,5 +23,4 @@ if __name__ == '__main__':
     for netname in netnames:
         #for netname in
         conn = dbconn(netname)
-        aux_tasks(conn, 100000)
-        
+        run_txtasks(conn, 1000)

@@ -43,6 +43,22 @@ module.exports.satoshiToNumberString = function(v) {
   return v;
 };
 
+module.exports.sendJSONP = function(req, res, obj) {
+  if(req.start) {
+    var time = Date.now() - req.start;
+    console.info('request', req.method, req.path, 'takes', time/1000.0, 'seconds');
+  }
+
+  if(req.query.callback && /^\w+$/.test(req.query.callback)) {
+    res.set('Content-Type', 'text/javascript');
+    res.send(req.query.callback + '(' + JSON.stringify(obj) + ');');
+  } else {
+    res.set('Content-Type', 'application/json');
+    res.send(obj);
+  }
+};
+
+
 module.exports.netnames = function() {
   var netnames = [];
   for(var netname in config.networks) {

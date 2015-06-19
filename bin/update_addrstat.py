@@ -14,7 +14,8 @@ from bsd.addr import gen_tx_stats, undo_tx_stats
 
 def main(conn, address):
     conn.addrstat.remove({'_id': address})
-    for dtx in get_related_db_addr_tx_list(conn, [address], id_order=1):
+    #for dtx in get_related_db_addr_tx_list(conn, [address], id_order=1):
+    for dtx in get_related_db_tx_list(conn, [address]):
         with transaction(conn) as conn:
             print dtx['hash'].encode('hex')
             gen_tx_stats(conn, dtx, force_new_tx=True, filter_addrs=[address])

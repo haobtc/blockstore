@@ -1,6 +1,5 @@
 import pymongo
 import os, sys
-import leveldb
 from pymongo import DESCENDING, ASCENDING
 from contextlib import contextmanager
 import settings

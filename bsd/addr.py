@@ -1,11 +1,15 @@
+import logging
 import database
 from struct import pack
 
+from blockstore import BlockStoreService, ttypes
 from collections import defaultdict
-from tx import get_tx_db_block, ensure_input_addrs
+from tx import get_tx_db_block, ensure_input_addrs, get_db_tx
 from pymongo import ReturnDocument
 from bson.binary import Binary
-import leveldb
+from bson.objectid import ObjectId
+from bson.errors import InvalidId
+from misc import itercol
 
 class TxStat:
     def __init__(self):
@@ -109,7 +113,7 @@ def undo_tx_stats(conn, dtx):
         if not addrtx:
             continue
 
-        conn.addrtx.remove({'_id': addrtx['_id']})
+        conn.addrtx.remove({'a': addrtx['_id']})
 
         query = {'_id': addr, 't': dtx['hash']}
         update = {}
@@ -126,4 +130,45 @@ def undo_tx_stats(conn, dtx):
             update['$pushAll'] = {'u': txstat.add_utxos}
             conn.addrstat.update(query, update)
 
+# watched address
+def watch_addresses(conn, group, addresses):
+    for address in addresses:
+        record = {'a': address, 'g': group}
+        if not conn.watchedaddr.find_one(record):
+            conn.watchedaddr.insert(record)
+            for addrtx in conn.addrtx.find({'a': address}).batch_size(30):
+                watch_addrtx(conn, addrtx)
 
+def watch_addrtx(conn, addrtx):
+    wa = conn.watchedaddr.find_one({'a': addrtx['a']})
+    if wa:
+        addrtx.pop('_id', None)
+        conn.watchedaddrtx.update({'a': addrtx['a'], 't': addrtx['t']}, 
+                                  {'$set': addrtx},
+                                  upsert=True)
+    
+def unwatch_tx(conn, dtx):
+    conn.watchedaddrtx.remove({'t': dtx['hash']})
+
+def get_watching_list(conn, group, count=20, cursor=None):
+    query = {}
+    if cursor:
+        try:
+            cursor = ObjectId(cursor)
+            query = {'_id': {'$gt': cursor}}
+        except bson.errors.InvalidId:
+            pass
+
+    watching_list = ttypes.WatchingList()
+    watching_list.txids = []
+
+    limit = max(count * 2, 1000)
+    for wat in conn.watchedaddrtx.find(query).batch_size(30).sort('_id').limit(limit):
+        watching_list.cursor = wat['_id'].binary
+        if conn.watchedaddr.find_one({'a': wat['a'], 'g': group}):
+            if wat['t'] not in watching_list.txids:
+                watching_list.txids.append(wat['t'])
+                if len(watching_list.txids) >= count:
+                    break
+    return watching_list
+    

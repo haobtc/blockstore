@@ -4,19 +4,19 @@ var bitcore = require('bitcore-multicoin');
 var helper = require('./helper');
 var blockstore = require('./blockstore');
 
-function segmentAddresses(addressList) {
+var segmentAddresses = module.exports.segmentAddresses = function(addressList) {
   var segs = {};
   addressList.forEach(function(addr) {
     addr.possibleNetworks().forEach(function(network) {
       var netname = network.name;
-      var s =segs[netname];
+      var s = segs[netname];
       if(s) {
-	s.arr.push(addr.toString());
+	      s.arr.push(addr.toString());
       } else {
-	segs[netname] = {
-	  netname: netname,
-	  arr: [addr.toString()],
-	}
+	      segs[netname] = {
+	        netname: netname,
+	        arr: [addr.toString()],
+	      }
       }
     });
   });
@@ -31,13 +31,13 @@ module.exports.getUnspent = function(addressList, callback) {
       var s = segs[netname];
       var rpcClient = blockstore[netname];
       rpcClient.getUnspent(s.arr, function(err, arr) {
-	if(!err) {
-	  arr = arr.map(function(utxo) {
-	    var q = utxo.toJSON();
-	    q.network = netname;
-	    return q;});
-	}
-	return cb(err, arr);
+	      if(!err) {
+	        arr = arr.map(function(utxo) {
+	          var q = utxo.toJSON();
+	          q.network = netname;
+	          return q;});
+	      }
+	      return cb(err, arr);
       });
     };
   };
@@ -69,21 +69,20 @@ module.exports.getTxListSinceId = function(netname, sinceObjId, count, callback)
   if(sinceObjId) {
     rpcClient.getTxListSince(sinceObjId, count, function(err, arr) {
       if(!err) {
-	arr = arr.map(function(tTx) { return tTx.toJSON();});
+	      arr = arr.map(function(tTx) { return tTx.toJSON();});
       }
       return callback(err, arr);
     });
   } else {
     rpcClient.getTailTxList(count, function(err, arr) {
-    //blockstore.thriftClient.getTailTxList(1, 20, function(err, arr) {
+      //blockstore.thriftClient.getTailTxList(1, 20, function(err, arr) {
       if(!err) {
-	arr = arr.map(function(tTx) { return tTx.toJSON();});
+	      arr = arr.map(function(tTx) { return tTx.toJSON();});
       }
       return callback(err, arr);
     });
   }
-}
-
+};
 
 module.exports.getTxListOfAddresses = function(addresses, requireDetail, callback) {
   var segs = segmentAddresses(addresses);
@@ -93,22 +92,22 @@ module.exports.getTxListOfAddresses = function(addresses, requireDetail, callbac
       var s = segs[netname];
       var rpcClient = blockstore[netname];
       if(requireDetail) {
-	rpcClient.getRelatedTxList(s.arr, function(err, arr) {
-	  if(!err && arr.length > 0) {
-	    arr = arr.map(function(tx){return tx.toJSON();});
-	    results.push({netname: netname, txList: arr});
-	  }
-	  return cb(err, arr);
-	});
+	      rpcClient.getRelatedTxList(s.arr, function(err, arr) {
+	        if(!err && arr.length > 0) {
+	          arr = arr.map(function(tx){return tx.toJSON();});
+	          results.push({netname: netname, txList: arr});
+	        }
+	        return cb(err, arr);
+	      });
       } else {
-	rpcClient.getRelatedTxIdList(s.arr, function(err,arr) {
-	  if(!err && arr.length > 0) {
-	    arr = arr.map(function(txId) {
-	      return txId.toString('hex');});
-	    results.push({netname: netname, txList: arr});
-	  }
-	  return cb(err, arr);
-	});
+	      rpcClient.getRelatedTxIdList(s.arr, function(err,arr) {
+	        if(!err && arr.length > 0) {
+	          arr = arr.map(function(txId) {
+	            return txId.toString('hex');});
+	          results.push({netname: netname, txList: arr});
+	        }
+	        return cb(err, arr);
+	      });
       }
     };
   };
@@ -123,7 +122,7 @@ module.exports.getTxListOfAddresses = function(addresses, requireDetail, callbac
     var txIDs = {};
     results.forEach(function(r) {
       if(r.txList.length > 0) {
-	txIDs[r.netname] = r.txList;
+	      txIDs[r.netname] = r.txList;
       }
     });
     callback(undefined, txIDs);
@@ -156,9 +155,9 @@ module.exports.addRawTx = function(netname, rawtx, info, callback) {
   async.series([
     function(c) {
       rpcClient.verifyTx(tTx, true, function(err, v) {
-	if(err) return c();
-	if(!v.verified) return c(new helper.UserError('tx_verify_failed', v.message));
-	c();
+	      if(err) return c();
+	      if(!v.verified) return c(new helper.UserError('tx_verify_failed', v.message));
+	      c();
       });
     },
     function(c) {
@@ -166,9 +165,9 @@ module.exports.addRawTx = function(netname, rawtx, info, callback) {
       sendTx.hash = tTx.hash;
       sendTx.raw = rawtx;
       if(info.remoteAddress)
-	sendTx.remoteAddress = info.remoteAddress;
+	      sendTx.remoteAddress = info.remoteAddress;
       if(info.sequence)
-	sendTx.sequence = info.sequence;
+	      sendTx.sequence = info.sequence;
       rpcClient.sendTx(sendTx, c);
     },
     function(c) {

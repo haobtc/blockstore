@@ -56,6 +56,37 @@ def itercol(conn, col, key, n, batch=1):
             yield obj
         set_var(conn, key, objid=obj['_id'], times=t)
 
+def fetchcol(conn, col, key):
+    v = get_var(conn, key)
+    obj = None
+    if v:
+        objid = v['objid']
+        t = v.get('times', 0)
+        objs = list(col.
+                    find({'_id': {'$gt': objid}}).
+                    sort([('_id', 1)]).
+                    limit(1))
+    else:
+        objs = list(col.find().
+                    sort([('_id', 1)]).
+                    limit(1))
+        t = 0
+    if len(objs) == 0:
+        return
+
+    t += 1
+    obj = objs[0]
+    set_var(conn, key, objid=obj['_id'], times=t)
+    return obj
+
+def titercol(conn, col, key, n, isolation='mvcc'):
+    for _ in xrange(n):
+        with database.transaction(conn, isolation=isolation) as conn:
+            dtx = fetchcol(conn, col, key)
+            if not dtx:
+                return
+            yield dtx
+
 def idslice(col, start_seconds, end_seconds=0):
     start_delta = timedelta(seconds=start_seconds)
     

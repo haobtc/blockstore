@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ENVDIR=$PWD/../ENV2
+ENVDIR=`python -c 'import sys, os; print os.path.abspath(sys.argv[1])' "$ENVDIR"`
+
 export PYTHONPATH="$PWD/lib:$ENVDIR:$PYTHONPATH"
 export PATH="$ENVDIR/bin:$PATH"
 

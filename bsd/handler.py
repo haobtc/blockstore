@@ -12,8 +12,9 @@ from tx import save_tx, update_addrs, add_dep
 from block import get_block, get_block_at_height,  get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list, rewind_tip, link_txes
 
-from addr import gen_tx_stats
+from addr import gen_tx_stats, watch_addresses, get_watching_list
 from misc import set_peers, get_peers, itercol, push_peers, pop_peers
+from tasks import constructive_task
 
 def network_conn(nettype):
     netname = resolve_network(nettype)
@@ -112,7 +113,7 @@ class BlockStoreHandler:
         with database.transaction(conn) as conn:
             verified_txes = []
             for tx in txes:
-                print 'saving', tx.hash.encode('hex')
+                logging.info('saving tx %s', tx.hash.encode('hex'))
                 if mempool:
                     v, m = verify_tx_mempool(conn, tx)
                 else:
@@ -130,18 +131,7 @@ class BlockStoreHandler:
                            len(verified_txes)):
             update_addrs(conn, dtx)
 
-        if False:
-            for dtx in itercol(conn, conn.tx, 
-                               'addrstat.tx._id',
-                               len(verified_txes)):
-                with transaction(conn) as conn:
-                    gen_tx_stats(conn, dtx)
-
-            for dtx in itercol(conn, conn.tx, 
-                               'txdep.tx._id',
-                               len(verified_txes)):
-                with transaction(conn) as conn:
-                    add_dep(conn, dtx)
+        constructive_task(conn, len(verified_txes))
 
     def removeTx(self, nettype, txid):
         conn = network_conn(nettype)
@@ -199,3 +189,12 @@ class BlockStoreHandler:
     def popPeers(self, nettype, n):
         conn = network_conn(nettype)
         return pop_peers(conn, n)
+
+    def watchAddresses(self, nettype, group, addresses):
+        conn = network_conn(nettype)
+        with database.transaction(conn) as conn:
+            watch_addresses(conn, group, addresses)
+
+    def getWatchingList(self, nettype, group, count, cursor):
+        conn = network_conn(nettype)
+        return get_watching_list(conn, group, count, cursor)

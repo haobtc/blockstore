@@ -111,6 +111,11 @@ struct Peer {
   3:i32 time
 }
 
+struct WatchingList {
+  1:binary cursor,
+  2:list<binary> txids
+}
+
 service BlockStoreService
 {
 
@@ -158,4 +163,9 @@ service BlockStoreService
   /* push some peers */
   void pushPeers(1:Network network, 2:list<Peer> peers);
   list<Peer> popPeers(1:Network network, 2:i32 n);
+
+  /* address watch related */
+  void watchAddresses(1:Network network, 2:string group, 3:list<string> addresses);
+  WatchingList getWatchingList(1:Network network, 2:string group, 3:i32 count, 4:binary cursor);
 }
+

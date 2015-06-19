@@ -19,7 +19,7 @@ def stat_addr(conn, n):
     if True:
         for _ in xrange(int(n/10)):
             with transaction(conn) as conn:
-                for dtx in itercol(conn, conn.removedtx, 'undo_addrstat.tx._id', 10):
+                for dtx in itercol(conn, conn.removedtx, 'addrstat.removedtx._id', 10):
                     undo_tx_stats(conn, dtx)
                 
 if __name__ == '__main__':

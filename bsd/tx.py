@@ -495,7 +495,6 @@ def get_related_db_addr_tx_list(conn, addresses, id_order=DESCENDING, remove_non
         for atid in missing_addrtxs:
             conn.addrtx.remove({'_id': atid})
 
-
 def get_related_db_tx_list(conn, addresses):
     addr_set = set(addresses)
     arr = conn.tx.find({
