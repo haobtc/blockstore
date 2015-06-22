@@ -2,7 +2,7 @@ import logging
 from misc import itercol, fetchcol, titercol
 from addr import gen_tx_stats, undo_tx_stats, unwatch_tx, watch_addrtx
 from tx import add_dep, remove_dep
-
+from bson.objectid import ObjectId
 
 def watch_addrtx_task(conn, n):
     key = 'watch.addrtx._id'
