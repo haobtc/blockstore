@@ -1399,7 +1399,7 @@ class Peer:
   def __ne__(self, other):
     return not (self == other)
 
-class WatchingList:
+class TxIdListWithCursor:
   """
   Attributes:
    - cursor
@@ -1449,7 +1449,7 @@ class WatchingList:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('WatchingList')
+    oprot.writeStructBegin('TxIdListWithCursor')
     if self.cursor is not None:
       oprot.writeFieldBegin('cursor', TType.STRING, 1)
       oprot.writeString(self.cursor)
@@ -1472,6 +1472,227 @@ class WatchingList:
     value = 17
     value = (value * 31) ^ hash(self.cursor)
     value = (value * 31) ^ hash(self.txids)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class AddrStat:
+  """
+  Attributes:
+   - address
+   - cntTxes
+   - receivedSatoshi
+   - balanceSatoshi
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'address', None, None, ), # 1
+    (2, TType.I32, 'cntTxes', None, None, ), # 2
+    (3, TType.STRING, 'receivedSatoshi', None, None, ), # 3
+    (4, TType.STRING, 'balanceSatoshi', None, None, ), # 4
+  )
+
+  def __init__(self, address=None, cntTxes=None, receivedSatoshi=None, balanceSatoshi=None,):
+    self.address = address
+    self.cntTxes = cntTxes
+    self.receivedSatoshi = receivedSatoshi
+    self.balanceSatoshi = balanceSatoshi
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.address = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.cntTxes = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.receivedSatoshi = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRING:
+          self.balanceSatoshi = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('AddrStat')
+    if self.address is not None:
+      oprot.writeFieldBegin('address', TType.STRING, 1)
+      oprot.writeString(self.address)
+      oprot.writeFieldEnd()
+    if self.cntTxes is not None:
+      oprot.writeFieldBegin('cntTxes', TType.I32, 2)
+      oprot.writeI32(self.cntTxes)
+      oprot.writeFieldEnd()
+    if self.receivedSatoshi is not None:
+      oprot.writeFieldBegin('receivedSatoshi', TType.STRING, 3)
+      oprot.writeString(self.receivedSatoshi)
+      oprot.writeFieldEnd()
+    if self.balanceSatoshi is not None:
+      oprot.writeFieldBegin('balanceSatoshi', TType.STRING, 4)
+      oprot.writeString(self.balanceSatoshi)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.address)
+    value = (value * 31) ^ hash(self.cntTxes)
+    value = (value * 31) ^ hash(self.receivedSatoshi)
+    value = (value * 31) ^ hash(self.balanceSatoshi)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class AddrTxId:
+  """
+  Attributes:
+   - address
+   - txid
+   - inputSatoshi
+   - outputSatoshi
+   - cursor
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'address', None, None, ), # 1
+    (2, TType.STRING, 'txid', None, None, ), # 2
+    (3, TType.STRING, 'inputSatoshi', None, None, ), # 3
+    (4, TType.STRING, 'outputSatoshi', None, None, ), # 4
+    (5, TType.STRING, 'cursor', None, None, ), # 5
+  )
+
+  def __init__(self, address=None, txid=None, inputSatoshi=None, outputSatoshi=None, cursor=None,):
+    self.address = address
+    self.txid = txid
+    self.inputSatoshi = inputSatoshi
+    self.outputSatoshi = outputSatoshi
+    self.cursor = cursor
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.address = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.txid = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.inputSatoshi = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRING:
+          self.outputSatoshi = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRING:
+          self.cursor = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('AddrTxId')
+    if self.address is not None:
+      oprot.writeFieldBegin('address', TType.STRING, 1)
+      oprot.writeString(self.address)
+      oprot.writeFieldEnd()
+    if self.txid is not None:
+      oprot.writeFieldBegin('txid', TType.STRING, 2)
+      oprot.writeString(self.txid)
+      oprot.writeFieldEnd()
+    if self.inputSatoshi is not None:
+      oprot.writeFieldBegin('inputSatoshi', TType.STRING, 3)
+      oprot.writeString(self.inputSatoshi)
+      oprot.writeFieldEnd()
+    if self.outputSatoshi is not None:
+      oprot.writeFieldBegin('outputSatoshi', TType.STRING, 4)
+      oprot.writeString(self.outputSatoshi)
+      oprot.writeFieldEnd()
+    if self.cursor is not None:
+      oprot.writeFieldBegin('cursor', TType.STRING, 5)
+      oprot.writeString(self.cursor)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.address)
+    value = (value * 31) ^ hash(self.txid)
+    value = (value * 31) ^ hash(self.inputSatoshi)
+    value = (value * 31) ^ hash(self.outputSatoshi)
+    value = (value * 31) ^ hash(self.cursor)
     return value
 
   def __repr__(self):

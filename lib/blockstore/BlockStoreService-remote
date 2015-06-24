@@ -42,17 +42,20 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('   getTailTxList(Network network, i32 n)')
   print('   getRelatedTxList(Network network,  addresses)')
   print('   getRelatedTxIdList(Network network,  addresses)')
+  print('   getRelatedAddrTxIdList(Network network,  addresses, string cursor, i32 count)')
   print('   getSendingTxList(Network network)')
   print('   getSendTxList(Network network,  txids)')
   print('  void sendTx(Network network, SendTx sendTx)')
   print('   getUnspent(Network network,  addresses)')
+  print('   getUnspentV1(Network network,  addresses, i32 count)')
   print('   getMissingInvList(Network network,  invs)')
   print('   getPeers(Network network)')
   print('  void setPeers(Network network,  peers)')
+  print('   getAddressStatList(Network network,  addresses)')
   print('  void pushPeers(Network network,  peers)')
   print('   popPeers(Network network, i32 n)')
   print('  void watchAddresses(Network network, string group,  addresses)')
-  print('  WatchingList getWatchingList(Network network, string group, i32 count, string cursor)')
+  print('  TxIdListWithCursor getWatchingList(Network network, string group, i32 count, string cursor)')
   print('')
   sys.exit(0)
 
@@ -217,6 +220,12 @@ elif cmd == 'getRelatedTxIdList':
     sys.exit(1)
   pp.pprint(client.getRelatedTxIdList(eval(args[0]),eval(args[1]),))
 
+elif cmd == 'getRelatedAddrTxIdList':
+  if len(args) != 4:
+    print('getRelatedAddrTxIdList requires 4 args')
+    sys.exit(1)
+  pp.pprint(client.getRelatedAddrTxIdList(eval(args[0]),eval(args[1]),args[2],eval(args[3]),))
+
 elif cmd == 'getSendingTxList':
   if len(args) != 1:
     print('getSendingTxList requires 1 args')
@@ -241,6 +250,12 @@ elif cmd == 'getUnspent':
     sys.exit(1)
   pp.pprint(client.getUnspent(eval(args[0]),eval(args[1]),))
 
+elif cmd == 'getUnspentV1':
+  if len(args) != 3:
+    print('getUnspentV1 requires 3 args')
+    sys.exit(1)
+  pp.pprint(client.getUnspentV1(eval(args[0]),eval(args[1]),eval(args[2]),))
+
 elif cmd == 'getMissingInvList':
   if len(args) != 2:
     print('getMissingInvList requires 2 args')
@@ -258,6 +273,12 @@ elif cmd == 'setPeers':
     print('setPeers requires 2 args')
     sys.exit(1)
   pp.pprint(client.setPeers(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'getAddressStatList':
+  if len(args) != 2:
+    print('getAddressStatList requires 2 args')
+    sys.exit(1)
+  pp.pprint(client.getAddressStatList(eval(args[0]),eval(args[1]),))
 
 elif cmd == 'pushPeers':
   if len(args) != 2:

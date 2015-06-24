@@ -4,6 +4,29 @@ var bitcore = require('bitcore-multicoin');
 var helper = require('./helper');
 var blockstore = require('./blockstore');
 
+var parseItemList = module.exports.parseItemList = function(req, fieldname) {
+  var query = req.query;
+  if(req.method == 'POST') {
+    query = req.body;
+  }
+  var itemList = query[fieldname];
+  if(!itemList) return [];
+  
+  return itemList.split(',');
+};
+
+var parseAddressList = module.exports.parseAddressList = function(req, fieldname) {
+  fieldname = fieldname || 'addresses';
+  var addressList = [];
+  parseItemList(req, fieldname).forEach(function(addrStr) {
+    var addr = new bitcore.Address(addrStr);
+    if (addr.isValid()) {
+      addressList.push(addr);
+    }
+  });
+  return addressList;
+};
+
 var segmentAddresses = module.exports.segmentAddresses = function(addressList) {
   var segs = {};
   addressList.forEach(function(addr) {
@@ -25,30 +48,39 @@ var segmentAddresses = module.exports.segmentAddresses = function(addressList) {
 
 module.exports.getUnspent = function(addressList, callback) {
   var segs = segmentAddresses(addressList);
-
-  function getUnspent(netname) {
-    return function(cb) {
-      var s = segs[netname];
+  var outputs = [];
+  async.forEachOf(segs, function(s, netname, cb) {
       var rpcClient = blockstore[netname];
       rpcClient.getUnspent(s.arr, function(err, arr) {
-	      if(!err) {
-	        arr = arr.map(function(utxo) {
-	          var q = utxo.toJSON();
-	          q.network = netname;
-	          return q;});
-	      }
-	      return cb(err, arr);
+        if(err) return cb(err);
+	      outputs = outputs.concat(arr.map(function(utxo) {
+	        var q = utxo.toJSON();
+	        q.network = netname;
+	        return q;
+        }));
+	      return cb();
       });
-    };
-  };
-  var tasks = [];
-  for(var netname in segs) {
-    tasks.push(getUnspent(netname));
-  }
-  async.parallel(tasks, function(err, results) {
-    if(err) return callback(err);
-    var outputs = underscore.flatten(results, true);
-    callback(undefined, outputs);
+  }, function(err) {
+    return callback(err, outputs);
+  });
+};
+
+module.exports.getUnspentV1 = function(addressList, callback) {
+  var segs = segmentAddresses(addressList);
+  var outputs = [];
+  async.forEachOf(segs, function(s, netname, cb) {
+      var rpcClient = blockstore[netname];
+      rpcClient.getUnspentV1(s.arr, 200, function(err, arr) {
+        if(err) return cb(err);
+	      outputs = outputs.concat(arr.map(function(utxo) {
+	        var q = utxo.toJSON();
+	        q.network = netname;
+	        return q;
+        }));
+	      return cb();
+      });
+  }, function(err) {
+    return callback(err, outputs);
   });
 };
 
@@ -84,40 +116,83 @@ module.exports.getTxListSinceId = function(netname, sinceObjId, count, callback)
   }
 };
 
+module.exports.getAddrStatList = function(addresses, callback) {
+  var segs = segmentAddresses(addresses);
+  var addrStats = [];
+  async.forEachOf(segs, function(s, netname, cb) {
+    var rpcClient = blockstore[netname];
+    rpcClient.getAddressStatList(s.arr, function(err, arr) {
+      if(err) return cb(err);
+      addrStats = addrStats.concat(arr.map(function(stat) {
+        var obj = stat.toJSON();
+        obj.network = netname;
+        return obj;
+      }));
+      cb();
+    });
+  }, function(err) {
+    return callback(err, addrStats);
+  });
+};
+
+module.exports.getRelatedTxIdList = function(addresses, cursor, count, useDetail, callback) {
+  var segs = segmentAddresses(addresses);
+  var results = {};
+  if(cursor) {
+    cursor = new Buffer(cursor, 'hex');
+  }
+  async.forEachOf(segs, function(s, netname, cb) {
+    var rpcClient = blockstore[netname];
+    rpcClient.getRelatedAddrTxIdList(s.arr, cursor, count, function(err, arr) {
+      if(err) return cb(err);
+      if(!arr || arr.length == 0) return cb();
+
+      var txids = [];
+      var nCursor;
+
+      arr.forEach(function(addrtx) {
+        if(useDetail) {
+          txids.push(addrtx.toJSON());
+        } else {
+          txids.push(addrtx.txid.toString('hex'));
+        }
+        nCursor = addrtx.cursor.toString('hex');
+      });
+      results[netname] = txids;
+      results[netname + '.cursor'] = nCursor;
+      cb();
+    });
+  }, function(err) {
+    return callback(err, results);
+  });
+};
+
 module.exports.getTxListOfAddresses = function(addresses, requireDetail, callback) {
   var segs = segmentAddresses(addresses);
   var results = [];
-  function getTXList(netname) {
-    return function(cb) {
-      var s = segs[netname];
+  async.forEachOf(segs, function(s, netname, cb) {
       var rpcClient = blockstore[netname];
       if(requireDetail) {
 	      rpcClient.getRelatedTxList(s.arr, function(err, arr) {
-	        if(!err && arr.length > 0) {
+          if(err) return cb(err);
+	        if(arr.length > 0) {
 	          arr = arr.map(function(tx){return tx.toJSON();});
 	          results.push({netname: netname, txList: arr});
 	        }
-	        return cb(err, arr);
+	        return cb();
 	      });
       } else {
 	      rpcClient.getRelatedTxIdList(s.arr, function(err,arr) {
-	        if(!err && arr.length > 0) {
+          if(err) return cb(err);
+	        if(arr.length > 0) {
 	          arr = arr.map(function(txId) {
 	            return txId.toString('hex');});
 	          results.push({netname: netname, txList: arr});
+	        return cb();
 	        }
-	        return cb(err, arr);
-	      });
+        });
       }
-    };
-  };
-
-  var tasks = [];
-  for(var netname in segs) {
-    tasks.push(getTXList(netname));
-  }
-
-  async.parallel(tasks, function(err) {
+  }, function(err) {
     if(err) return callback(err);
     var txIDs = {};
     results.forEach(function(r) {

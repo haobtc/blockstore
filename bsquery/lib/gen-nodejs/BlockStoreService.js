@@ -2610,6 +2610,202 @@ blockstore.BlockStoreService_getRelatedTxIdList_result.prototype.write = functio
   return;
 };
 
+blockstore.BlockStoreService_getRelatedAddrTxIdList_args = function(args) {
+  this.network = null;
+  this.addresses = null;
+  this.cursor = null;
+  this.count = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.addresses !== undefined) {
+      this.addresses = args.addresses;
+    }
+    if (args.cursor !== undefined) {
+      this.cursor = args.cursor;
+    }
+    if (args.count !== undefined) {
+      this.count = args.count;
+    }
+  }
+};
+blockstore.BlockStoreService_getRelatedAddrTxIdList_args.prototype = {};
+blockstore.BlockStoreService_getRelatedAddrTxIdList_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size136 = 0;
+        var _rtmp3140;
+        this.addresses = [];
+        var _etype139 = 0;
+        _rtmp3140 = input.readListBegin();
+        _etype139 = _rtmp3140.etype;
+        _size136 = _rtmp3140.size;
+        for (var _i141 = 0; _i141 < _size136; ++_i141)
+        {
+          var elem142 = null;
+          elem142 = input.readString();
+          this.addresses.push(elem142);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.cursor = input.readBinary();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.I32) {
+        this.count = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getRelatedAddrTxIdList_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getRelatedAddrTxIdList_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.addresses !== null && this.addresses !== undefined) {
+    output.writeFieldBegin('addresses', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
+    for (var iter143 in this.addresses)
+    {
+      if (this.addresses.hasOwnProperty(iter143))
+      {
+        iter143 = this.addresses[iter143];
+        output.writeString(iter143);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.cursor !== null && this.cursor !== undefined) {
+    output.writeFieldBegin('cursor', Thrift.Type.STRING, 3);
+    output.writeBinary(this.cursor);
+    output.writeFieldEnd();
+  }
+  if (this.count !== null && this.count !== undefined) {
+    output.writeFieldBegin('count', Thrift.Type.I32, 4);
+    output.writeI32(this.count);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getRelatedAddrTxIdList_result = function(args) {
+  this.success = null;
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+  }
+};
+blockstore.BlockStoreService_getRelatedAddrTxIdList_result.prototype = {};
+blockstore.BlockStoreService_getRelatedAddrTxIdList_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size144 = 0;
+        var _rtmp3148;
+        this.success = [];
+        var _etype147 = 0;
+        _rtmp3148 = input.readListBegin();
+        _etype147 = _rtmp3148.etype;
+        _size144 = _rtmp3148.size;
+        for (var _i149 = 0; _i149 < _size144; ++_i149)
+        {
+          var elem150 = null;
+          elem150 = new ttypes.AddrTxId();
+          elem150.read(input);
+          this.success.push(elem150);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getRelatedAddrTxIdList_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getRelatedAddrTxIdList_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter151 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter151))
+      {
+        iter151 = this.success[iter151];
+        iter151.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 blockstore.BlockStoreService_getSendingTxList_args = function(args) {
   this.network = null;
   if (args) {
@@ -2687,19 +2883,19 @@ blockstore.BlockStoreService_getSendingTxList_result.prototype.read = function(i
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size136 = 0;
-        var _rtmp3140;
+        var _size152 = 0;
+        var _rtmp3156;
         this.success = [];
-        var _etype139 = 0;
-        _rtmp3140 = input.readListBegin();
-        _etype139 = _rtmp3140.etype;
-        _size136 = _rtmp3140.size;
-        for (var _i141 = 0; _i141 < _size136; ++_i141)
+        var _etype155 = 0;
+        _rtmp3156 = input.readListBegin();
+        _etype155 = _rtmp3156.etype;
+        _size152 = _rtmp3156.size;
+        for (var _i157 = 0; _i157 < _size152; ++_i157)
         {
-          var elem142 = null;
-          elem142 = new ttypes.SendTx();
-          elem142.read(input);
-          this.success.push(elem142);
+          var elem158 = null;
+          elem158 = new ttypes.SendTx();
+          elem158.read(input);
+          this.success.push(elem158);
         }
         input.readListEnd();
       } else {
@@ -2723,12 +2919,12 @@ blockstore.BlockStoreService_getSendingTxList_result.prototype.write = function(
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
-    for (var iter143 in this.success)
+    for (var iter159 in this.success)
     {
-      if (this.success.hasOwnProperty(iter143))
+      if (this.success.hasOwnProperty(iter159))
       {
-        iter143 = this.success[iter143];
-        iter143.write(output);
+        iter159 = this.success[iter159];
+        iter159.write(output);
       }
     }
     output.writeListEnd();
@@ -2774,18 +2970,18 @@ blockstore.BlockStoreService_getSendTxList_args.prototype.read = function(input)
       break;
       case 2:
       if (ftype == Thrift.Type.LIST) {
-        var _size144 = 0;
-        var _rtmp3148;
+        var _size160 = 0;
+        var _rtmp3164;
         this.txids = [];
-        var _etype147 = 0;
-        _rtmp3148 = input.readListBegin();
-        _etype147 = _rtmp3148.etype;
-        _size144 = _rtmp3148.size;
-        for (var _i149 = 0; _i149 < _size144; ++_i149)
+        var _etype163 = 0;
+        _rtmp3164 = input.readListBegin();
+        _etype163 = _rtmp3164.etype;
+        _size160 = _rtmp3164.size;
+        for (var _i165 = 0; _i165 < _size160; ++_i165)
         {
-          var elem150 = null;
-          elem150 = input.readBinary();
-          this.txids.push(elem150);
+          var elem166 = null;
+          elem166 = input.readBinary();
+          this.txids.push(elem166);
         }
         input.readListEnd();
       } else {
@@ -2811,12 +3007,12 @@ blockstore.BlockStoreService_getSendTxList_args.prototype.write = function(outpu
   if (this.txids !== null && this.txids !== undefined) {
     output.writeFieldBegin('txids', Thrift.Type.LIST, 2);
     output.writeListBegin(Thrift.Type.STRING, this.txids.length);
-    for (var iter151 in this.txids)
+    for (var iter167 in this.txids)
     {
-      if (this.txids.hasOwnProperty(iter151))
+      if (this.txids.hasOwnProperty(iter167))
       {
-        iter151 = this.txids[iter151];
-        output.writeBinary(iter151);
+        iter167 = this.txids[iter167];
+        output.writeBinary(iter167);
       }
     }
     output.writeListEnd();
@@ -2851,19 +3047,19 @@ blockstore.BlockStoreService_getSendTxList_result.prototype.read = function(inpu
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size152 = 0;
-        var _rtmp3156;
+        var _size168 = 0;
+        var _rtmp3172;
         this.success = [];
-        var _etype155 = 0;
-        _rtmp3156 = input.readListBegin();
-        _etype155 = _rtmp3156.etype;
-        _size152 = _rtmp3156.size;
-        for (var _i157 = 0; _i157 < _size152; ++_i157)
+        var _etype171 = 0;
+        _rtmp3172 = input.readListBegin();
+        _etype171 = _rtmp3172.etype;
+        _size168 = _rtmp3172.size;
+        for (var _i173 = 0; _i173 < _size168; ++_i173)
         {
-          var elem158 = null;
-          elem158 = new ttypes.SendTx();
-          elem158.read(input);
-          this.success.push(elem158);
+          var elem174 = null;
+          elem174 = new ttypes.SendTx();
+          elem174.read(input);
+          this.success.push(elem174);
         }
         input.readListEnd();
       } else {
@@ -2887,12 +3083,12 @@ blockstore.BlockStoreService_getSendTxList_result.prototype.write = function(out
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
-    for (var iter159 in this.success)
+    for (var iter175 in this.success)
     {
-      if (this.success.hasOwnProperty(iter159))
+      if (this.success.hasOwnProperty(iter175))
       {
-        iter159 = this.success[iter159];
-        iter159.write(output);
+        iter175 = this.success[iter175];
+        iter175.write(output);
       }
     }
     output.writeListEnd();
@@ -3063,18 +3259,18 @@ blockstore.BlockStoreService_getUnspent_args.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.LIST) {
-        var _size160 = 0;
-        var _rtmp3164;
+        var _size176 = 0;
+        var _rtmp3180;
         this.addresses = [];
-        var _etype163 = 0;
-        _rtmp3164 = input.readListBegin();
-        _etype163 = _rtmp3164.etype;
-        _size160 = _rtmp3164.size;
-        for (var _i165 = 0; _i165 < _size160; ++_i165)
+        var _etype179 = 0;
+        _rtmp3180 = input.readListBegin();
+        _etype179 = _rtmp3180.etype;
+        _size176 = _rtmp3180.size;
+        for (var _i181 = 0; _i181 < _size176; ++_i181)
         {
-          var elem166 = null;
-          elem166 = input.readString();
-          this.addresses.push(elem166);
+          var elem182 = null;
+          elem182 = input.readString();
+          this.addresses.push(elem182);
         }
         input.readListEnd();
       } else {
@@ -3100,12 +3296,12 @@ blockstore.BlockStoreService_getUnspent_args.prototype.write = function(output) 
   if (this.addresses !== null && this.addresses !== undefined) {
     output.writeFieldBegin('addresses', Thrift.Type.LIST, 2);
     output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
-    for (var iter167 in this.addresses)
+    for (var iter183 in this.addresses)
     {
-      if (this.addresses.hasOwnProperty(iter167))
+      if (this.addresses.hasOwnProperty(iter183))
       {
-        iter167 = this.addresses[iter167];
-        output.writeString(iter167);
+        iter183 = this.addresses[iter183];
+        output.writeString(iter183);
       }
     }
     output.writeListEnd();
@@ -3140,19 +3336,19 @@ blockstore.BlockStoreService_getUnspent_result.prototype.read = function(input) 
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size168 = 0;
-        var _rtmp3172;
+        var _size184 = 0;
+        var _rtmp3188;
         this.success = [];
-        var _etype171 = 0;
-        _rtmp3172 = input.readListBegin();
-        _etype171 = _rtmp3172.etype;
-        _size168 = _rtmp3172.size;
-        for (var _i173 = 0; _i173 < _size168; ++_i173)
+        var _etype187 = 0;
+        _rtmp3188 = input.readListBegin();
+        _etype187 = _rtmp3188.etype;
+        _size184 = _rtmp3188.size;
+        for (var _i189 = 0; _i189 < _size184; ++_i189)
         {
-          var elem174 = null;
-          elem174 = new ttypes.UTXO();
-          elem174.read(input);
-          this.success.push(elem174);
+          var elem190 = null;
+          elem190 = new ttypes.UTXO();
+          elem190.read(input);
+          this.success.push(elem190);
         }
         input.readListEnd();
       } else {
@@ -3176,12 +3372,192 @@ blockstore.BlockStoreService_getUnspent_result.prototype.write = function(output
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
-    for (var iter175 in this.success)
+    for (var iter191 in this.success)
     {
-      if (this.success.hasOwnProperty(iter175))
+      if (this.success.hasOwnProperty(iter191))
       {
-        iter175 = this.success[iter175];
-        iter175.write(output);
+        iter191 = this.success[iter191];
+        iter191.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getUnspentV1_args = function(args) {
+  this.network = null;
+  this.addresses = null;
+  this.count = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.addresses !== undefined) {
+      this.addresses = args.addresses;
+    }
+    if (args.count !== undefined) {
+      this.count = args.count;
+    }
+  }
+};
+blockstore.BlockStoreService_getUnspentV1_args.prototype = {};
+blockstore.BlockStoreService_getUnspentV1_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size192 = 0;
+        var _rtmp3196;
+        this.addresses = [];
+        var _etype195 = 0;
+        _rtmp3196 = input.readListBegin();
+        _etype195 = _rtmp3196.etype;
+        _size192 = _rtmp3196.size;
+        for (var _i197 = 0; _i197 < _size192; ++_i197)
+        {
+          var elem198 = null;
+          elem198 = input.readString();
+          this.addresses.push(elem198);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.I32) {
+        this.count = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getUnspentV1_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getUnspentV1_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.addresses !== null && this.addresses !== undefined) {
+    output.writeFieldBegin('addresses', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
+    for (var iter199 in this.addresses)
+    {
+      if (this.addresses.hasOwnProperty(iter199))
+      {
+        iter199 = this.addresses[iter199];
+        output.writeString(iter199);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.count !== null && this.count !== undefined) {
+    output.writeFieldBegin('count', Thrift.Type.I32, 3);
+    output.writeI32(this.count);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getUnspentV1_result = function(args) {
+  this.success = null;
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+  }
+};
+blockstore.BlockStoreService_getUnspentV1_result.prototype = {};
+blockstore.BlockStoreService_getUnspentV1_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size200 = 0;
+        var _rtmp3204;
+        this.success = [];
+        var _etype203 = 0;
+        _rtmp3204 = input.readListBegin();
+        _etype203 = _rtmp3204.etype;
+        _size200 = _rtmp3204.size;
+        for (var _i205 = 0; _i205 < _size200; ++_i205)
+        {
+          var elem206 = null;
+          elem206 = new ttypes.UTXO();
+          elem206.read(input);
+          this.success.push(elem206);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getUnspentV1_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getUnspentV1_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter207 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter207))
+      {
+        iter207 = this.success[iter207];
+        iter207.write(output);
       }
     }
     output.writeListEnd();
@@ -3227,19 +3603,19 @@ blockstore.BlockStoreService_getMissingInvList_args.prototype.read = function(in
       break;
       case 2:
       if (ftype == Thrift.Type.LIST) {
-        var _size176 = 0;
-        var _rtmp3180;
+        var _size208 = 0;
+        var _rtmp3212;
         this.invs = [];
-        var _etype179 = 0;
-        _rtmp3180 = input.readListBegin();
-        _etype179 = _rtmp3180.etype;
-        _size176 = _rtmp3180.size;
-        for (var _i181 = 0; _i181 < _size176; ++_i181)
+        var _etype211 = 0;
+        _rtmp3212 = input.readListBegin();
+        _etype211 = _rtmp3212.etype;
+        _size208 = _rtmp3212.size;
+        for (var _i213 = 0; _i213 < _size208; ++_i213)
         {
-          var elem182 = null;
-          elem182 = new ttypes.Inventory();
-          elem182.read(input);
-          this.invs.push(elem182);
+          var elem214 = null;
+          elem214 = new ttypes.Inventory();
+          elem214.read(input);
+          this.invs.push(elem214);
         }
         input.readListEnd();
       } else {
@@ -3265,12 +3641,12 @@ blockstore.BlockStoreService_getMissingInvList_args.prototype.write = function(o
   if (this.invs !== null && this.invs !== undefined) {
     output.writeFieldBegin('invs', Thrift.Type.LIST, 2);
     output.writeListBegin(Thrift.Type.STRUCT, this.invs.length);
-    for (var iter183 in this.invs)
+    for (var iter215 in this.invs)
     {
-      if (this.invs.hasOwnProperty(iter183))
+      if (this.invs.hasOwnProperty(iter215))
       {
-        iter183 = this.invs[iter183];
-        iter183.write(output);
+        iter215 = this.invs[iter215];
+        iter215.write(output);
       }
     }
     output.writeListEnd();
@@ -3305,19 +3681,19 @@ blockstore.BlockStoreService_getMissingInvList_result.prototype.read = function(
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size184 = 0;
-        var _rtmp3188;
+        var _size216 = 0;
+        var _rtmp3220;
         this.success = [];
-        var _etype187 = 0;
-        _rtmp3188 = input.readListBegin();
-        _etype187 = _rtmp3188.etype;
-        _size184 = _rtmp3188.size;
-        for (var _i189 = 0; _i189 < _size184; ++_i189)
+        var _etype219 = 0;
+        _rtmp3220 = input.readListBegin();
+        _etype219 = _rtmp3220.etype;
+        _size216 = _rtmp3220.size;
+        for (var _i221 = 0; _i221 < _size216; ++_i221)
         {
-          var elem190 = null;
-          elem190 = new ttypes.Inventory();
-          elem190.read(input);
-          this.success.push(elem190);
+          var elem222 = null;
+          elem222 = new ttypes.Inventory();
+          elem222.read(input);
+          this.success.push(elem222);
         }
         input.readListEnd();
       } else {
@@ -3341,12 +3717,12 @@ blockstore.BlockStoreService_getMissingInvList_result.prototype.write = function
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
-    for (var iter191 in this.success)
+    for (var iter223 in this.success)
     {
-      if (this.success.hasOwnProperty(iter191))
+      if (this.success.hasOwnProperty(iter223))
       {
-        iter191 = this.success[iter191];
-        iter191.write(output);
+        iter223 = this.success[iter223];
+        iter223.write(output);
       }
     }
     output.writeListEnd();
@@ -3434,18 +3810,18 @@ blockstore.BlockStoreService_getPeers_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size192 = 0;
-        var _rtmp3196;
+        var _size224 = 0;
+        var _rtmp3228;
         this.success = [];
-        var _etype195 = 0;
-        _rtmp3196 = input.readListBegin();
-        _etype195 = _rtmp3196.etype;
-        _size192 = _rtmp3196.size;
-        for (var _i197 = 0; _i197 < _size192; ++_i197)
+        var _etype227 = 0;
+        _rtmp3228 = input.readListBegin();
+        _etype227 = _rtmp3228.etype;
+        _size224 = _rtmp3228.size;
+        for (var _i229 = 0; _i229 < _size224; ++_i229)
         {
-          var elem198 = null;
-          elem198 = input.readString();
-          this.success.push(elem198);
+          var elem230 = null;
+          elem230 = input.readString();
+          this.success.push(elem230);
         }
         input.readListEnd();
       } else {
@@ -3469,12 +3845,12 @@ blockstore.BlockStoreService_getPeers_result.prototype.write = function(output) 
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRING, this.success.length);
-    for (var iter199 in this.success)
+    for (var iter231 in this.success)
     {
-      if (this.success.hasOwnProperty(iter199))
+      if (this.success.hasOwnProperty(iter231))
       {
-        iter199 = this.success[iter199];
-        output.writeString(iter199);
+        iter231 = this.success[iter231];
+        output.writeString(iter231);
       }
     }
     output.writeListEnd();
@@ -3520,18 +3896,18 @@ blockstore.BlockStoreService_setPeers_args.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.LIST) {
-        var _size200 = 0;
-        var _rtmp3204;
+        var _size232 = 0;
+        var _rtmp3236;
         this.peers = [];
-        var _etype203 = 0;
-        _rtmp3204 = input.readListBegin();
-        _etype203 = _rtmp3204.etype;
-        _size200 = _rtmp3204.size;
-        for (var _i205 = 0; _i205 < _size200; ++_i205)
+        var _etype235 = 0;
+        _rtmp3236 = input.readListBegin();
+        _etype235 = _rtmp3236.etype;
+        _size232 = _rtmp3236.size;
+        for (var _i237 = 0; _i237 < _size232; ++_i237)
         {
-          var elem206 = null;
-          elem206 = input.readString();
-          this.peers.push(elem206);
+          var elem238 = null;
+          elem238 = input.readString();
+          this.peers.push(elem238);
         }
         input.readListEnd();
       } else {
@@ -3557,12 +3933,12 @@ blockstore.BlockStoreService_setPeers_args.prototype.write = function(output) {
   if (this.peers !== null && this.peers !== undefined) {
     output.writeFieldBegin('peers', Thrift.Type.LIST, 2);
     output.writeListBegin(Thrift.Type.STRING, this.peers.length);
-    for (var iter207 in this.peers)
+    for (var iter239 in this.peers)
     {
-      if (this.peers.hasOwnProperty(iter207))
+      if (this.peers.hasOwnProperty(iter239))
       {
-        iter207 = this.peers[iter207];
-        output.writeString(iter207);
+        iter239 = this.peers[iter239];
+        output.writeString(iter239);
       }
     }
     output.writeListEnd();
@@ -3596,6 +3972,170 @@ blockstore.BlockStoreService_setPeers_result.prototype.read = function(input) {
 
 blockstore.BlockStoreService_setPeers_result.prototype.write = function(output) {
   output.writeStructBegin('BlockStoreService_setPeers_result');
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getAddressStatList_args = function(args) {
+  this.network = null;
+  this.addresses = null;
+  if (args) {
+    if (args.network !== undefined) {
+      this.network = args.network;
+    }
+    if (args.addresses !== undefined) {
+      this.addresses = args.addresses;
+    }
+  }
+};
+blockstore.BlockStoreService_getAddressStatList_args.prototype = {};
+blockstore.BlockStoreService_getAddressStatList_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.I32) {
+        this.network = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size240 = 0;
+        var _rtmp3244;
+        this.addresses = [];
+        var _etype243 = 0;
+        _rtmp3244 = input.readListBegin();
+        _etype243 = _rtmp3244.etype;
+        _size240 = _rtmp3244.size;
+        for (var _i245 = 0; _i245 < _size240; ++_i245)
+        {
+          var elem246 = null;
+          elem246 = input.readString();
+          this.addresses.push(elem246);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getAddressStatList_args.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getAddressStatList_args');
+  if (this.network !== null && this.network !== undefined) {
+    output.writeFieldBegin('network', Thrift.Type.I32, 1);
+    output.writeI32(this.network);
+    output.writeFieldEnd();
+  }
+  if (this.addresses !== null && this.addresses !== undefined) {
+    output.writeFieldBegin('addresses', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
+    for (var iter247 in this.addresses)
+    {
+      if (this.addresses.hasOwnProperty(iter247))
+      {
+        iter247 = this.addresses[iter247];
+        output.writeString(iter247);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getAddressStatList_result = function(args) {
+  this.success = null;
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+  }
+};
+blockstore.BlockStoreService_getAddressStatList_result.prototype = {};
+blockstore.BlockStoreService_getAddressStatList_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size248 = 0;
+        var _rtmp3252;
+        this.success = [];
+        var _etype251 = 0;
+        _rtmp3252 = input.readListBegin();
+        _etype251 = _rtmp3252.etype;
+        _size248 = _rtmp3252.size;
+        for (var _i253 = 0; _i253 < _size248; ++_i253)
+        {
+          var elem254 = null;
+          elem254 = new ttypes.AddrStat();
+          elem254.read(input);
+          this.success.push(elem254);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.BlockStoreService_getAddressStatList_result.prototype.write = function(output) {
+  output.writeStructBegin('BlockStoreService_getAddressStatList_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter255 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter255))
+      {
+        iter255 = this.success[iter255];
+        iter255.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
   output.writeFieldStop();
   output.writeStructEnd();
   return;
@@ -3636,19 +4176,19 @@ blockstore.BlockStoreService_pushPeers_args.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.LIST) {
-        var _size208 = 0;
-        var _rtmp3212;
+        var _size256 = 0;
+        var _rtmp3260;
         this.peers = [];
-        var _etype211 = 0;
-        _rtmp3212 = input.readListBegin();
-        _etype211 = _rtmp3212.etype;
-        _size208 = _rtmp3212.size;
-        for (var _i213 = 0; _i213 < _size208; ++_i213)
+        var _etype259 = 0;
+        _rtmp3260 = input.readListBegin();
+        _etype259 = _rtmp3260.etype;
+        _size256 = _rtmp3260.size;
+        for (var _i261 = 0; _i261 < _size256; ++_i261)
         {
-          var elem214 = null;
-          elem214 = new ttypes.Peer();
-          elem214.read(input);
-          this.peers.push(elem214);
+          var elem262 = null;
+          elem262 = new ttypes.Peer();
+          elem262.read(input);
+          this.peers.push(elem262);
         }
         input.readListEnd();
       } else {
@@ -3674,12 +4214,12 @@ blockstore.BlockStoreService_pushPeers_args.prototype.write = function(output) {
   if (this.peers !== null && this.peers !== undefined) {
     output.writeFieldBegin('peers', Thrift.Type.LIST, 2);
     output.writeListBegin(Thrift.Type.STRUCT, this.peers.length);
-    for (var iter215 in this.peers)
+    for (var iter263 in this.peers)
     {
-      if (this.peers.hasOwnProperty(iter215))
+      if (this.peers.hasOwnProperty(iter263))
       {
-        iter215 = this.peers[iter215];
-        iter215.write(output);
+        iter263 = this.peers[iter263];
+        iter263.write(output);
       }
     }
     output.writeListEnd();
@@ -3808,19 +4348,19 @@ blockstore.BlockStoreService_popPeers_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size216 = 0;
-        var _rtmp3220;
+        var _size264 = 0;
+        var _rtmp3268;
         this.success = [];
-        var _etype219 = 0;
-        _rtmp3220 = input.readListBegin();
-        _etype219 = _rtmp3220.etype;
-        _size216 = _rtmp3220.size;
-        for (var _i221 = 0; _i221 < _size216; ++_i221)
+        var _etype267 = 0;
+        _rtmp3268 = input.readListBegin();
+        _etype267 = _rtmp3268.etype;
+        _size264 = _rtmp3268.size;
+        for (var _i269 = 0; _i269 < _size264; ++_i269)
         {
-          var elem222 = null;
-          elem222 = new ttypes.Peer();
-          elem222.read(input);
-          this.success.push(elem222);
+          var elem270 = null;
+          elem270 = new ttypes.Peer();
+          elem270.read(input);
+          this.success.push(elem270);
         }
         input.readListEnd();
       } else {
@@ -3844,12 +4384,12 @@ blockstore.BlockStoreService_popPeers_result.prototype.write = function(output) 
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
-    for (var iter223 in this.success)
+    for (var iter271 in this.success)
     {
-      if (this.success.hasOwnProperty(iter223))
+      if (this.success.hasOwnProperty(iter271))
       {
-        iter223 = this.success[iter223];
-        iter223.write(output);
+        iter271 = this.success[iter271];
+        iter271.write(output);
       }
     }
     output.writeListEnd();
@@ -3906,18 +4446,18 @@ blockstore.BlockStoreService_watchAddresses_args.prototype.read = function(input
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size224 = 0;
-        var _rtmp3228;
+        var _size272 = 0;
+        var _rtmp3276;
         this.addresses = [];
-        var _etype227 = 0;
-        _rtmp3228 = input.readListBegin();
-        _etype227 = _rtmp3228.etype;
-        _size224 = _rtmp3228.size;
-        for (var _i229 = 0; _i229 < _size224; ++_i229)
+        var _etype275 = 0;
+        _rtmp3276 = input.readListBegin();
+        _etype275 = _rtmp3276.etype;
+        _size272 = _rtmp3276.size;
+        for (var _i277 = 0; _i277 < _size272; ++_i277)
         {
-          var elem230 = null;
-          elem230 = input.readString();
-          this.addresses.push(elem230);
+          var elem278 = null;
+          elem278 = input.readString();
+          this.addresses.push(elem278);
         }
         input.readListEnd();
       } else {
@@ -3948,12 +4488,12 @@ blockstore.BlockStoreService_watchAddresses_args.prototype.write = function(outp
   if (this.addresses !== null && this.addresses !== undefined) {
     output.writeFieldBegin('addresses', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
-    for (var iter231 in this.addresses)
+    for (var iter279 in this.addresses)
     {
-      if (this.addresses.hasOwnProperty(iter231))
+      if (this.addresses.hasOwnProperty(iter279))
       {
-        iter231 = this.addresses[iter231];
-        output.writeString(iter231);
+        iter279 = this.addresses[iter279];
+        output.writeString(iter279);
       }
     }
     output.writeListEnd();
@@ -4114,7 +4654,7 @@ blockstore.BlockStoreService_getWatchingList_result.prototype.read = function(in
     {
       case 0:
       if (ftype == Thrift.Type.STRUCT) {
-        this.success = new ttypes.WatchingList();
+        this.success = new ttypes.TxIdListWithCursor();
         this.success.read(input);
       } else {
         input.skip(ftype);
@@ -5030,6 +5570,56 @@ blockstore.BlockStoreServiceClient.prototype.recv_getRelatedTxIdList = function(
   }
   return callback('getRelatedTxIdList failed: unknown result');
 };
+blockstore.BlockStoreServiceClient.prototype.getRelatedAddrTxIdList = function(network, addresses, cursor, count, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_getRelatedAddrTxIdList(network, addresses, cursor, count);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_getRelatedAddrTxIdList(network, addresses, cursor, count);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_getRelatedAddrTxIdList = function(network, addresses, cursor, count) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getRelatedAddrTxIdList', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_getRelatedAddrTxIdList_args();
+  args.network = network;
+  args.addresses = addresses;
+  args.cursor = cursor;
+  args.count = count;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_getRelatedAddrTxIdList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_getRelatedAddrTxIdList_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('getRelatedAddrTxIdList failed: unknown result');
+};
 blockstore.BlockStoreServiceClient.prototype.getSendingTxList = function(network, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
@@ -5221,6 +5811,55 @@ blockstore.BlockStoreServiceClient.prototype.recv_getUnspent = function(input,mt
   }
   return callback('getUnspent failed: unknown result');
 };
+blockstore.BlockStoreServiceClient.prototype.getUnspentV1 = function(network, addresses, count, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_getUnspentV1(network, addresses, count);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_getUnspentV1(network, addresses, count);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_getUnspentV1 = function(network, addresses, count) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getUnspentV1', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_getUnspentV1_args();
+  args.network = network;
+  args.addresses = addresses;
+  args.count = count;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_getUnspentV1 = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_getUnspentV1_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('getUnspentV1 failed: unknown result');
+};
 blockstore.BlockStoreServiceClient.prototype.getMissingInvList = function(network, invs, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
@@ -5360,6 +5999,54 @@ blockstore.BlockStoreServiceClient.prototype.recv_setPeers = function(input,mtyp
   input.readMessageEnd();
 
   callback(null)
+};
+blockstore.BlockStoreServiceClient.prototype.getAddressStatList = function(network, addresses, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_getAddressStatList(network, addresses);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_getAddressStatList(network, addresses);
+  }
+};
+
+blockstore.BlockStoreServiceClient.prototype.send_getAddressStatList = function(network, addresses) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getAddressStatList', Thrift.MessageType.CALL, this.seqid());
+  var args = new blockstore.BlockStoreService_getAddressStatList_args();
+  args.network = network;
+  args.addresses = addresses;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+blockstore.BlockStoreServiceClient.prototype.recv_getAddressStatList = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new blockstore.BlockStoreService_getAddressStatList_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('getAddressStatList failed: unknown result');
 };
 blockstore.BlockStoreServiceClient.prototype.pushPeers = function(network, peers, callback) {
   this._seqid = this.new_seqid();
@@ -6108,6 +6795,36 @@ blockstore.BlockStoreServiceProcessor.prototype.process_getRelatedTxIdList = fun
   }
 }
 
+blockstore.BlockStoreServiceProcessor.prototype.process_getRelatedAddrTxIdList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getRelatedAddrTxIdList_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.getRelatedAddrTxIdList.length === 4) {
+    Q.fcall(this._handler.getRelatedAddrTxIdList, args.network, args.addresses, args.cursor, args.count)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_getRelatedAddrTxIdList_result({success: result});
+        output.writeMessageBegin("getRelatedAddrTxIdList", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_getRelatedAddrTxIdList_result(err);
+        output.writeMessageBegin("getRelatedAddrTxIdList", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.getRelatedAddrTxIdList(args.network, args.addresses, args.cursor, args.count,  function (err, result) {
+      var result = new blockstore.BlockStoreService_getRelatedAddrTxIdList_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("getRelatedAddrTxIdList", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
 blockstore.BlockStoreServiceProcessor.prototype.process_getSendingTxList = function(seqid, input, output) {
   var args = new blockstore.BlockStoreService_getSendingTxList_args();
   args.read(input);
@@ -6228,6 +6945,36 @@ blockstore.BlockStoreServiceProcessor.prototype.process_getUnspent = function(se
   }
 }
 
+blockstore.BlockStoreServiceProcessor.prototype.process_getUnspentV1 = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getUnspentV1_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.getUnspentV1.length === 3) {
+    Q.fcall(this._handler.getUnspentV1, args.network, args.addresses, args.count)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_getUnspentV1_result({success: result});
+        output.writeMessageBegin("getUnspentV1", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_getUnspentV1_result(err);
+        output.writeMessageBegin("getUnspentV1", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.getUnspentV1(args.network, args.addresses, args.count,  function (err, result) {
+      var result = new blockstore.BlockStoreService_getUnspentV1_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("getUnspentV1", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
 blockstore.BlockStoreServiceProcessor.prototype.process_getMissingInvList = function(seqid, input, output) {
   var args = new blockstore.BlockStoreService_getMissingInvList_args();
   args.read(input);
@@ -6311,6 +7058,36 @@ blockstore.BlockStoreServiceProcessor.prototype.process_setPeers = function(seqi
     this._handler.setPeers(args.network, args.peers,  function (err, result) {
       var result = new blockstore.BlockStoreService_setPeers_result((err != null ? err : {success: result}));
       output.writeMessageBegin("setPeers", Thrift.MessageType.REPLY, seqid);
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+}
+
+blockstore.BlockStoreServiceProcessor.prototype.process_getAddressStatList = function(seqid, input, output) {
+  var args = new blockstore.BlockStoreService_getAddressStatList_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.getAddressStatList.length === 2) {
+    Q.fcall(this._handler.getAddressStatList, args.network, args.addresses)
+      .then(function(result) {
+        var result = new blockstore.BlockStoreService_getAddressStatList_result({success: result});
+        output.writeMessageBegin("getAddressStatList", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result = new blockstore.BlockStoreService_getAddressStatList_result(err);
+        output.writeMessageBegin("getAddressStatList", Thrift.MessageType.REPLY, seqid);
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.getAddressStatList(args.network, args.addresses,  function (err, result) {
+      var result = new blockstore.BlockStoreService_getAddressStatList_result((err != null ? err : {success: result}));
+      output.writeMessageBegin("getAddressStatList", Thrift.MessageType.REPLY, seqid);
       result.write(output);
       output.writeMessageEnd();
       output.flush();

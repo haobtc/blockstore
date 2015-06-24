@@ -1,18 +1,21 @@
 import logging
 from bson.binary import Binary
+from bson.objectid import ObjectId
+from bson.errors import InvalidId
+
 import database
 from blockstore import BlockStoreService, ttypes
 from helper import resolve_network
 
 from tx import get_tx, get_tx_list, get_missing_txid_list, verify_tx_mempool, verify_tx_chain
 from tx import get_sending_tx_list, get_send_tx_list, send_tx, get_tail_tx_list, get_tx_list_since
-from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_tx
-from tx import save_tx, update_addrs, add_dep
+from tx import get_unspent, get_related_txid_list, get_related_tx_list, remove_tx, get_unspent_v2
+from tx import save_tx, update_addrs, add_dep, get_related_addrtx_list
 
 from block import get_block, get_block_at_height,  get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list, rewind_tip, link_txes
 
-from addr import gen_tx_stats, watch_addresses, get_watching_list
+from addr import gen_tx_stats, watch_addresses, get_watching_list, get_addr_stat_list
 from misc import set_peers, get_peers, itercol, push_peers, pop_peers
 from tasks import constructive_task
 
@@ -103,6 +106,10 @@ class BlockStoreHandler:
     def getUnspent(self, nettype, addresses):
         conn = network_conn(nettype)
         return get_unspent(conn, addresses)
+
+    def getUnspentV1(self, nettype, addresses, count):
+        conn = network_conn(nettype)
+        return get_unspent_v2(conn, addresses, count=count)
 
     def getMissingTxIdList(self, nettype, txids):
         conn = network_conn(nettype)
@@ -198,3 +205,26 @@ class BlockStoreHandler:
     def getWatchingList(self, nettype, group, count, cursor):
         conn = network_conn(nettype)
         return get_watching_list(conn, group, count, cursor)
+
+    def getAddressStatList(self, nettype, addresses):
+        conn = network_conn(nettype)
+        return get_addr_stat_list(conn, addresses)
+
+    def getRelatedAddrTxIdList(self, nettype, addresses, cursor, count):
+        conn = network_conn(nettype)
+        try:
+            cursor = ObjectId(cursor)
+        except InvalidId:
+            cursor = None
+        ts = []
+        for addrtx in get_related_addrtx_list(conn, addresses, cursor=cursor, count=count):
+            t = ttypes.AddrTxId(address=addrtx['a'],
+                                txid=addrtx['t'],
+                                inputSatoshi=str(addrtx['i']),
+                                outputSatoshi=str(addrtx['o']),
+                                cursor=addrtx['_id'].binary)
+            ts.append(t)
+        return ts
+            
+        
+        

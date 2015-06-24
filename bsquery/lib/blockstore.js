@@ -195,6 +195,41 @@ ttypes.Peer.prototype.toPeer = function(p) {
   return p;
 };
 
+ttypes.AddrStat.prototype.toJSON = function() {
+  var obj = {
+    address: this.address,
+    cntTxes: this.cntTxes
+  };
+  if(this.receivedSatoshi) {
+    obj.receivedSatoshi = this.receivedSatoshi;
+    obj.received =  helper.satoshiToNumberString(this.receivedSatoshi);
+  }
+  if(this.balanceSatoshi) {
+    obj.balanceSatoshi = this.balanceSatoshi;
+    obj.balance = helper.satoshiToNumberString(this.balanceSatoshi);
+  }
+  return obj;
+};
+
+ttypes.AddrTxId.prototype.toJSON = function() {
+  var obj = {
+    address: this.address,
+    txid: this.txid.toString('hex'),
+  };
+  if(this.inputSatoshi) {
+    obj.inputSatoshi = this.inputSatoshi;
+    obj.input = helper.satoshiToNumberString(this.inputSatoshi);
+  }
+  if(this.outputSatoshi) {
+    obj.outputSatoshi = this.outputSatoshi;
+    obj.output = helper.satoshiToNumberString(this.outputSatoshi);
+  }
+  if(this.cursor) {
+    obj.cursor = this.cursor.toString('hex');
+  }
+  return obj;
+};
+
 transport = thrift.TBufferedTransport()
 protocol = thrift.TBinaryProtocol()
 
@@ -294,7 +329,8 @@ RPCWrapper.prototype.keepTip = function() {
  'getTxListSince', 'getTailTxList', 'getRelatedTxList', 'getRelatedTxIdList',
  'getSendingTxList', 'getSendTxList', 'sendTx', 'getUnspent', 'getMissingInvList',
  'setPeers', 'getPeers', 'pushPeers', 'popPeers',
- 'watchAddresses', 'getWatchingList'
+ 'watchAddresses', 'getWatchingList', 'getAddressStatList',
+ 'getRelatedAddrTxIdList', 'getUnspentV1',
 ].forEach(function wrapRpc(clientRpc) {
   RPCWrapper.prototype[clientRpc] = function() {
     var args = [];

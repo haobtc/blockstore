@@ -16,7 +16,7 @@
   "author": "superisaac",
   "license": "MIT",
   "dependencies": {
-    "async": "~0.9.0",
+    "async": "~1.2.1",
     "bigint": "~0.4.2",
     "bignum": "~0.7.0",
     "bitcore-multicoin": "~0.1.20",

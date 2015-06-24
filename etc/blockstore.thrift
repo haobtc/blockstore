@@ -111,9 +111,24 @@ struct Peer {
   3:i32 time
 }
 
-struct WatchingList {
+struct TxIdListWithCursor {
   1:binary cursor,
   2:list<binary> txids
+}
+
+struct AddrStat {
+  1:string address,
+  2:i32 cntTxes,
+  3:string receivedSatoshi,
+  4:string balanceSatoshi
+}
+
+struct AddrTxId {
+  1:string address,
+  2:binary txid,
+  3:optional string inputSatoshi,
+  4:optional string outputSatoshi,
+  5:optional binary cursor
 }
 
 service BlockStoreService
@@ -143,6 +158,7 @@ service BlockStoreService
   list<Tx> getTailTxList(1:Network network, 2:i32 n);
   list<Tx> getRelatedTxList(1:Network network, 2:list<string> addresses);
   list<binary> getRelatedTxIdList(1:Network network, 2:list<string> addresses);
+  list<AddrTxId> getRelatedAddrTxIdList(1:Network network, 2:list<string> addresses, 3:binary cursor, 4:i32 count);
 
   /* sendtx related methods */
   list<SendTx> getSendingTxList(1:Network network);
@@ -151,6 +167,7 @@ service BlockStoreService
 
   /* utxo related methods */
   list<UTXO> getUnspent(1:Network network, 2:list<string> addresses);
+  list<UTXO> getUnspentV1(1:Network network, 2:list<string> addresses, 3:i32 count);
 
   /* inv related methods */
   list<Inventory> getMissingInvList(1:Network network, 2:list<Inventory> invs);
@@ -159,13 +176,16 @@ service BlockStoreService
   /* Get/Set Peers. depricated! */
   list<string> getPeers(1:Network network);
   void setPeers(1:Network network, 2:list<string> peers);
-  
+
+  /* Address methods */
+  list<AddrStat> getAddressStatList(1:Network network, 2:list<string> addresses);
+    
   /* push some peers */
   void pushPeers(1:Network network, 2:list<Peer> peers);
   list<Peer> popPeers(1:Network network, 2:i32 n);
 
   /* address watch related */
   void watchAddresses(1:Network network, 2:string group, 3:list<string> addresses);
-  WatchingList getWatchingList(1:Network network, 2:string group, 3:i32 count, 4:binary cursor);
+  TxIdListWithCursor getWatchingList(1:Network network, 2:string group, 3:i32 count, 4:binary cursor);
 }
 

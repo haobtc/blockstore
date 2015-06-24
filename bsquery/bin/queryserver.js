@@ -11,11 +11,11 @@ var Query = require('../lib/Query');
 var helper = require('../lib/helper');
 var blockstore = require('../lib/blockstore');
 var queryapiv1 = require('../lib/queryapiv1');
+var queryapiv2 = require('../lib/queryapiv2');
 
 app.use(bodyParser());
 
 app.use('/explorer/', express.static('public'));
-
 
 app.use(function(req, res, next) {
   req.start = Date.now();
@@ -23,6 +23,7 @@ app.use(function(req, res, next) {
 });
 
 queryapiv1.installAPI(app);
+queryapiv2.installAPI(app);
 
 app.use(function(err, req, res, next){
   if(err instanceof blockstore.ttypes.AppException) {

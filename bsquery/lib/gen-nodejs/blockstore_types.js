@@ -1334,7 +1334,7 @@ blockstore.Peer.prototype.write = function(output) {
   return;
 };
 
-blockstore.WatchingList = module.exports.WatchingList = function(args) {
+blockstore.TxIdListWithCursor = module.exports.TxIdListWithCursor = function(args) {
   this.cursor = null;
   this.txids = null;
   if (args) {
@@ -1346,8 +1346,8 @@ blockstore.WatchingList = module.exports.WatchingList = function(args) {
     }
   }
 };
-blockstore.WatchingList.prototype = {};
-blockstore.WatchingList.prototype.read = function(input) {
+blockstore.TxIdListWithCursor.prototype = {};
+blockstore.TxIdListWithCursor.prototype.read = function(input) {
   input.readStructBegin();
   while (true)
   {
@@ -1396,8 +1396,8 @@ blockstore.WatchingList.prototype.read = function(input) {
   return;
 };
 
-blockstore.WatchingList.prototype.write = function(output) {
-  output.writeStructBegin('WatchingList');
+blockstore.TxIdListWithCursor.prototype.write = function(output) {
+  output.writeStructBegin('TxIdListWithCursor');
   if (this.cursor !== null && this.cursor !== undefined) {
     output.writeFieldBegin('cursor', Thrift.Type.STRING, 1);
     output.writeBinary(this.cursor);
@@ -1415,6 +1415,218 @@ blockstore.WatchingList.prototype.write = function(output) {
       }
     }
     output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.AddrStat = module.exports.AddrStat = function(args) {
+  this.address = null;
+  this.cntTxes = null;
+  this.receivedSatoshi = null;
+  this.balanceSatoshi = null;
+  if (args) {
+    if (args.address !== undefined) {
+      this.address = args.address;
+    }
+    if (args.cntTxes !== undefined) {
+      this.cntTxes = args.cntTxes;
+    }
+    if (args.receivedSatoshi !== undefined) {
+      this.receivedSatoshi = args.receivedSatoshi;
+    }
+    if (args.balanceSatoshi !== undefined) {
+      this.balanceSatoshi = args.balanceSatoshi;
+    }
+  }
+};
+blockstore.AddrStat.prototype = {};
+blockstore.AddrStat.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.address = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I32) {
+        this.cntTxes = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.receivedSatoshi = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.balanceSatoshi = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.AddrStat.prototype.write = function(output) {
+  output.writeStructBegin('AddrStat');
+  if (this.address !== null && this.address !== undefined) {
+    output.writeFieldBegin('address', Thrift.Type.STRING, 1);
+    output.writeString(this.address);
+    output.writeFieldEnd();
+  }
+  if (this.cntTxes !== null && this.cntTxes !== undefined) {
+    output.writeFieldBegin('cntTxes', Thrift.Type.I32, 2);
+    output.writeI32(this.cntTxes);
+    output.writeFieldEnd();
+  }
+  if (this.receivedSatoshi !== null && this.receivedSatoshi !== undefined) {
+    output.writeFieldBegin('receivedSatoshi', Thrift.Type.STRING, 3);
+    output.writeString(this.receivedSatoshi);
+    output.writeFieldEnd();
+  }
+  if (this.balanceSatoshi !== null && this.balanceSatoshi !== undefined) {
+    output.writeFieldBegin('balanceSatoshi', Thrift.Type.STRING, 4);
+    output.writeString(this.balanceSatoshi);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+blockstore.AddrTxId = module.exports.AddrTxId = function(args) {
+  this.address = null;
+  this.txid = null;
+  this.inputSatoshi = null;
+  this.outputSatoshi = null;
+  this.cursor = null;
+  if (args) {
+    if (args.address !== undefined) {
+      this.address = args.address;
+    }
+    if (args.txid !== undefined) {
+      this.txid = args.txid;
+    }
+    if (args.inputSatoshi !== undefined) {
+      this.inputSatoshi = args.inputSatoshi;
+    }
+    if (args.outputSatoshi !== undefined) {
+      this.outputSatoshi = args.outputSatoshi;
+    }
+    if (args.cursor !== undefined) {
+      this.cursor = args.cursor;
+    }
+  }
+};
+blockstore.AddrTxId.prototype = {};
+blockstore.AddrTxId.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.address = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.txid = input.readBinary();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.inputSatoshi = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.outputSatoshi = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRING) {
+        this.cursor = input.readBinary();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.AddrTxId.prototype.write = function(output) {
+  output.writeStructBegin('AddrTxId');
+  if (this.address !== null && this.address !== undefined) {
+    output.writeFieldBegin('address', Thrift.Type.STRING, 1);
+    output.writeString(this.address);
+    output.writeFieldEnd();
+  }
+  if (this.txid !== null && this.txid !== undefined) {
+    output.writeFieldBegin('txid', Thrift.Type.STRING, 2);
+    output.writeBinary(this.txid);
+    output.writeFieldEnd();
+  }
+  if (this.inputSatoshi !== null && this.inputSatoshi !== undefined) {
+    output.writeFieldBegin('inputSatoshi', Thrift.Type.STRING, 3);
+    output.writeString(this.inputSatoshi);
+    output.writeFieldEnd();
+  }
+  if (this.outputSatoshi !== null && this.outputSatoshi !== undefined) {
+    output.writeFieldBegin('outputSatoshi', Thrift.Type.STRING, 4);
+    output.writeString(this.outputSatoshi);
+    output.writeFieldEnd();
+  }
+  if (this.cursor !== null && this.cursor !== undefined) {
+    output.writeFieldBegin('cursor', Thrift.Type.STRING, 5);
+    output.writeBinary(this.cursor);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

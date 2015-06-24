@@ -1,6 +1,7 @@
 import time
 import pytz
 import logging
+from struct import unpack
 from blockstore import BlockStoreService, ttypes
 from pymongo import DESCENDING, ASCENDING
 from pymongo import ReturnDocument
@@ -430,18 +431,6 @@ def get_utxo(conn, dtx, output, i):
         #utxo.timestamp = int(time.time())
     return utxo
 
-def new_get_unspent(conn, addresses):
-    aset = set(addresses)
-    for dtx in get_related_db_addr_tx_list(conn, addresses, id_order=1):
-        for i, output in enumerate(dtx['vout']):
-            addrs = output.get('addrs')
-            if addrs and addrs[0] not in aset:
-                continue
-            spt = output.get('w', False)
-            if not spt:
-                utxo = get_utxo(conn, dtx, output, i)
-                yield utxo
-
 def get_unspent(conn, addresses):
     addr_set = set(addresses)
     output_txes = conn.tx.find({'oa': {'$in': addresses}}, projection=['hash', 'vout'])
@@ -479,17 +468,27 @@ def get_related_txid_list(conn, addresses):
                                projection=['hash'])
     return [tx['hash'] for tx in txes]
 
-def get_related_db_addr_tx_list(conn, addresses, id_order=DESCENDING, remove_non_existing_tx=True):
+def get_related_addrtx_list(conn, addresses, id_order=DESCENDING, cursor=None, count=None):
+    q = {'a': {'$in': addresses}}
+    if id_order == DESCENDING and cursor:
+        q['_id'] = {'$lt': cursor}
+    elif id_order == ASCENDING and cursor:
+        q['_id'] = {'$gt': cursor}
+    qs = conn.addrtx.find(q).batch_size(30).sort([('_id', id_order)])
+    if count is not None:
+        qs = qs.limit(count)
+    return qs
+
+def get_related_db_tx_list_v1(conn, addresses, id_order=DESCENDING, cursor=None, count=None, remove_non_existing_tx=True):
     missing_addrtxs = []
-    for address in addresses:
-        print address
-        for at in conn.addrtx.find({'a': address}).batch_size(30).sort([('_id', id_order)]):
-            dtx = get_db_tx(conn, at['t'])
-            if not dtx:
-                logging.error('No addrtx found %s for address %s', at['t'].encode('hex'), address)
-                missing_addrtxs.append(at['_id'])
-            if dtx:
-                yield dtx
+    for at in get_related_addrtx_list(conn, addresses, id_order=id_order,
+                                      cursor=None, count=count):
+        dtx = get_db_tx(conn, at['t'])
+        if not dtx:
+            logging.error('No addrtx found %s for address %s', at['t'].encode('hex'), address)
+            missing_addrtxs.append(at['_id'])
+        if dtx:
+            yield dtx
 
     if remove_non_existing_tx and missing_addrtxs:
         for atid in missing_addrtxs:
@@ -572,3 +571,34 @@ def remove_dep(conn, dtx):
     remove tx dependencies when dtx is going to be removed/archived
     '''
     conn.txdep.remove({'t': dtx['hash']})
+
+
+# new methods
+def get_unspent_v1(conn, addresses):
+    aset = set(addresses)
+    for dtx in get_related_db_tx_list_v1(conn, addresses, id_order=1):
+        for i, output in enumerate(dtx['vout']):
+            addrs = output.get('addrs')
+            if addrs and addrs[0] not in aset:
+                continue
+            spt = output.get('w', False)
+            if not spt:
+                utxo = get_utxo(conn, dtx, output, i)
+                yield utxo
+
+def get_unspent_v2(conn, addresses, count=200):
+    if not addresses:
+        return []
+    utxos = []
+    for addrstat in conn.addrstat.find({'_id': {'$in': addresses}}):
+        u = addrstat.get('u', [])
+        if len(u) > count:
+            u = u[:count]
+        for uid in u:
+            txid = uid[:32]
+            s = uid[33:]
+            n = unpack('>I', s)[0]
+            dtx = get_db_tx(conn, txid)
+            utxo = get_utxo(conn, dtx, dtx['vout'][n], n)
+            utxos.append(utxo)
+    return utxos

@@ -156,10 +156,10 @@ def get_watching_list(conn, group, count=20, cursor=None):
         try:
             cursor = ObjectId(cursor)
             query = {'_id': {'$gt': cursor}}
-        except bson.errors.InvalidId:
+        except InvalidId:
             pass
 
-    watching_list = ttypes.WatchingList()
+    watching_list = ttypes.TxIdListWithCursor()
     watching_list.txids = []
 
     limit = max(count * 2, 1000)
@@ -171,4 +171,18 @@ def get_watching_list(conn, group, count=20, cursor=None):
                 if len(watching_list.txids) >= count:
                     break
     return watching_list
-    
+
+def get_addr_stat_list(conn, addresses):
+    if not addresses:
+        return []
+
+    addr_stat_list = []
+    for addrstat in conn.addrstat.find({'_id': {'$in': addresses}}, projection=['_id', 'n', 'r', 'b']).batch_size(30):
+        stat = ttypes.AddrStat()
+        stat.address = addrstat['_id']
+        stat.receivedSatoshi = str(addrstat['r'])
+        stat.balanceSatoshi = str(addrstat['b'])
+        stat.cntTxes = addrstat['n']
+        addr_stat_list.append(stat)
+    return addr_stat_list
+

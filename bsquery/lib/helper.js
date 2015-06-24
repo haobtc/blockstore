@@ -58,7 +58,6 @@ module.exports.sendJSONP = function(req, res, obj) {
   }
 };
 
-
 module.exports.netnames = function() {
   var netnames = [];
   for(var netname in config.networks) {

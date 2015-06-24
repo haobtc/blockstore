@@ -1,14 +1,9 @@
 'use strict';
 
-var express = require('express');
-
-var cluster = require('cluster');
-var http = require('http');
 var bitcore = require('bitcore-multicoin');
 var config = require('./config');
 var async = require('async');
-var app = express();
-var bodyParser = require('body-parser');
+
 var Query = require('./Query');
 
 var blockstore = require('./blockstore');

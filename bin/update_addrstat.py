@@ -9,18 +9,18 @@ from bsd.database import transaction, rollback
 from bsd.misc import itercol
 from bson.binary import Binary
 from bsd.block import remove_block, get_tip_block
-from bsd.tx import get_db_tx, ensure_input_addrs, get_related_db_tx_list, get_related_db_addr_tx_list, new_get_unspent
+from bsd.tx import get_db_tx, ensure_input_addrs, get_related_db_tx_list, get_related_db_tx_list_v1, get_unspent_v1
 from bsd.addr import gen_tx_stats, undo_tx_stats
 
 def main(conn, address):
     conn.addrstat.remove({'_id': address})
-    #for dtx in get_related_db_addr_tx_list(conn, [address], id_order=1):
-    for dtx in get_related_db_tx_list(conn, [address]):
+    for dtx in get_related_db_tx_list_v1(conn, [address], id_order=1):
+    #for dtx in get_related_db_tx_list(conn, [address]):
         with transaction(conn) as conn:
             print dtx['hash'].encode('hex')
             gen_tx_stats(conn, dtx, force_new_tx=True, filter_addrs=[address])
     # urefs = []
-    # for utxo in new_get_unspent(conn, [address]):
+    # for utxo in get_unspent_v1(conn, [address]):
     #     uref = Binary('#'.join([utxo.txid, pack('>I', utxo.vout)]))
     #     urefs.append(uref)
     # conn.addrstat.update({'_id': address}, {'$set': {'u': urefs}})

@@ -77,6 +77,7 @@ Node.prototype.run = function(callback) {
       conn.on('getdata', self.handleGetData.bind(self));
       conn.on('version', self.handleVersion.bind(self));
       conn.on('addr', self.handleAddr.bind(self));
+      conn.on('reject', self.handleReject.bind(self));
       /*if(Math.random() < 0.2) {
 	// Don't have to save peers every time
 	self.savePeers();
@@ -140,6 +141,10 @@ Node.prototype.startSync = function() {
   setTimeout(function() {
     self.requireBlocks();
   }, 1000);
+};
+
+Node.prototype.handleReject = function(info) {
+  console.info('reject', info);
 };
 
 Node.prototype.handleBlock = function(info) {
