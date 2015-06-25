@@ -46,7 +46,7 @@ module.exports.satoshiToNumberString = function(v) {
 module.exports.sendJSONP = function(req, res, obj) {
   if(req.start) {
     var time = Date.now() - req.start;
-    console.info('request', req.method, req.path, 'takes', time/1000.0, 'seconds');
+    console.info(new Date(), 'request', req.method, req.path, 'takes', time/1000.0, 'seconds');
   }
 
   if(req.query.callback && /^\w+$/.test(req.query.callback)) {

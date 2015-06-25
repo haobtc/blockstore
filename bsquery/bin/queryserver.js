@@ -19,6 +19,8 @@ app.use('/explorer/', express.static('public'));
 
 app.use(function(req, res, next) {
   req.start = Date.now();
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.info(new Date(), req.method, req.path, ip);
   next();
 });
 
