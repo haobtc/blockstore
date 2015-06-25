@@ -1256,6 +1256,7 @@ blockstore.Peer = module.exports.Peer = function(args) {
   this.host = null;
   this.port = null;
   this.time = null;
+  this.version = null;
   if (args) {
     if (args.host !== undefined) {
       this.host = args.host;
@@ -1265,6 +1266,9 @@ blockstore.Peer = module.exports.Peer = function(args) {
     }
     if (args.time !== undefined) {
       this.time = args.time;
+    }
+    if (args.version !== undefined) {
+      this.version = args.version;
     }
   }
 };
@@ -1303,6 +1307,13 @@ blockstore.Peer.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.I32) {
+        this.version = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1327,6 +1338,11 @@ blockstore.Peer.prototype.write = function(output) {
   if (this.time !== null && this.time !== undefined) {
     output.writeFieldBegin('time', Thrift.Type.I32, 3);
     output.writeI32(this.time);
+    output.writeFieldEnd();
+  }
+  if (this.version !== null && this.version !== undefined) {
+    output.writeFieldBegin('version', Thrift.Type.I32, 4);
+    output.writeI32(this.version);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

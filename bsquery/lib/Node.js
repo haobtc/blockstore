@@ -56,14 +56,14 @@ Node.prototype.run = function(callback) {
       peers = config.networks[self.netname].peers;
     } else {
       peers = peers.map(function(tPeer) {
-	return tPeer.host + ':' + tPeer.port;
+	      return tPeer.host + ':' + tPeer.port;
       });
     }
 
     var p2pPort = bitcore.networks[self.netname].defaultClientPort;
     peers.forEach(function(peerHost){
       if(peerHost.indexOf(':') < 0) {
-	peerHost = peerHost + ':' + p2pPort;
+	      peerHost = peerHost + ':' + p2pPort;
       }
       self.peerman.addPeer(new Peer(peerHost));
     });
@@ -79,14 +79,14 @@ Node.prototype.run = function(callback) {
       conn.on('addr', self.handleAddr.bind(self));
       conn.on('reject', self.handleReject.bind(self));
       /*if(Math.random() < 0.2) {
-	// Don't have to save peers every time
-	self.savePeers();
+	    // Don't have to save peers every time
+	    self.savePeers();
       }*/
     });
 
     self.peerman.on('netConnected', function(info) {
       if(self.updateBlockChain) {
-	self.startSync();
+	      self.startSync();
       }
       if(self.waitingBlockHash) {
         self.startFetching();
@@ -94,16 +94,16 @@ Node.prototype.run = function(callback) {
       //self.rpcClient.keepTip();
 
       if(typeof callback == 'function') {
-	callback();
+	      callback();
       }
     });
     self.peerman.start();
 
     if(self.peerDiscovery) {
       setInterval(function() {
-	self.discoverPeers(function(err, arr) {
-	  if(err) throw err;
-	});
+	      self.discoverPeers(function(err, arr) {
+	        if(err) throw err;
+	      });
       }, 5000);
       
     }
@@ -160,29 +160,31 @@ Node.prototype.handleBlock = function(info) {
 Node.prototype.handleRawBlock = function(info) {
   var self = this;
   this.stopOnTimeout();
-   var block = new bitcore.Block();
+  var block = new bitcore.Block();
   block.parse(info.message.parser, true);
   var bHash = block.calcHash(bitcore.networks[this.netname].blockHashFunc);
+  if(this.waitingBlockHash)
+    console.info('bHash', helper.reverseBuffer(bHash).toString('hex'), this.waitingBlockHash.toString('hex'));
   if(this.waitingBlockHash &&
      bHash.toString("hex") == helper.reverseBuffer(this.waitingBlockHash).toString('hex')) {
     this.gotWaitingBlock(block,
                          {rawMode: true, parser:info.message.parser}, 
                          function(err, q) {
-			   if(err) throw err;
-			   process.exit();
-    });
+			                     if(err) throw err;
+			                     process.exit();
+                         });
   } else if(this.updateBlockChain) {
     this.blockQueue.task(
       {timestamp:block.timestamp, hexHash: bHash.toString('hex')},
       function(c) {
         self.onBlock(block,
-		     {rawMode: true, parser: info.message.parser}, 
-		     function(err) {
-		       if(err) {
-		         console.error('error on raw block', err, err.stack);
-		       }
-		       c();
-		     });
+		                 {rawMode: true, parser: info.message.parser}, 
+		                 function(err) {
+		                   if(err) {
+		                     console.error('error on raw block', err, err.stack);
+		                   }
+		                   c();
+		                 });
       }, null);
   }
 };
@@ -197,11 +199,11 @@ Node.prototype.handleTx = function(info) {
 
     self.rpcClient.verifyTx(tTx, true, function(err, r) {
       if(!r.verified) {
-	console.warn('tx not verified ', tTx.hash.toString('hex'), r.message);
+	      console.warn('tx not verified ', tTx.hash.toString('hex'), r.message);
       } else {
-	self.rpcClient.addTxList([tTx], true, function(err, r) {
-	  if(err) throw err;
-	});
+	      self.rpcClient.addTxList([tTx], true, function(err, r) {
+	        if(err) throw err;
+	      });
       }
     });
   }
@@ -216,7 +218,7 @@ Node.prototype.handleInv = function(info) {
     if(inv.type != 1) return true;
     if(!self.updateMempool) return false;
     return true;
-  }); */
+    }); */
   if(invs.length > 0) {
     var tInvs = invs.map(function(inv) {
       var tInv = new blockstore.ttypes.Inventory();
@@ -228,13 +230,13 @@ Node.prototype.handleInv = function(info) {
     self.rpcClient.getMissingInvList(tInvs, function(err, missingInvs) {
       if(err) throw err;
       if(missingInvs.length > 0) {
-	var invs = missingInvs.map(function(tInv) {
-	  return {
-	    'type': tInv.type,
-	    'hash': helper.reverseBuffer(tInv.hash)
-	  };
-	});
-	info.conn.sendGetData(invs);
+	      var invs = missingInvs.map(function(tInv) {
+	        return {
+	          'type': tInv.type,
+	          'hash': helper.reverseBuffer(tInv.hash)
+	        };
+	      });
+	      info.conn.sendGetData(invs);
       }
     });
   }
@@ -253,9 +255,9 @@ Node.prototype.handleGetData = function(info) {
     this.rpcClient.getSendTxList(txIdList, function(err, arr) {
       if(err) throw err;
       arr.forEach(function(sendtx) {
-	if(sendtx.raw) {
-	  info.conn.sendMessage('tx', sendtx.raw);
-	}
+	      if(sendtx.raw) {
+	        info.conn.sendMessage('tx', sendtx.raw);
+	      }
       });
     });
   }    
@@ -263,13 +265,18 @@ Node.prototype.handleGetData = function(info) {
 
 Node.prototype.handleVersion = function(info) {
   this.stopOnTimeout();
-/*  if(info.message.start_height > this.startHeight) {
-    this.startHeight = info.message.start_height;
-  } */
+console.info('version', info.message);
+  /*  if(info.message.start_height > this.startHeight) {
+      this.startHeight = info.message.start_height;
+      } */
   if(this.peerDiscovery &&
-      (info.message.version >= 31402 || this.peerman.peers.length < this.peerman.peerLimit)) {
+     (info.message.version >= bitcore.networks[this.netname].protocolVersion ||
+      this.peerman.peers.length < this.peerman.peerLimit)) {
     info.conn.sendGetAddr();
     info.conn.getaddr = true;
+    info.conn.version = info.message.version;
+  } else {
+    info.conn.socket.destroy();
   }
 };
 
@@ -296,7 +303,7 @@ Node.prototype.requireBlocks = function() {
   var self = this;
 
   console.info('block queue size', this.blockQueue.size());
-  var conns = this.randomConns(10);
+  var conns = this.randomConns(3);
   if(!conns) {
     console.warn(this.netname, 'No active connections');
     return;
@@ -305,9 +312,9 @@ Node.prototype.requireBlocks = function() {
   this.rpcClient.getTipBlock(function(err, tipBlock) {
     if(err) {
       if(err instanceof blockstore.ttypes.NotFound) {
-	tipBlock = undefined;
+	      tipBlock = undefined;
       } else {
-	throw err;
+	      throw err;
       }
     }
     if(tipBlock) {
@@ -315,40 +322,40 @@ Node.prototype.requireBlocks = function() {
 
       var gHash = helper.reverseBuffer(tipBlock.hash);
       conns.forEach(function(c) { 
-	c.sendGetBlocks([gHash], 0);
-	console.info(self.netname, 'getting blocks starting from', tipBlock.hash.toString('hex'), 'from', c.peer.host);
+	      c.sendGetBlocks([gHash], 0);
+	      console.info(self.netname, 'getting blocks starting from', tipBlock.hash.toString('hex'), 'from', c.peer.host);
       });
 
       if(tipBlock.prevHash && Math.random() < 0.2) {
-	var conns1 = self.randomConns(3);
-	if(!!conns1) {
-	  var pHash = helper.reverseBuffer(tipBlock.prevHash);;
-	  conns1.forEach(function(c) { 
-	    c.sendGetBlocks([pHash], 0);
-	    console.info(self.netname, 'getting blocks starting from prev ', tipBlock.prevHash.toString('hex'), 'from', c.peer.host);
-	  });
-	}
+	      var conns1 = self.randomConns(3);
+	      if(!!conns1) {
+	        var pHash = helper.reverseBuffer(tipBlock.prevHash);;
+	        conns1.forEach(function(c) { 
+	          c.sendGetBlocks([pHash], 0);
+	          console.info(self.netname, 'getting blocks starting from prev ', tipBlock.prevHash.toString('hex'), 'from', c.peer.host);
+	        });
+	      }
       } else if(Math.random() < 0.2){
-	self.rpcClient.getTailBlockList(6, function(err, arr) {
-	  if(err) throw err;
-	  var tBlock = arr[0];
-	  if(tBlock) {
-	    var conns2 = self.randomConns(3);
-	    var pHash = helper.reverseBuffer(tBlock.hash);;
-	    conns2.forEach(function(c) {
-	      c.sendGetBlocks([pHash], 0);
-	      console.info(self.netname, 'getting blocks starting from prev5 ', tBlock.hash.toString('hex'), 'from', c.peer.host);
-	    });
-	  }
-	});
+	      self.rpcClient.getTailBlockList(6, function(err, arr) {
+	        if(err) throw err;
+	        var tBlock = arr[0];
+	        if(tBlock) {
+	          var conns2 = self.randomConns(3);
+	          var pHash = helper.reverseBuffer(tBlock.hash);;
+	          conns2.forEach(function(c) {
+	            c.sendGetBlocks([pHash], 0);
+	            console.info(self.netname, 'getting blocks starting from prev5 ', tBlock.hash.toString('hex'), 'from', c.peer.host);
+	          });
+	        }
+	      });
       }
     } else {
       //var gHash = buffertools.fill(new Buffer(32), 0);
       var genesisBlock = helper.clone(bitcore.networks[self.netname].genesisBlock);
       conns.forEach(function(c) {
-	console.info(self.netname, 'getting genesis block', helper.reverseBuffer(genesisBlock.hash).toString('hex'), 'from', c.peer.host);
-	var inv = {type: 2, hash:genesisBlock.hash};
-	c.sendGetData([inv]);
+	      console.info(self.netname, 'getting genesis block', helper.reverseBuffer(genesisBlock.hash).toString('hex'), 'from', c.peer.host);
+	      var inv = {type: 2, hash:genesisBlock.hash};
+	      c.sendGetData([inv]);
       });
     }
   });  
@@ -372,7 +379,7 @@ Node.prototype.fetchBlock = function() {
     return;
   }
 
-  var conns = this.randomConns(10);
+  var conns = this.randomConns(3);
   if(!conns||conns.length == 0) {
     console.warn(this.netname, 'No active connections');
     return;
@@ -398,7 +405,7 @@ Node.prototype.onBlock = function(block, opts, callback) {
   if(!this.updateBlockChain) return callback();
   
   var tipBlock = self.rpcClient.tipBlock;
- 
+  
   if(!this.blockGateDays >= 0 &&
      tipBlock &&
      block.timestamp < tipBlock.timestamp - 86400 * this.blockGateDays) {
@@ -415,61 +422,61 @@ Node.prototype.onBlock = function(block, opts, callback) {
   async.series(
     [
       function(c) {
-	if(!self.rpcClient.tipBlock) {
-	  var genesisBlock = helper.clone(bitcore.networks[self.netname].genesisBlock);
-	  if(tBlock.hash.toString('hex') != helper.reverseBuffer(genesisBlock.hash).toString('hex')) {
-	    return c(new Error('Invalid genesis block ' + tBlock.hash.toString('hex')));
-	  }
-	}
-	c();
+	      if(!self.rpcClient.tipBlock) {
+	        var genesisBlock = helper.clone(bitcore.networks[self.netname].genesisBlock);
+	        if(tBlock.hash.toString('hex') != helper.reverseBuffer(genesisBlock.hash).toString('hex')) {
+	          return c(new Error('Invalid genesis block ' + tBlock.hash.toString('hex')));
+	        }
+	      }
+	      c();
       },
       function(c) {
-	self.rpcClient.verifyBlock(tBlock, function(err, v) {
-	  blockVerified = v.verified;
-	  if(!v.verified) {
-	    console.warn('block not verified ' + tBlock.hash.toString('hex') + ' message: ' + v.message);
-	    return c();
-	  }
-	  if(opts.rawMode) block.parseTxes(opts.parser);
-	  tBlock.cntTxes = block.txs.length;
-	  txList = block.txs.map(function(tx) {
-	    var tTx = new blockstore.ttypes.Tx();
-	    tTx.netname(self.netname);
-	    tTx.fromTxObj(tx);
-	    txIdList.push(tTx.hash);
-	    return tTx;
-	  });
-	  c();
-	});
+	      self.rpcClient.verifyBlock(tBlock, function(err, v) {
+	        blockVerified = v.verified;
+	        if(!v.verified) {
+	          console.warn('block not verified ' + tBlock.hash.toString('hex') + ' message: ' + v.message);
+	          return c();
+	        }
+	        if(opts.rawMode) block.parseTxes(opts.parser);
+	        tBlock.cntTxes = block.txs.length;
+	        txList = block.txs.map(function(tx) {
+	          var tTx = new blockstore.ttypes.Tx();
+	          tTx.netname(self.netname);
+	          tTx.fromTxObj(tx);
+	          txIdList.push(tTx.hash);
+	          return tTx;
+	        });
+	        c();
+	      });
       },
       function(c) {
-	if(!blockVerified) return c();
-	if(txIdList.length ==0) return c();
-	console.info('tx id list', txIdList.length);
-	self.rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
-	  if(err) return c(err);
-	  newTxIdList = arr;
-	  c();
-	});
+	      if(!blockVerified) return c();
+	      if(txIdList.length ==0) return c();
+	      console.info('tx id list', txIdList.length);
+	      self.rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
+	        if(err) return c(err);
+	        newTxIdList = arr;
+	        c();
+	      });
       },
       function(c) {
-	if(!blockVerified) return c();
-	if(!newTxIdList || newTxIdList.length == 0) return c();
-	var newTxIdMap = {};
-	newTxIdList.forEach(function(txId) {
-	  newTxIdMap[txId.toString('hex')] = true;
-	});
+	      if(!blockVerified) return c();
+	      if(!newTxIdList || newTxIdList.length == 0) return c();
+	      var newTxIdMap = {};
+	      newTxIdList.forEach(function(txId) {
+	        newTxIdMap[txId.toString('hex')] = true;
+	      });
 
-	var newTxList = txList.filter(function(tTx) {
-	  return !!newTxIdMap[tTx.hash.toString('hex')];
-	});
-	if(newTxList.length == 0) return c();
-	console.info('addeding tx list', newTxList.length);
-	self.rpcClient.addTxList(newTxList, false, c);
+	      var newTxList = txList.filter(function(tTx) {
+	        return !!newTxIdMap[tTx.hash.toString('hex')];
+	      });
+	      if(newTxList.length == 0) return c();
+	      console.info('addeding tx list', newTxList.length);
+	      self.rpcClient.addTxList(newTxList, false, c);
       },
       function(c) {
-	if(!blockVerified) return c();
-	self.rpcClient.addBlock(tBlock, txIdList, c);
+	      if(!blockVerified) return c();
+	      self.rpcClient.addBlock(tBlock, txIdList, c);
       }
     ],
     callback);
@@ -485,16 +492,16 @@ Node.prototype.sendRawTx = function(callback) {
     sendTxList.forEach(function(sendtx) {
       console.warn('broadcast tx', self.netname, sendtx.hash.toString("hex"), 'to', conns.length, 'peers');
       conns.forEach(function(conn) {
-	conn.sendMessage('tx', sendtx.raw);
+	      conn.sendMessage('tx', sendtx.raw);
       });
     });
   }
   async.series([
     function(c) {
       self.rpcClient.getSendingTxList(function(err, arr) {
-	if(err) return c(err);
-	sendTxList = arr;
-	c();
+	      if(err) return c(err);
+	      sendTxList = arr;
+	      c();
       });
     },
     function(c) {
@@ -541,7 +548,7 @@ Node.prototype.handleAddr = function (e) {
       p.lastSeen = addr.time;
 
       var tPeer = new blockstore.ttypes.Peer();
-      tPeer.fromPeer(p);
+      tPeer.fromPeer(p, e.conn.version);
       tPeers.push(tPeer);
       // TODO: Handle addr relay
     } catch(e) {
@@ -568,9 +575,9 @@ Node.prototype.discoverPeers = function(callback) {
     this.rpcClient.popPeers(n, function(err, arr) {
       if(err) return callback(err);
       arr.forEach(function(tPeer) {
-	if(self.peerman.peers.length >= self.peerman.peerLimit) return;
-	var peer = tPeer.toPeer();
-	self.peerman.peers.push(peer);
+	      if(self.peerman.peers.length >= self.peerman.peerLimit) return;
+	      var peer = tPeer.toPeer();
+	      self.peerman.peers.push(peer);
       });
       return callback(err, arr);
     });    
@@ -613,31 +620,31 @@ Node.prototype.gotWaitingBlock = function(block, opts, callback) {
   async.series(
     [
       function(c) {
-	if(txIdList.length ==0) return c();
-	rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
-	  if(err) return c(err);
-	  console.info('missing txList ', arr.length);
-	  newTxIdList = arr;
-	  c();
-	});
+	      if(txIdList.length ==0) return c();
+	      rpcClient.getMissingTxIdList(txIdList, function(err, arr) {
+	        if(err) return c(err);
+	        console.info('missing txList ', arr.length);
+	        newTxIdList = arr;
+	        c();
+	      });
       },
       function(c) {
-	if(!newTxIdList || newTxIdList.length == 0) return c();
-	var newTxIdMap = {};
-	newTxIdList.forEach(function(txId) {
-	  newTxIdMap[txId.toString('hex')] = true;
-	});
-	
-	var newTxList = txList.filter(function(tTx) {
-	  return !!newTxIdMap[tTx.hash.toString('hex')];
-	});
-	console.info('new txlist', newTxList.length);
-	if(newTxList.length == 0) return c();
-	rpcClient.addTxList(newTxList, false, c);
+	      if(!newTxIdList || newTxIdList.length == 0) return c();
+	      var newTxIdMap = {};
+	      newTxIdList.forEach(function(txId) {
+	        newTxIdMap[txId.toString('hex')] = true;
+	      });
+	      
+	      var newTxList = txList.filter(function(tTx) {
+	        return !!newTxIdMap[tTx.hash.toString('hex')];
+	      });
+	      console.info('new txlist', newTxList.length);
+	      if(newTxList.length == 0) return c();
+	      rpcClient.addTxList(newTxList, false, c);
       },
       function(c) {
-	console.info('linking block');
-	rpcClient.linkBlock(tBlock.hash, txIdList, c);
+	      console.info('linking block');
+	      rpcClient.linkBlock(tBlock.hash, txIdList, c);
       }
     ],
     callback);

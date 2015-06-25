@@ -39,6 +39,7 @@ def ensure_indices(c):
     c.peerpool.ensure_index([('host', 1), ('port', 1)], unique=True)
     c.peerpool.ensure_index([('borrowed', -1)])
     c.peerpool.ensure_index([('borrowed', -1), ('lastSeen', -1)])
+    c.peerpool.ensure_index([('borrowed', -1), ('version', -1), ('lastSeen', -1)])
     c.peerpool.ensure_index([('borrowed', -1), ('lastBorrowed', -1)])
     
 

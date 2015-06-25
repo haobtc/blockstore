@@ -109,7 +109,7 @@ def push_peers(conn, peers):
     now_time = int(time.time())
     for peer in peers:
         conn.peerpool.update({'host': peer.host, 'port': peer.port},
-                             {'$set': {'lastSeen': now_time}},
+                             {'$set': {'lastSeen': now_time, 'version': (peer.version or 0)}},
                              upsert=True)
 
     return_borrowed_peers(conn)
@@ -118,10 +118,12 @@ def pop_peers(conn, n):
     return_borrowed_peers(conn)
     now_time = int(time.time())
     arr = list(conn.peerpool.find().sort([('borrowed', DESCENDING),
-                                          ('lastSeen', DESCENDING)]).limit(n))
+                                          ('version', DESCENDING),
+                                          ('lastSeen', DESCENDING),
+                                      ]).limit(n))
     peers = []
     for p in arr:
-        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['lastSeen'])
+        peer = ttypes.Peer(host=p['host'], port=p['port'], time=p['lastSeen'], version=p.get('version', 0))
         peers.append(peer)
         conn.peerpool.update({'host': peer.host, 'port': peer.port},
                              {'$set': {

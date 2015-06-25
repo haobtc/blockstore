@@ -1314,6 +1314,7 @@ class Peer:
    - host
    - port
    - time
+   - version
   """
 
   thrift_spec = (
@@ -1321,12 +1322,14 @@ class Peer:
     (1, TType.STRING, 'host', None, None, ), # 1
     (2, TType.I32, 'port', None, None, ), # 2
     (3, TType.I32, 'time', None, None, ), # 3
+    (4, TType.I32, 'version', None, None, ), # 4
   )
 
-  def __init__(self, host=None, port=None, time=None,):
+  def __init__(self, host=None, port=None, time=None, version=None,):
     self.host = host
     self.port = port
     self.time = time
+    self.version = version
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1352,6 +1355,11 @@ class Peer:
           self.time = iprot.readI32();
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I32:
+          self.version = iprot.readI32();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1374,6 +1382,10 @@ class Peer:
       oprot.writeFieldBegin('time', TType.I32, 3)
       oprot.writeI32(self.time)
       oprot.writeFieldEnd()
+    if self.version is not None:
+      oprot.writeFieldBegin('version', TType.I32, 4)
+      oprot.writeI32(self.version)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -1386,6 +1398,7 @@ class Peer:
     value = (value * 31) ^ hash(self.host)
     value = (value * 31) ^ hash(self.port)
     value = (value * 31) ^ hash(self.time)
+    value = (value * 31) ^ hash(self.version)
     return value
 
   def __repr__(self):

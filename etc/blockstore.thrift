@@ -108,7 +108,8 @@ struct Inventory {
 struct Peer {
   1:string host,
   2:i32 port,
-  3:i32 time
+  3:i32 time,
+  4:optional i32 version
 }
 
 struct TxIdListWithCursor {

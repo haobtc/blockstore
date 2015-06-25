@@ -36,8 +36,8 @@ module.exports.start = function(argv){
     function stopNode() {
       console.log('stopping node server\n');
       nodeSet.stop(function(){
-	console.log('stopped\n');
-	process.exit();
+	      console.log('stopped\n');
+	      process.exit();
       });
     }
     process.on('SIGINT', stopNode);
@@ -47,21 +47,3 @@ module.exports.start = function(argv){
     }
   });
 };
-
-/*
-var express = require('express');
-var bitcore = require('bitcore-multicoin');
-var helper = require('../lib/helper');
-var config = require('../lib/config');
-var BlockFetcher = require('../lib/BlockFetcher');
-
-module.exports.start = function(argv){
-  var netname = argv.c;
-  var blockHash = new Buffer(argv.b, 'hex');
-  
-  var fetcher = new BlockFetcher(netname, blockHash);
-  fetcher.start(function(err) {
-    console.info('on ok', err);
-  });
-};
-*/

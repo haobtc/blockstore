@@ -182,11 +182,13 @@ ttypes.UTXO.prototype.toJSON = function() {
   return obj;
 };
 
-ttypes.Peer.prototype.fromPeer = function(p) {
+ttypes.Peer.prototype.fromPeer = function(p, version) {
   this.host = p.host;
   this.port = p.port;
   this.time = p.lastSeen;
   this.services = p.services;
+  if(version) 
+    this.version = version;
 };
 
 ttypes.Peer.prototype.toPeer = function(p) {
