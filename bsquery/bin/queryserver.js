@@ -51,7 +51,7 @@ function startServer(argv){
     server.close(function() {
       process.exit();
     });
-//  }, 5000 + Math.random() * 2000);
+    //  }, 5000 + Math.random() * 2000);
   }, 360 * 1000 + Math.random() * 60000);
 
   setTimeout(function() {
@@ -64,6 +64,15 @@ module.exports.start = function(argv){
   numWorkers = parseInt(numWorkers);
   var workers = [];
   if(cluster.isMaster) {
+    if(argv.ttl) {
+      var ttl = parseInt(argv.ttl);
+      if(!isNaN(ttl) && ttl >= 10) {
+        setTimeout(function() {
+          console.log('server shutdown');
+          process.exit();
+        }, ttl * 1000);
+      }
+    }
     console.info('start', numWorkers, 'workers');
     for(var i=0; i<numWorkers; i++) {
       var worker = cluster.fork();
@@ -72,13 +81,13 @@ module.exports.start = function(argv){
     cluster.on('exit', function(worker, code, signal) {
       console.log(new Date(), 'work ' + worker.process.pid + ' died');
       if(!worker.suicide) {
-	for(var i = 0; i<workers.length; i++) {
-	  if(workers[i].id == worker.id) {
-	    workers[i] = cluster.fork();
-	    console.log(new Date(), 'worker ', workers[i].process.pid, 'retarted');
-	    break;
-	  }
-	}
+	      for(var i = 0; i<workers.length; i++) {
+	        if(workers[i].id == worker.id) {
+	          workers[i] = cluster.fork();
+	          console.log(new Date(), 'worker ', workers[i].process.pid, 'retarted');
+	          break;
+	        }
+	      }
       }
     });
   } else {

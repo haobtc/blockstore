@@ -1,4 +1,5 @@
 import sys
+import time
 import logging
 import logging.config
 logging.config.fileConfig('etc/logging.conf')
@@ -17,11 +18,15 @@ def run_txtasks(conn, n):
                 
 if __name__ == '__main__':
     #all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
-    all_netnames =  ['bitcoin', 'dogecoin', 'litecoin']
+    all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
     netnames = [n for n in sys.argv[1:] if n in all_netnames]
     if not netnames:
         netnames = all_netnames
+    start_time = time.time()
     for netname in netnames:
         #for netname in
         conn = dbconn(netname)
         run_txtasks(conn, 1000)
+    end_time = time.time()
+    if end_time - start_time < 10:
+        time.sleep(10 - end_time + start_time)

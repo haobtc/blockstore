@@ -199,7 +199,7 @@ Node.prototype.handleTx = function(info) {
 
     self.rpcClient.verifyTx(tTx, true, function(err, r) {
       if(!r.verified) {
-	      console.warn('tx not verified ', tTx.hash.toString('hex'), r.message);
+	      console.warn(self.netname, 'tx not verified ', tTx.hash.toString('hex'), r.message);
       } else {
 	      self.rpcClient.addTxList([tTx], true, function(err, r) {
 	        if(err) throw err;
@@ -265,7 +265,6 @@ Node.prototype.handleGetData = function(info) {
 
 Node.prototype.handleVersion = function(info) {
   this.stopOnTimeout();
-console.info('version', info.message);
   /*  if(info.message.start_height > this.startHeight) {
       this.startHeight = info.message.start_height;
       } */
@@ -490,7 +489,7 @@ Node.prototype.sendRawTx = function(callback) {
   function deliverSendTxes() {
     var conns = self.peerman.getActiveConnections();
     sendTxList.forEach(function(sendtx) {
-      console.warn('broadcast tx', self.netname, sendtx.hash.toString("hex"), 'to', conns.length, 'peers');
+      console.info('broadcast tx', self.netname, sendtx.hash.toString("hex"), 'to', conns.length, 'peers');
       conns.forEach(function(conn) {
 	      conn.sendMessage('tx', sendtx.raw);
       });
