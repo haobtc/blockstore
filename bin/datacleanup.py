@@ -9,6 +9,7 @@ from bsd.misc import itercol, idslice
 from bsd.block import remove_block, get_tip_block
 from bsd.helper import generated_seconds, get_netname
 from bsd.tx import remove_db_tx, get_tx_db_block
+from bsd.addr import watch_addrtx
 
 def cleanup_blocks(conn):
     tip_block = get_tip_block(conn)
@@ -34,11 +35,19 @@ def cleanup_txes(conn):
 
     logging.warn('cleanup outdated %s txes  cleaned=%s, total=%s', get_netname(conn), m, n)
 
+def fix_watch_addrtx(conn):
+    t = 0
+    for addrtx in idslice(conn.addrtx, 86400, 600):
+        t += 1
+        watch_addrtx(conn, addrtx)
+    print t
+
 def main():
     for netname in ['litecoin', 'darkcoin', 'dogecoin', 'bitcoin']:
         conn = dbconn(netname)
         #cleanup_blocks(conn)
         cleanup_txes(conn)
+        fix_watch_addrtx(conn)
 
 if __name__ == '__main__':
     main()

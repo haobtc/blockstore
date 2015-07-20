@@ -26,6 +26,8 @@ def main(netname, start_height, n=100):
         cnt = conn.tx.find({'hash': {'$in': txids}}).count()
         if cnt != b['cntTxes']:
             print 'cnt mismatch', b['hash'].encode('hex'), b['height'], cnt, b['cntTxes']
+        else:
+            print 'block at height', height
 
 if __name__ == '__main__':
     main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
