@@ -163,8 +163,6 @@ Node.prototype.handleRawBlock = function(info) {
   var block = new bitcore.Block();
   block.parse(info.message.parser, true);
   var bHash = block.calcHash(bitcore.networks[this.netname].blockHashFunc);
-  if(this.waitingBlockHash)
-    console.info('bHash', helper.reverseBuffer(bHash).toString('hex'), this.waitingBlockHash.toString('hex'));
   if(this.waitingBlockHash &&
      bHash.toString("hex") == helper.reverseBuffer(this.waitingBlockHash).toString('hex')) {
     this.gotWaitingBlock(block,
@@ -302,7 +300,7 @@ Node.prototype.requireBlocks = function() {
   var self = this;
 
   console.info('block queue size', this.blockQueue.size());
-  var conns = this.randomConns(3);
+  var conns = this.randomConns(6);
   if(!conns) {
     console.warn(this.netname, 'No active connections');
     return;
@@ -378,7 +376,7 @@ Node.prototype.fetchBlock = function() {
     return;
   }
 
-  var conns = this.randomConns(3);
+  var conns = this.randomConns(6);
   if(!conns||conns.length == 0) {
     console.warn(this.netname, 'No active connections');
     return;

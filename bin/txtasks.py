@@ -17,7 +17,6 @@ def run_txtasks(conn, n):
     destructive_task(conn, n)
                 
 if __name__ == '__main__':
-    #all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
     all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
     netnames = [n for n in sys.argv[1:] if n in all_netnames]
     if not netnames:
