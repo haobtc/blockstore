@@ -25,36 +25,36 @@ function Stream(server, netnames) {
     var addressList = [];
     socket.on('watch', function(data) {
       data.addresses.forEach(function(addrStr) {
-	var addr = new bitcore.Address(addrStr);
-	if(addr.isValid()) {
-	  addressList.push(addr);
-	}
+	      var addr = new bitcore.Address(addrStr);
+	      if(addr.isValid()) {
+	        addressList.push(addr);
+	      }
       });
       Query.getTXList(addressList, {}, true, function(err, txes) {
-	if(err) throw err;
-	console.info('send snapshot txes', txes);
-	socket.emit('snapshot txes', txes);
+	      if(err) throw err;
+	      console.info('send snapshot txes', txes);
+	      socket.emit('snapshot txes', txes);
       });
 
       Query.getUnspent(addressList, function(err, unspent) {
-	if(err) throw err;
-	console.info('send unspent', unspent);
-	socket.emit('unspent', unspent);
+	      if(err) throw err;
+	      console.info('send unspent', unspent);
+	      socket.emit('unspent', unspent);
       });
 
       function sendLatestBlock(netname, timeout) {
-	setTimeout(function() {
-	  var lb = latestBlocks[netname];
-	  console.info('block', lb);
-	  if(latestBlocks[netname]) {
-	    socket.emit('block', lb);
-	  }
-	}, timeout);
+	      setTimeout(function() {
+	        var lb = latestBlocks[netname];
+	        console.info('block', lb);
+	        if(latestBlocks[netname]) {
+	          socket.emit('block', lb);
+	        }
+	      }, timeout);
       }
       var timeout = 100;
       for(var netname in latestBlocks) {
-	sendLatestBlock(netname, timeout);
-	timeout += 100;
+	      sendLatestBlock(netname, timeout);
+	      timeout += 100;
       }
       self.watchAddresses(addressList, socket);
     });
@@ -71,18 +71,18 @@ function Stream(server, netnames) {
       var method = rpcCall.method;
       var fn = rpcMethods[method];
       if(fn) {
-	var rpcObj = {
-	  send: function(ret) {
-	    socket.emit('rpc return', {
-	      seq: rpcCall.seq,
-	      result: ret
-	    });
-	  }
-	};
-	rpcCall.args.unshift(rpcObj);
-	fn.apply(undefined, rpcCall.args);
+	      var rpcObj = {
+	        send: function(ret) {
+	          socket.emit('rpc return', {
+	            seq: rpcCall.seq,
+	            result: ret
+	          });
+	        }
+	      };
+	      rpcCall.args.unshift(rpcObj);
+	      fn.apply(undefined, rpcCall.args);
       } else {
-	console.warn('No such call', rpcCall);
+	      console.warn('No such call', rpcCall);
       }
     });
   });
@@ -130,7 +130,7 @@ Stream.prototype.onTx = function(tx, archived) {
     var arr = netAddrs[input.address];
     if(arr) {
       arr.forEach(function(sock) {
-	affectedSockets[sock.id] = sock;
+	      affectedSockets[sock.id] = sock;
       });
     }
   });
@@ -139,7 +139,7 @@ Stream.prototype.onTx = function(tx, archived) {
     var arr = netAddrs[output.address];
     if(arr) {
       arr.forEach(function(sock) {
-	affectedSockets[sock.id] = sock;
+	      affectedSockets[sock.id] = sock;
       });
     }
   });
@@ -184,9 +184,9 @@ Stream.prototype.unwatchAddresses = function(addressList, socket) {
     if(arr) {
       arr = underscore.reject(arr, function(sock) { return sock == socket; });
       if(arr.length > 0) {
-	netAddrs[addrStr] = arr;
+	      netAddrs[addrStr] = arr;
       } else {
-	delete netAddrs[addrStr];
+	      delete netAddrs[addrStr];
       }
     }
   });
@@ -220,8 +220,8 @@ TxIterator.prototype.nextTx = function(callback) {
     col.find().sort({_id: -1}).limit(1).toArray(function(err, vals) {
       if(err) return callback(err);
       if(vals.length > 0) {
-	var tx = vals[0];
-	self.txId = tx._id;
+	      var tx = vals[0];
+	      self.txId = tx._id;
       }
       callback();
     });
@@ -230,11 +230,11 @@ TxIterator.prototype.nextTx = function(callback) {
     col.find({_id: {$gt: this.txId}}).sort({_id: 1}).limit(1).toArray(function(err, vals) {
       if(err) return callback(err);
       if(vals.length > 0) {
-	var tx = vals[0];
-	self.txId = tx._id;
-	callback(undefined, tx);
+	      var tx = vals[0];
+	      self.txId = tx._id;
+	      callback(undefined, tx);
       } else {
-	callback();
+	      callback();
       }
     });    
   }  
@@ -246,15 +246,15 @@ TxIterator.prototype.start = function() {
     self.nextTx(function(err, tx) {
       if(err) return c(err);
       if(tx) {
-	Query.txListToJSON(self.store(), [tx], function(err, txList) {
-	  if(err) return c(err);
-	  if(txList.length > 0) {
-	    self.emit('tx', txList[0]);
-	  }
-	  setTimeout(c, 0);
-	});
+	      Query.txListToJSON(self.store(), [tx], function(err, txList) {
+	        if(err) return c(err);
+	        if(txList.length > 0) {
+	          self.emit('tx', txList[0]);
+	        }
+	        setTimeout(c, 0);
+	      });
       } else {
-	setTimeout(c, 3000);
+	      setTimeout(c, 3000);
       }
     });
   }, function() {
@@ -287,11 +287,11 @@ BlockIterator.prototype.nextBlock = function(callback) {
     col.find().sort({_id: -1}).limit(1).toArray(function(err, vals) {
       if(err) return callback(err);
       if(vals.length > 0) {
-	var block = vals[0];
-	block.network = self.netname;
-	block = Query.handleBlock(block);
-	latestBlocks[self.netname] = block;
-	self.blockId = block._id;
+	      var block = vals[0];
+	      block.network = self.netname;
+	      block = Query.handleBlock(block);
+	      latestBlocks[self.netname] = block;
+	      self.blockId = block._id;
       }
       callback();
     });
@@ -300,14 +300,14 @@ BlockIterator.prototype.nextBlock = function(callback) {
     col.find({_id: {$gt: this.blockId}}).sort({_id: 1}).limit(1).toArray(function(err, vals) {
       if(err) return callback(err);
       if(vals.length > 0) {
-	var block = vals[0];
-	self.blockId = block._id;
-	block.network = self.netname;
-	block = Query.handleBlock(block);
-	latestBlocks[self.netname] = block;
-	callback(undefined, block);
+	      var block = vals[0];
+	      self.blockId = block._id;
+	      block.network = self.netname;
+	      block = Query.handleBlock(block);
+	      latestBlocks[self.netname] = block;
+	      callback(undefined, block);
       } else {
-	callback();
+	      callback();
       }
     });    
   }  
@@ -319,10 +319,10 @@ BlockIterator.prototype.start = function() {
     self.nextBlock(function(err, block) {
       if(err) return c(err);
       if(block) {
-	self.emit('block', block);
-	setTimeout(c, 0);
+	      self.emit('block', block);
+	      setTimeout(c, 0);
       } else {
-	setTimeout(c, 3000);
+	      setTimeout(c, 3000);
       }
     });
   }, function() {

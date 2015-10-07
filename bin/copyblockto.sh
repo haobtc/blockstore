@@ -36,7 +36,7 @@ mongodump --host $MONGODB_HOST -d blockdump -out bdump
 
 check_exit
 
-rsync -avz bdump $tohost:~/blockstore/
+rsync -avz --progress bdump $tohost:~/blockstore/
 
 check_exit
 

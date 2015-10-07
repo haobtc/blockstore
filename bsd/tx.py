@@ -306,9 +306,10 @@ def do_remove_tx(conn, dtx):
     conn['removedtx'].save(dtx)
     #print 'do remove tx',  dtx['hash'].encode('hex')
     conn.txblock.remove({'t': dtx['hash']})
-    conn.sendtx.update({'hash': dtx['hash']}, 
-                       {'$set': {'sent': True,
-                                 'by_removed': True}})
+    conn.sendtx.remove({'hash': dtx['hash']})
+    # conn.sendtx.update({'hash': dtx['hash']}, 
+    #                    {'$set': {'sent': True,
+    #                              'by_removed': True}})
     conn.tx.remove({'hash': dtx['hash']})
     logging.info('removed tx %s', dtx['hash'].encode('hex'))
 

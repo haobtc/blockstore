@@ -10,12 +10,13 @@ from bsd.misc import itercol, fetchcol, titercol
 from bsd.block import remove_block, get_tip_block
 from bsd.addr import gen_tx_stats, undo_tx_stats
 from bsd.tx import add_dep, remove_dep
-from bsd.tasks import constructive_task, destructive_task
+from bsd.tasks import watch_addrtx_task, unwatch_tx_task
+
 
 def run_txtasks(conn, n):
-    constructive_task(conn, n)
-    destructive_task(conn, n)
-                
+    watch_addrtx_task(conn, n)
+    unwatch_tx_task(conn, n)
+
 if __name__ == '__main__':
     all_netnames =  ['bitcoin', 'dogecoin', 'litecoin', 'darkcoin']
     netnames = [n for n in sys.argv[1:] if n in all_netnames]

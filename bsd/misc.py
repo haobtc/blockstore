@@ -1,5 +1,7 @@
 import time
+import logging
 from pymongo import DESCENDING, ASCENDING
+import pymongo.errors
 from datetime  import datetime, timedelta
 from bson.binary import Binary
 from bson.objectid import ObjectId
@@ -76,16 +78,22 @@ def fetchcol(conn, col, key):
 
     t += 1
     obj = objs[0]
-    set_var(conn, key, objid=obj['_id'], times=t)
+    for _ in xrange(5):
+        try:
+            set_var(conn, key, objid=obj['_id'], times=t)
+            break
+        except pymongo.errors.OperationFailure:
+            logging.error('pymongo operation failure at set_var(%s, %s)', key, obj['_id'], exc_info=True)
+            time.sleep(0.01)
     return obj
 
 def titercol(conn, col, key, n, isolation='mvcc'):
     for _ in xrange(n):
         with database.transaction(conn, isolation=isolation) as conn:
-            dtx = fetchcol(conn, col, key)
-            if not dtx:
+            obj = fetchcol(conn, col, key)
+            if not obj:
                 return
-            yield dtx
+            yield obj
 
 def idslice(col, start_seconds, end_seconds=0):
     start_delta = timedelta(seconds=start_seconds)

@@ -1,4 +1,5 @@
 #!/bin/bash
 
+cd ~/blockstore
 source setup-env.sh
-exec python bin/txtasks.py $*
+exec python $*

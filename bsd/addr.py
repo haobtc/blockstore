@@ -17,7 +17,21 @@ class TxStat:
         self.output_amount = 0
         self.remove_utxos = []
         self.add_utxos = []
-        
+
+def get_addr_set(dtx):
+    addr_set = set([])
+    
+    for input in dtx.get('vin', []):
+        for a in input.get('addrs', []):
+            addr_set.add(a)
+            break
+
+    for output in dtx.get('vout', []):
+        for a in output.get('addrs', []):
+            addr_set.add(a)
+            break
+    return addr_set
+
 def gen_tx_stats(conn, dtx, force_new_tx=False, filter_addrs=None):
     vin = dtx.get('vin', [])
     changes = defaultdict(TxStat)
