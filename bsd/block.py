@@ -67,7 +67,7 @@ def get_tip_block(conn):
 def verify_block(conn, tblock):
     b = get_block(conn, tblock.hash)
     if b:
-        return False, 'already_exist'
+        return False, 'already_exist %s' % tblock.hash.encode('hex')
     tip_block = get_tip_block(conn)
     if tip_block:
         pb = get_block(conn, tblock.prevHash)
