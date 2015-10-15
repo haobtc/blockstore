@@ -56,6 +56,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('   popPeers(Network network, i32 n)')
   print('  void watchAddresses(Network network, string group,  addresses)')
   print('  TxIdListWithCursor getWatchingList(Network network, string group, i32 count, string cursor)')
+  print('  AddressListWithCursor getWatchingAddressList(Network network, string group, i32 count, string cursor)')
   print('')
   sys.exit(0)
 
@@ -303,6 +304,12 @@ elif cmd == 'getWatchingList':
     print('getWatchingList requires 4 args')
     sys.exit(1)
   pp.pprint(client.getWatchingList(eval(args[0]),args[1],eval(args[2]),args[3],))
+
+elif cmd == 'getWatchingAddressList':
+  if len(args) != 4:
+    print('getWatchingAddressList requires 4 args')
+    sys.exit(1)
+  pp.pprint(client.getWatchingAddressList(eval(args[0]),args[1],eval(args[2]),args[3],))
 
 else:
   print('Unrecognized method %s' % cmd)

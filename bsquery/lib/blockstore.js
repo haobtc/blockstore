@@ -331,7 +331,7 @@ RPCWrapper.prototype.keepTip = function() {
  'getTxListSince', 'getTailTxList', 'getRelatedTxList', 'getRelatedTxIdList',
  'getSendingTxList', 'getSendTxList', 'sendTx', 'getUnspent', 'getMissingInvList',
  'setPeers', 'getPeers', 'pushPeers', 'popPeers',
- 'watchAddresses', 'getWatchingList', 'getAddressStatList',
+ 'watchAddresses', 'getWatchingList', 'getWatchingAddressList', 'getAddressStatList',
  'getRelatedAddrTxIdList', 'getUnspentV1',
 ].forEach(function wrapRpc(clientRpc) {
   RPCWrapper.prototype[clientRpc] = function() {

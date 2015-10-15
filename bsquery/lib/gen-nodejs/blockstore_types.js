@@ -1438,6 +1438,94 @@ blockstore.TxIdListWithCursor.prototype.write = function(output) {
   return;
 };
 
+blockstore.AddressListWithCursor = module.exports.AddressListWithCursor = function(args) {
+  this.cursor = null;
+  this.addresses = null;
+  if (args) {
+    if (args.cursor !== undefined) {
+      this.cursor = args.cursor;
+    }
+    if (args.addresses !== undefined) {
+      this.addresses = args.addresses;
+    }
+  }
+};
+blockstore.AddressListWithCursor.prototype = {};
+blockstore.AddressListWithCursor.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.cursor = input.readBinary();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        var _size24 = 0;
+        var _rtmp328;
+        this.addresses = [];
+        var _etype27 = 0;
+        _rtmp328 = input.readListBegin();
+        _etype27 = _rtmp328.etype;
+        _size24 = _rtmp328.size;
+        for (var _i29 = 0; _i29 < _size24; ++_i29)
+        {
+          var elem30 = null;
+          elem30 = input.readString();
+          this.addresses.push(elem30);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+blockstore.AddressListWithCursor.prototype.write = function(output) {
+  output.writeStructBegin('AddressListWithCursor');
+  if (this.cursor !== null && this.cursor !== undefined) {
+    output.writeFieldBegin('cursor', Thrift.Type.STRING, 1);
+    output.writeBinary(this.cursor);
+    output.writeFieldEnd();
+  }
+  if (this.addresses !== null && this.addresses !== undefined) {
+    output.writeFieldBegin('addresses', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRING, this.addresses.length);
+    for (var iter31 in this.addresses)
+    {
+      if (this.addresses.hasOwnProperty(iter31))
+      {
+        iter31 = this.addresses[iter31];
+        output.writeString(iter31);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 blockstore.AddrStat = module.exports.AddrStat = function(args) {
   this.address = null;
   this.cntTxes = null;

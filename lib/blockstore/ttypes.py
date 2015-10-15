@@ -1498,6 +1498,92 @@ class TxIdListWithCursor:
   def __ne__(self, other):
     return not (self == other)
 
+class AddressListWithCursor:
+  """
+  Attributes:
+   - cursor
+   - addresses
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'cursor', None, None, ), # 1
+    (2, TType.LIST, 'addresses', (TType.STRING,None), None, ), # 2
+  )
+
+  def __init__(self, cursor=None, addresses=None,):
+    self.cursor = cursor
+    self.addresses = addresses
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.cursor = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.addresses = []
+          (_etype24, _size21) = iprot.readListBegin()
+          for _i25 in xrange(_size21):
+            _elem26 = iprot.readString();
+            self.addresses.append(_elem26)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('AddressListWithCursor')
+    if self.cursor is not None:
+      oprot.writeFieldBegin('cursor', TType.STRING, 1)
+      oprot.writeString(self.cursor)
+      oprot.writeFieldEnd()
+    if self.addresses is not None:
+      oprot.writeFieldBegin('addresses', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRING, len(self.addresses))
+      for iter27 in self.addresses:
+        oprot.writeString(iter27)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.cursor)
+    value = (value * 31) ^ hash(self.addresses)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class AddrStat:
   """
   Attributes:

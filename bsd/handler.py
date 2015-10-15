@@ -15,7 +15,7 @@ from tx import save_tx, update_addrs, add_dep, get_related_addrtx_list
 from block import get_block, get_block_at_height,  get_tip_block, verify_block, get_missing_block_hash_list, add_block
 from block import get_tail_block_list, rewind_tip, link_txes
 
-from addr import gen_tx_stats, watch_addresses, get_watching_list, get_addr_stat_list
+from addr import gen_tx_stats, watch_addresses, get_watching_list, get_addr_stat_list, get_watching_address_list
 from misc import set_peers, get_peers, itercol, push_peers, pop_peers
 from tasks import constructive_task
 
@@ -205,6 +205,10 @@ class BlockStoreHandler:
     def getWatchingList(self, nettype, group, count, cursor):
         conn = network_conn(nettype)
         return get_watching_list(conn, group, count, cursor)
+
+    def getWatchingAddressList(self, nettype, group, count, cursor):
+        conn = network_conn(nettype)
+        return get_watching_address_list(conn, group, count, cursor)
 
     def getAddressStatList(self, nettype, addresses):
         conn = network_conn(nettype)

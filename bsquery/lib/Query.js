@@ -208,9 +208,9 @@ var decodeRawTx = module.exports.decodeRawTx = function(netname, rawtx) {
   var parser = new bitcore.BinaryParser(rawtx);
   var tx = new bitcore.Transaction();
   tx.parse(parser);
-  if(tx.serialize().toString('hex') !== rawtx.toString("hex")) {
+  /*if(tx.serialize().toString('hex') !== rawtx.toString("hex")) {
     throw new helper.UserError('tx_rejected', 'Tx rejected');
-  }
+  }*/
   return tx;
 };
 

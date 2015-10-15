@@ -186,6 +186,24 @@ def get_watching_list(conn, group, count=20, cursor=None):
                     break
     return watching_list
 
+def get_watching_address_list(conn, group, count=20, cursor=None):
+    query = {}
+    if cursor:
+        try:
+            cursor = ObjectId(cursor)
+            query = {'_id': {'$gt': cursor}}
+        except InvalidId:
+            pass
+
+    address_list = ttypes.AddressListWithCursor()
+    address_list.addresses = []
+
+    limit = max(count * 2, 1000)
+    for wat in conn.watchedaddr.find(query).batch_size(30).sort('_id').limit(limit):
+        address_list.cursor = wat['_id'].binary
+        address_list.addresses.append(wat['a'])
+    return address_list
+
 def get_addr_stat_list(conn, addresses):
     if not addresses:
         return []

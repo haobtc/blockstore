@@ -117,6 +117,11 @@ struct TxIdListWithCursor {
   2:list<binary> txids
 }
 
+struct AddressListWithCursor {
+  1:binary cursor,
+  2:list<string> addresses
+}
+
 struct AddrStat {
   1:string address,
   2:i32 cntTxes,
@@ -188,5 +193,6 @@ service BlockStoreService
   /* address watch related */
   void watchAddresses(1:Network network, 2:string group, 3:list<string> addresses);
   TxIdListWithCursor getWatchingList(1:Network network, 2:string group, 3:i32 count, 4:binary cursor);
+  AddressListWithCursor getWatchingAddressList(1:Network network, 2:string group, 3:i32 count, 4:binary cursor);
 }
 

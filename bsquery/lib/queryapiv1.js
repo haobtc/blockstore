@@ -224,7 +224,7 @@ module.exports.installAPI = function(app) {
       }
 
       if(ret != undefined) {
-        if(req.query.format == 'json') {
+        if(req.query.format == 'json' || query.format == 'json') {
 	        sendJSONP(req, res, {'txid': ret});
         } else {
 	        res.send(ret);
@@ -243,7 +243,8 @@ module.exports.installAPI = function(app) {
     if(req.method == 'POST') {
       query = req.body;
     }
-    var tx = Query.decodeRawTx(req.params.netname, query.rawtx);
+    var rawtx = new Buffer(query.rawtx, 'hex');
+    var tx = Query.decodeRawTx(req.params.netname, rawtx);
     var tTx = new blockstore.ttypes.Tx();
     tTx.netname(req.params.netname);
     tTx.fromTxObj(tx);
@@ -272,12 +273,29 @@ module.exports.installAPI = function(app) {
     var addresses = req.body.addresses.split(',');
     var rpcClient = blockstore[req.params.netname];
     rpcClient.watchAddresses(req.params.group, addresses, function(err, result) {
-      console.info('return of watch addresses', err, res);
       sendJSONP(req, res, {"result": "ok"});
     });
   });
 
-  app.get(URL_PREFIX + '/watch/:netname/:group/tx/list/', function(req, res) {
+  app.get(URL_PREFIX + '/watch/:netname/:group/addresses/', function(req, res, next) {
+    var cursor = new Buffer(req.query.cursor || '', 'hex');
+    var count = parseInt(req.query.count);
+    if(isNaN(count) || count <= 0 || count > 500) {
+      count = 500;
+    }
+    var rpcClient = blockstore[req.params.netname];
+    rpcClient.getWatchingAddressList(req.params.group, count, cursor, function(err, result) {
+      if(err) return next(err);
+      var r = {};
+      if(result.cursor) {
+        r[req.params.netname + '.cursor'] = result.cursor.toString('hex');
+      }
+      r[req.params.netname] = result.addresses;
+      sendJSONP(req, res, r);
+    });
+  });
+
+  app.get(URL_PREFIX + '/watch/:netname/:group/tx/list/', function(req, res, next) {
     var cursor = new Buffer(req.query.cursor || '', 'hex');
     var count = parseInt(req.query.count);
     if(isNaN(count) || count <= 0 || count > 50) {
@@ -285,6 +303,7 @@ module.exports.installAPI = function(app) {
     }
     var rpcClient = blockstore[req.params.netname];
     rpcClient.getWatchingList(req.params.group, count, cursor, function(err, result) {
+      if(err) return next(err);
       var r = {};
       if(result.cursor) {
         r[req.params.netname + '.cursor'] = result.cursor.toString('hex');
@@ -295,4 +314,6 @@ module.exports.installAPI = function(app) {
       sendJSONP(req, res, r);
     });
   });
+
+
 };
