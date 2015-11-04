@@ -13,7 +13,7 @@ var blockstore = require('../lib/blockstore');
 var queryapiv1 = require('../lib/queryapiv1');
 var queryapiv2 = require('../lib/queryapiv2');
 
-app.use(bodyParser());
+app.use(bodyParser({limit: '10mb'}));
 
 app.use('/explorer/', express.static('public'));
 

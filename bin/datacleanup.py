@@ -15,7 +15,7 @@ def cleanup_blocks(conn):
     tip_block = get_tip_block(conn)
     if not tip_block:
         return
-    for block in idslice(conn.block, 86400 * 2, 86300):
+    for block in idslice(conn.block, 86400 * 2, 3600 * 3):
         if not block['isMain']:
             logging.warn('block %s is outdated, cleaning up', block['hash'].encode('hex'))
             with transaction(conn) as conn:
@@ -24,7 +24,7 @@ def cleanup_blocks(conn):
 def cleanup_txes(conn):
     n = 0
     m = 0
-    for dtx in idslice(conn.tx, 86400 * 2, 86300):
+    for dtx in idslice(conn.tx, 86400 * 2, 3600 * 3):
         n += 1
         b, _ = get_tx_db_block(conn, dtx)
         if not b:

@@ -187,11 +187,12 @@ def get_watching_list(conn, group, count=20, cursor=None):
     return watching_list
 
 def get_watching_address_list(conn, group, count=20, cursor=None):
-    query = {}
+    query = {'g': group}
     if cursor:
         try:
             cursor = ObjectId(cursor)
-            query = {'_id': {'$gt': cursor}}
+            #query = {'_id': {'$gt': cursor}}
+            query['_id'] = {'$gt': cursor}
         except InvalidId:
             pass
 
